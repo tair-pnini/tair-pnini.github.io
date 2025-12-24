@@ -1,0 +1,127 @@
+import React from 'react';
+import { Mail, Gamepad2, BookOpen, Heart, Sparkles, Music, Users, MapPin, Coffee, School, ExternalLink, Gift, Utensils } from 'lucide-react';
+
+const App = () => {
+  const activities = [
+    { icon: <Users size={20} className="text-blue-500" />, text: "הובלת קמ\"ל מורות ומורי מתמטיקה למחוננים (יחד עם לורה)" },
+    { icon: <School size={20} className="text-indigo-500" />, text: "הוראת מחוננים בימי שליפה במכללת אורנים" },
+    { icon: <Gamepad2 size={20} className="text-emerald-500" />, text: "הדרכת משחקי קופסה בחברת MindX" },
+    { icon: <BookOpen size={20} className="text-amber-500" />, text: "לימודי תואר שני במכללת אורנים" },
+    { icon: <Music size={20} className="text-purple-500" />, text: "מחקר, יצירה, מחשבה ומשחק (והרבה מוזיקה)" },
+    { icon: <MapPin size={20} className="text-rose-500" />, text: "שיעורים פרטיים במתמטיקה - במפגשים פרונטליים בחיפה" }
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#fafafa] flex items-center justify-center p-6 md:p-12 font-sans text-right selection:bg-blue-50" dir="rtl">
+      {/* Background decoration */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-blue-50/40 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-rose-50/20 rounded-full blur-3xl"></div>
+      </div>
+
+      <main className="max-w-2xl w-full relative z-10">
+        <div className="space-y-12">
+          
+          {/* Header */}
+          <header>
+            <h1 className="text-6xl font-black text-black mb-6 tracking-tighter">
+              תאיר פניני
+            </h1>
+            <p className="text-2xl text-slate-700 leading-relaxed font-normal italic">
+              <span className="inline-block border-b-4 border-blue-200 pb-1">ברוכותים הבאותים</span> לפינה הקטנה שלי ברשת.
+            </p>
+            <p className="text-lg text-slate-500 mt-4 font-light">
+              המקום הזה נוצר כדי שיהיה לי לאן להעלות אתרים שאני בונה עם חברי הטוב <span className="font-semibold text-slate-700">Gemini</span>.
+            </p>
+          </header>
+
+          {/* Activities */}
+          <section>
+            <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+              <Sparkles size={24} className="text-blue-400" />
+              מה קורה אצלי בתשפ"ו:
+            </h2>
+            <ul className="space-y-5">
+              {activities.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-4 text-slate-700 group">
+                  <div className="mt-1 p-1 rounded-lg bg-white shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">
+                    {item.icon}
+                  </div>
+                  <span className="text-lg leading-snug">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* ADHD Personal Note */}
+          <section className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-1.5 h-full bg-blue-500"></div>
+            <div className="flex items-start gap-5">
+              <div className="p-2 bg-rose-50 rounded-full text-rose-400 shrink-0">
+                <Heart size={20} fill="currentColor" className="opacity-40" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-bold text-slate-900 text-lg">בנימה אישית:</h3>
+                <p className="text-slate-600 leading-relaxed text-lg">
+                  אני חיה ויוצרת עם הפרעת קשב וריכוז – היא מנוע אדיר ליצירתיות, אבל לעיתים גורמת לכך שלא אענה להודעות גם כשהתכוונתי מאוד לעשות זאת. 
+                  <span className="font-semibold block mt-3 text-slate-900">אם לא חזרתי אליכם, זה ממש לא אישי, מוזמנות/ים לשלוח תזכורת.</span>
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Contact & Support */}
+          <footer className="pt-8 border-t border-slate-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+              
+              {/* Contact Info */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-black font-bold text-xl tracking-tight">בואו לדבר איתי</h3>
+                  <Coffee size={20} className="text-amber-500/60 rotate-12" />
+                </div>
+                <p className="text-slate-500 text-base leading-snug">זמינה לשיתופי פעולה, שאלות או סתם שיחה.</p>
+                <div className="flex items-center gap-3 text-slate-800 group pt-2">
+                  <Mail size={20} className="text-blue-400 group-hover:scale-110 transition-transform" />
+                  <a 
+                    href="mailto:tair.pnini@gmail.com" 
+                    className="text-2xl font-medium border-b-2 border-slate-100 hover:border-blue-500 transition-all tracking-tight"
+                  >
+                    tair.pnini@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              {/* Support Section - Simplified & Gift icon */}
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-slate-900 shadow-sm transition-all hover:bg-white hover:shadow-md group">
+                <div className="flex items-center gap-2 font-bold mb-3 text-slate-800">
+                  <Gift size={20} className="text-rose-400 group-hover:bounce animate-pulse" />
+                  <span>שי קטן של תודה</span>
+                </div>
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  נהניתם ממשהו שעשיתי? תמיכה סמלית (או משהו טעים) היא דרך נפלאה לעזור לי להמשיך ליצור. זה תמיד משמח, וממש לא מחייב.
+                </p>
+                <a 
+                  href="https://links.payboxapp.com/dZ5410C6mZb" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-600 transition-colors shadow-sm w-full justify-center md:w-auto"
+                >
+                  להוקרה סמלית דרך Paybox
+                  <ExternalLink size={14} />
+                </a>
+              </div>
+
+            </div>
+
+            <p className="mt-16 text-slate-400 text-xs text-center font-light">
+              © {new Date().getFullYear()} תאיר פניני | נבנה בחברות עם Gemini
+            </p>
+          </footer>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default App;
