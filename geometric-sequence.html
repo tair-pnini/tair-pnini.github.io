@@ -508,16 +508,13 @@ function Header({ onToggleSidebar }) {
                 </button>
                 <h1 className="text-xl md:text-2xl font-bold text-slate-800 leading-none">סדרות - פעילות מבוא לסדרה הנדסית</h1>
             </div>
-            <div className="hidden md:block text-slate-400 text-xs text-left" dir="ltr">
-                Math Investigations
-            </div>
         </header>
     );
 }
 
 function Footer() {
     return (
-        <footer className="bg-white border-t border-slate-200 p-3 text-center z-10">
+        <footer className="bg-white border-t border-slate-200 p-3 text-center z-10 w-full shrink-0">
             <div className="text-xs text-slate-500 leading-relaxed">
                 נוצר ע"י <a href="https://tair-pnini.github.io" target="_blank" className="text-blue-600 hover:text-blue-800 font-bold underline transition-colors">תאיר פניני</a> | מוזמנים להשתמש ולהנות. אם לקחתם השראה נא תנו קרדיט.
                 <span className="mx-2 text-slate-300">|</span>
@@ -561,7 +558,7 @@ function Sidebar({ riddles, progress, currentId, onSelect, isOpen, toggleSidebar
             </div>
 
             {/* Riddle List */}
-            <div className="flex-1 overflow-y-auto custom-scroll p-4 space-y-2">
+            <div className="flex-1 overflow-y-auto custom-scroll p-4 space-y-2 pb-20 md:pb-4">
                 {riddles.map((riddle) => {
                     const status = progress[riddle.id] || { completed: false };
                     const isActive = currentId === riddle.id;
@@ -659,8 +656,8 @@ function MainContent({ riddle, status, onSolve, onHintReveal, onNext, onPrev }) 
             
             <div className="p-4 md:p-10 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-start pt-8 md:pt-10 pb-20">
                 
-                {/* Interaction Area (Right) */}
-                <div className="flex flex-col gap-6 order-1 lg:order-1">
+                {/* Interaction Area (Right on Desktop, Second on Mobile) */}
+                <div className="flex flex-col gap-6 order-2 lg:order-1">
                     
                     <div className="mb-2">
                         <h2 className="text-2xl font-bold text-slate-800">{riddle.title}</h2>
@@ -812,8 +809,8 @@ function MainContent({ riddle, status, onSolve, onHintReveal, onNext, onPrev }) 
 
                 </div>
 
-                {/* Sequence & Graph (Left) */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 order-2 lg:order-2">
+                {/* Sequence & Graph (Left on Desktop, First on Mobile) */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 order-1 lg:order-2">
                     <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-3">
                         <h2 className="font-bold text-slate-700">הסדרה הנתונה</h2>
                         <span className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">חקירה</span>
@@ -897,7 +894,7 @@ function App() {
     const currentStatus = progress[currentId];
 
     return (
-        <div className="flex flex-col h-screen w-screen bg-slate-50 overflow-hidden" dir="rtl">
+        <div className="flex flex-col h-[100dvh] w-screen bg-slate-50 overflow-hidden" dir="rtl">
             
             <Header onToggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
 
