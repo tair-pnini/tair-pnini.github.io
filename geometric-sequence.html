@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אתגר הסדרות - תאיר פניני</title>
+    <title>אתגר הסדרות - חקירה גרפית</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -130,24 +130,20 @@ const riddlesData = [
         title: "חידה מספר 2",
         sequence: [
             { n: 1, val: "?" },
-            { n: 2, val: "12" },
-            { n: 3, val: "14" },
-            { n: 4, val: "18" },
-            { n: 5, val: "26" },
-            { n: 6, val: "38" },
-            { n: 7, val: "62" },
-            { n: 8, val: "74" },
-            { n: 9, val: "102" },
-            { n: 10, val: "102" }
+            { n: 2, val: "26" },
+            { n: 3, val: "38" },
+            { n: 4, val: "62" },
+            { n: 5, val: "74" },
+            { n: 6, val: "102" }
         ],
         targetN: 1, 
-        answer: ["6"],
+        answer: ["18"],
         hints: [
             "הסתכלו על ההפרש בין איבר בסדרה לבין זה שבא אחריו.",
-            <>האיבר <MathText sub="2">a</MathText> הוא 12 וההפרש בינו לבין <MathText sub="3">a</MathText> הוא 2. מה הקשר בין 12 לבין 2?</>,
-            "ההפרש הוא מכפלת הספרות של המספר הקודם. אם המספר הוא 14, מוסיפים 1x4=4 ומקבלים 18."
+            <>האיבר <MathText sub="2">a</MathText> הוא 26 וההפרש בינו לבין <MathText sub="3">a</MathText> הוא 12. מה הקשר בין 26 לבין 12?</>,
+            "ההפרש הוא מכפלת הספרות של המספר הקודם. כדי למצוא את הראשון, צריך מספר שאם נוסיף לו את מכפלת ספרותיו נקבל 26."
         ],
-        explanation: "החוקיות היא להוסיף למספר את מכפלת ספרותיו. כדי להגיע ל-12, היינו צריכים מספר שסכומו ועוד מכפלת ספרותיו שווה 12. 6 ועוד 6 שווה 12."
+        explanation: "החוקיות היא להוסיף למספר את מכפלת ספרותיו. 18 ועוד (1 כפול 8) שווה 26."
     },
     {
         id: 3,
@@ -446,10 +442,8 @@ const SequenceGraph = ({ sequence, isSolved, answer, targetN, riddleId }) => {
 };
 
 // --- קומפוננטת רפלקציה קבועה ---
-const ReflectionSection = () => {
-    // states: null, 'yes', 'no'
-    const [q1, setQ1] = useState(null);
-    const [q2, setQ2] = useState(null);
+const ReflectionSection = ({ values, onUpdate }) => {
+    // values = { q1: null/'yes'/'no', q2: null/'yes'/'no' }
 
     const ButtonGroup = ({ value, onChange }) => (
         <div className="flex gap-2">
@@ -480,14 +474,14 @@ const ReflectionSection = () => {
                     <span className="text-sm text-slate-600 leading-tight">
                         האם לדעתכם ניתן לכתוב <strong>הגדרה מתמטית בהירה</strong> לסדרה?
                     </span>
-                    <ButtonGroup value={q1} onChange={setQ1} />
+                    <ButtonGroup value={values?.q1} onChange={(val) => onUpdate('q1', val)} />
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
                     <span className="text-sm text-slate-600 leading-tight">
                         האם לדעתכם ניתן לכתוב <strong>נוסחה פשוטה</strong> לחישוב איבר כללי בסדרה?
                     </span>
-                    <ButtonGroup value={q2} onChange={setQ2} />
+                    <ButtonGroup value={values?.q2} onChange={(val) => onUpdate('q2', val)} />
                 </div>
             </div>
         </div>
@@ -599,7 +593,7 @@ function Sidebar({ riddles, progress, currentId, onSelect, isOpen, toggleSidebar
     );
 }
 
-function MainContent({ riddle, status, onSolve, onHintReveal, onNext, onPrev }) {
+function MainContent({ riddle, status, onSolve, onHintReveal, onNext, onPrev, onReflectionUpdate }) {
     const [input, setInput] = useState("");
     const [qInput, setQInput] = useState("");
     const [errorState, setErrorState] = useState(false);
@@ -795,7 +789,7 @@ function MainContent({ riddle, status, onSolve, onHintReveal, onNext, onPrev }) 
                     )}
 
                     {/* Reflection */}
-                    <ReflectionSection />
+                    <ReflectionSection values={status?.reflection} onUpdate={(key, val) => onReflectionUpdate(riddle.id, key, val)} />
 
                     {/* Navigation Buttons (Bottom) */}
                     <div className="flex justify-between pt-6 border-t border-slate-100">
@@ -818,7 +812,7 @@ function MainContent({ riddle, status, onSolve, onHintReveal, onNext, onPrev }) 
                     
                     {/* Table */}
                     <div className="max-h-60 overflow-y-auto custom-scroll pr-2">
-                         <div className="flex justify-between px-3 text-xs text-slate-400 font-bold mb-2 uppercase tracking-wider math-serif italic" dir="ltr">
+                         <div className="flex justify-between px-3 text-xl text-slate-500 font-bold mb-2 tracking-wider math-serif" dir="ltr">
                             <span>n</span>
                             <span>a<sub>n</sub></span>
                         </div>
@@ -831,7 +825,7 @@ function MainContent({ riddle, status, onSolve, onHintReveal, onNext, onPrev }) 
                                     <div className="text-slate-300 text-xs">➜</div>
                                     <div className={`font-bold math-serif ${item.val === "?" ? "text-blue-600" : "text-slate-700"}`}>
                                         {item.val === "?" && isSolved 
-                                            ? (riddle.id === 10 && item.n === 2 ? "1.5" : riddle.answer[0]) 
+                                            ? (riddle.id === 10 && item.n === 2 ? "1.5" : (riddle.id === 2 && item.n === 1 ? riddle.answer[0] : item.val))
                                             : item.val}
                                     </div>
                                 </div>
@@ -853,7 +847,7 @@ function App() {
     const [currentId, setCurrentId] = useState(1);
     const [progress, setProgress] = useState(() => {
         const initial = {};
-        riddlesData.forEach(r => initial[r.id] = { completed: false, hintsRevealed: 0 });
+        riddlesData.forEach(r => initial[r.id] = { completed: false, hintsRevealed: 0, reflection: { q1: null, q2: null } });
         return initial;
     });
     const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -877,6 +871,16 @@ function App() {
             }
             return prev;
         });
+    };
+
+    const handleReflectionUpdate = (id, key, value) => {
+         setProgress(prev => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                reflection: { ...prev[id].reflection, [key]: value }
+            }
+        }));
     };
 
     const navigate = (direction) => {
@@ -915,6 +919,7 @@ function App() {
                     onHintReveal={handleHintReveal}
                     onNext={() => navigate('next')}
                     onPrev={() => navigate('prev')}
+                    onReflectionUpdate={handleReflectionUpdate}
                 />
             </div>
             
