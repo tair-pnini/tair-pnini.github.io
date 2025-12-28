@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="שיעור פייתון אינטראקטיבי: מילונים וניתוח נתונים">
+    <title>שיעור פייתון: צוללים למידע</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐍</text></svg>">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --bg-color: #f8f9fa;
+            --text-color: #2b2d42;
+            --card-bg: #ffffff;
+            --code-bg: #1e1e1e;
+            --terminal-bg: #2d2d2d;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Rubik', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Style */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            margin-top: 10px;
+            font-family: 'Heebo', sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background-color: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background-color: var(--success-color, #4cc9f0);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Step Management */
+        .step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Content Styling */
+        section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-top: 0;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .explanation {
+            font-family: 'Heebo', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Code Block Styling */
+        .code-block-wrapper {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            color: #d4d4d4;
+            padding: 25px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            white-space: pre;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Heebo', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Syntax Highlighting */
+        .comment { color: #6a9955; font-style: italic; }
+        .keyword { color: #569cd6; font-weight: bold; }
+        .string { color: #ce9178; }
+        .number { color: #b5cea8; }
+        .function { color: #dcdcaa; }
+
+        /* Terminal / Output Box */
+        .terminal {
+            background-color: var(--terminal-bg);
+            color: #00ff00; /* Hacker Green */
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            direction: ltr;
+            text-align: left;
+            margin-top: 15px;
+            border-left: 5px solid #00aa00;
+        }
+
+        .terminal-title {
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            display: block;
+        }
+
+        /* Question Box */
+        .question-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .question-icon { font-size: 1.5rem; }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-family: 'Rubik', sans-serif;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background-color: var(--primary-color);
+            color: white;
+            margin-right: auto; /* Push to left in RTL */
+        }
+        
+        .btn-next:hover {
+            background-color: var(--secondary-color);
+            transform: translateX(-3px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-prev {
+            background-color: #e9ecef;
+            color: var(--text-color);
+        }
+
+        .btn-prev:hover {
+            background-color: #dee2e6;
+        }
+        
+        .hidden { visibility: hidden; }
+        .solution-hidden { display: none; }
+
+        /* Challenge Card */
+        .challenge-card {
+            background: #f0f7ff;
+            border: 2px dashed var(--primary-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .badge {
+            background-color: #dbeafe;
+            color: var(--primary-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .solution-toggle-btn {
+            background-color: #6c757d;
+            color: white;
+            border-radius: 50px;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            font-family: 'Heebo', sans-serif;
+            transition: background 0.3s;
+        }
+        
+        .solution-toggle-btn:hover {
+            background-color: #495057;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>שיעור פייתון: מפצחים את הנתונים 🐍</h1>
+        <p>שלב אחר שלב: מרשימות למילונים ו-Big Data</p>
+    </header>
+
+<div class="container">
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Step 1: The List Problem -->
+    <div class="step active" id="step1">
+        <section>
+            <h2>1. הבעיה עם רשימות</h2>
+            <p class="explanation">רשימה (List) היא מעולה כשיש סדר, אבל גרועה כשיש משמעות. תסתכלו על הרשימה הזו שמייצגת תלמיד, האם אתם יכולים לנחש מה אומר כל מספר?</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyToClipboard(this)">העתק קוד</button>
+                <div class="code-block">
+student = [<span class="string">"Dani"</span>, <span class="number">13</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="string">"Haifa"</span>]
+
+<span class="comment"># בואו ננסה להבין את הנתונים:</span>
+<span class="function">print</span>(student[<span class="number">1</span>])
+<span class="function">print</span>(student[<span class="number">2</span>])
+<span class="function">print</span>(student[<span class="number">3</span>])
+                </div>
+            </div>
+
+            <div class="terminal">
+                <span class="terminal-title">Output / פלט מסוף</span>
+                13<br>
+                2<br>
+                4
+            </div>
+
+            <div class="question-box">
+                <span class="question-icon">🤔</span>
+                <div>
+                    <strong>רגע, תעצרו. מה אלו המספרים האלו?</strong><br>
+                    אנחנו רואים 13 (אולי גיל?), אבל מה זה 2? מספר אחים? מספר חיות מחמד? <br>
+                    ומה זה 4? כיתה ד'? ציון במתמטיקה? מידת נעליים?<br>
+                    ברשימה רגילה - אין לנו שום דרך לדעת!
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Step 2: Dictionary Solution -->
+    <div class="step" id="step2">
+        <section>
+            <h2>2. הפתרון: מילון (Dictionary)</h2>
+            <p class="explanation">מילון מאפשר לנו לתת <strong>מפתח</strong> (Key) לכל <strong>ערך</strong> (Value). זה עובד בדיוק כמו אנשי קשר בטלפון: אנחנו לא מחפשים לפי "מיקום 3 ברשימה", אלא מחפשים שם - ומקבלים מספר.</p>
+            
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyToClipboard(this)">העתק קוד</button>
+                <div class="code-block">
+student = {
+    <span class="string">"name"</span>: <span class="string">"Dani"</span>,
+    <span class="string">"age"</span>: <span class="number">13</span>,
+    <span class="string">"siblings"</span>: <span class="number">2</span>,
+    <span class="string">"grade"</span>: <span class="number">4</span>,
+    <span class="string">"city"</span>: <span class="string">"Haifa"</span>
+}
+
+<span class="comment"># עכשיו זה הרבה יותר ברור:</span>
+<span class="function">print</span>(<span class="string">"Siblings:"</span>, student[<span class="string">"siblings"</span>])
+<span class="function">print</span>(<span class="string">"City:"</span>, student[<span class="string">"city"</span>])
+                </div>
+            </div>
+
+            <div class="terminal">
+                <span class="terminal-title">Output / פלט מסוף</span>
+                Siblings: 2<br>
+                City: Haifa
+            </div>
+
+            <div class="challenge-card">
+                <h3>🎯 משימה 1: פרופיל אישי</h3>
+                <p>צרו מילון שמייצג אתכם. הוא חייב לכלול לפחות 4 שדות:</p>
+                <ul>
+                    <li>שם (<span class="badge">name</span>)</li>
+                    <li>מאכל אהוב (<span class="badge">food</span>)</li>
+                    <li>כוח על רצוי (<span class="badge">superpower</span>)</li>
+                    <li>דבר שאתם שונאים (<span class="badge">hate</span>)</li>
+                </ul>
+                <p>הדפיסו משפט: <code>Danny wants to fly and eat Sushi</code></p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Step 3: Big Data Project (Modified) -->
+    <div class="step" id="step3">
+        <section>
+            <h2>3. פרויקט כיתתי: Big Data</h2>
+            <p class="explanation">רשימה אחת זה נחמד, אבל מה קורה כשיש לנו כיתה שלמה? אנחנו ניצור <strong>רשימה של מילונים</strong>. זה הבסיס לכל מאגר מידע בעולם האמיתי.</p>
+
+            <div class="challenge-card" style="background: #e6fffa; border-color: #38b2ac;">
+                <h3>🛠️ המשימה שלכם: בניית המאגר</h3>
+                <p>כתבו תוכנית שאוספת נתונים מכל החברים בכיתה:</p>
+                <ol>
+                    <li>צרו רשימה ריקה בשם <code>database</code>.</li>
+                    <li>הריצו לולאת <code>while</code> אינסופית שמבקשת קלט (שם, מאכל, כוח-על).</li>
+                    <li>אם המשתמש מקליד 'q' בשם - עצרו את הלולאה.</li>
+                    <li>לכל משתמש: צרו <strong>מילון</strong> אישי והוסיפו אותו לרשימה הגדולה.</li>
+                </ol>
+            </div>
+
+            <button class="solution-toggle-btn" onclick="toggleSolution()">👀 נתקעתם? לחצו להצצה בקוד הפתרון</button>
+
+            <div id="solution-box" class="solution-hidden">
+                <div class="code-block-wrapper">
+                    <button class="copy-btn" onclick="copyToClipboard(this)">העתק קוד</button>
+                    <div class="code-block">
+database = []
+
+<span class="keyword">while</span> <span class="keyword">True</span>:
+    name = <span class="function">input</span>(<span class="string">"Name (or 'q'): "</span>)
+    <span class="keyword">if</span> name == <span class="string">'q'</span>:
+        <span class="keyword">break</span>
+        
+    food = <span class="function">input</span>(<span class="string">"Favorite food: "</span>)
+    power = <span class="function">input</span>(<span class="string">"Superpower: "</span>)
+    
+    <span class="comment"># 1. יוצרים מילון לאדם הנוכחי</span>
+    person = {<span class="string">"name"</span>: name, <span class="string">"food"</span>: food, <span class="string">"power"</span>: power}
+    
+    <span class="comment"># 2. מוסיפים לרשימה הגדולה</span>
+    database.append(person)
+
+<span class="function">print</span>(<span class="string">"Total students:"</span>, <span class="function">len</span>(database))
+<span class="function">print</span>(database)
+                    </div>
+                </div>
+
+                <div class="terminal">
+                    <span class="terminal-title">Simulation / הרצה לדוגמה</span>
+                    Name (or 'q'): <span style="color: white">Ron</span><br>
+                    Favorite food: <span style="color: white">Burger</span><br>
+                    Superpower: <span style="color: white">Invisibility</span><br>
+                    Name (or 'q'): <span style="color: white">Sarah</span><br>
+                    Favorite food: <span style="color: white">Pizza</span><br>
+                    Superpower: <span style="color: white">Flying</span><br>
+                    Name (or 'q'): <span style="color: white">q</span><br>
+                    <br>
+                    Total students: 2<br>
+                    [{'name': 'Ron', ...}, {'name': 'Sarah', ...}]
+                </div>
+            </div>
+
+            <div class="question-box">
+                <span class="question-icon">🚀</span>
+                <div>
+                    <strong>האתגר הבא: כריית מידע (Data Mining)</strong><br>
+                    אחרי שיש לכם את הרשימה המלאה, נסו לגלות:<br>
+                    1. כמה ילדים בחרו ב-Teleportation?<br>
+                    2. האם מישהו אוהב "Broccoli"?<br>
+                    3. למי יש את השם הכי ארוך?
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Step 4: Bonus -->
+    <div class="step" id="step4">
+        <section>
+            <h2>4. בונוס למהירים: בלש התדרים 🕵️‍♂️</h2>
+            <p class="explanation">איך גוגל יודע מה הנושא של דף אינטרנט? הוא סופר מילים. בואו נבנה סקריפט שסופר אותיות בטקסט ארוך.</p>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyToClipboard(this)">העתק קוד</button>
+                <div class="code-block">
+text = <span class="string">"python is amazing and super cool..."</span>
+counts = {}
+
+<span class="keyword">for</span> letter <span class="keyword">in</span> text:
+    <span class="comment"># אם האות כבר במילון - נוסיף 1 לערך הקיים</span>
+    <span class="keyword">if</span> letter <span class="keyword">in</span> counts:
+        counts[letter] = counts[letter] + <span class="number">1</span>
+    <span class="comment"># אם פעם ראשונה שפגשנו אותה - נתחיל מ-1</span>
+    <span class="keyword">else</span>:
+        counts[letter] = <span class="number">1</span>
+
+<span class="function">print</span>(counts)
+                </div>
+            </div>
+
+            <div class="terminal">
+                <span class="terminal-title">Output / פלט מסוף</span>
+                {<br>
+                &nbsp;&nbsp;'p': 2,<br>
+                &nbsp;&nbsp;'y': 1,<br>
+                &nbsp;&nbsp;'t': 1,<br>
+                &nbsp;&nbsp;'h': 1,<br>
+                &nbsp;&nbsp;'o': 3,<br>
+                &nbsp;&nbsp;'n': 2,<br>
+                &nbsp;&nbsp;...<br>
+                }
+            </div>
+
+            <div class="footer">
+                סיימתם את השיעור! כל הכבוד 🏆
+            </div>
+        </section>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-buttons">
+        <button class="btn btn-next" onclick="nextStep()">המשך לשלב הבא &larr;</button>
+        <button class="btn btn-prev hidden" onclick="prevStep()">&rarr; חזור</button>
+    </div>
+
+</div>
+
+<div id="toast">✅ הקוד הועתק!</div>
+
+<script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    function updateUI() {
+        // Hide all steps
+        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        // Show current step
+        document.getElementById(`step${currentStep}`).classList.add('active');
+
+        // Update Buttons
+        const prevBtn = document.querySelector('.btn-prev');
+        const nextBtn = document.querySelector('.btn-next');
+
+        if (currentStep === 1) prevBtn.classList.add('hidden');
+        else prevBtn.classList.remove('hidden');
+
+        if (currentStep === totalSteps) {
+            nextBtn.innerHTML = "סיום השיעור 🎉";
+            // Optional: Disable next button or link to home
+        } else {
+            nextBtn.innerHTML = "המשך לשלב הבא &larr;";
+        }
+
+        // Update Progress Bar
+        const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        document.getElementById('progressBar').style.width = `${progress}%`;
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextStep() {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            updateUI();
+        }
+    }
+
+    function prevStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateUI();
+        }
+    }
+
+    // Toggle Solution Visibility
+    function toggleSolution() {
+        const box = document.getElementById('solution-box');
+        const btn = document.querySelector('.solution-toggle-btn');
+        
+        if (box.style.display === 'block') {
+            box.style.display = 'none';
+            btn.innerText = "👀 נתקעתם? לחצו להצצה בקוד הפתרון";
+        } else {
+            box.style.display = 'block';
+            box.style.animation = "fadeIn 0.5s";
+            btn.innerText = "🙈 הסתר את הקוד";
+        }
+    }
+
+    // --- Copy Functionality (Same as before) ---
+    async function copyToClipboard(button) {
+        const wrapper = button.parentElement;
+        const codeBlock = wrapper.querySelector('.code-block');
+        if (!codeBlock) return;
+
+        const text = codeBlock.innerText;
+        const originalText = button.innerText;
+
+        try {
+            await navigator.clipboard.writeText(text);
+            showSuccess(button, originalText);
+        } catch (err) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showSuccess(button, originalText);
+        }
+    }
+
+    function showSuccess(button, originalText) {
+        const toast = document.getElementById("toast");
+        toast.className = "show";
+        setTimeout(() => toast.className = toast.className.replace("show", ""), 3000);
+        
+        button.innerText = "הועתק!";
+        setTimeout(() => button.innerText = originalText, 2000);
+    }
+
+    // Initialize
+    updateUI();
+</script>
+
+</body>
+</html>
