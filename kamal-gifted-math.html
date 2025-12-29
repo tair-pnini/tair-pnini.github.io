@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>קמ"ל מתמטיקה למחוננים</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #fafafa;
+            color: #333;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Rubik', sans-serif;
+        }
+        .step-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Modal Animation */
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        body.modal-active {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-[#fafafa]">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-gray-800 tracking-tight">קמ"ל מתמטיקה למחוננים</h1>
+                <p class="text-sm text-stone-500">קהילה מקצועית לומדת</p>
+            </div>
+            
+            <div class="hidden md:block text-sm font-medium text-stone-600 bg-stone-100 px-4 py-1.5 rounded-full">
+                בהובלת לורה ותאיר
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="py-20 text-center px-4 max-w-4xl mx-auto">
+        <h2 class="text-4xl md:text-5xl font-black mb-6 text-gray-800 leading-tight">
+            צומחים יחד בקהילה
+        </h2>
+        <p class="text-xl text-stone-600 mb-10 leading-relaxed max-w-3xl mx-auto font-light">
+            המטרה של קהילות מקצועיות לומדות היא לעזור לכולנו להפוך למורים ומורות טובים יותר לתלמידים שלנו.
+            <br><br>
+            בסוף כל השתלמות יש להגיש עבודה מסכמת עם ציון. את העבודה שלנו השנה נבנה תוך כדי 3 משימות א-סינכרוניות שבסופן יהיו כל החומרים לצורך כריכה, סיכום והגשה כעבודה.
+        </p>
+        
+        <!-- Elegant Alert Box -->
+        <div class="bg-white border border-stone-200 p-6 text-right rounded-xl shadow-sm max-w-2xl mx-auto relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-1 h-full bg-emerald-500"></div>
+            <h3 class="font-bold text-gray-800 text-lg mb-2 flex items-center gap-2">
+                <i class="fas fa-check-circle text-emerald-500"></i> תנאים לקבלת גמול (30 שעות)
+            </h3>
+            <p class="text-xs text-stone-500 font-bold mb-3 border-b border-stone-100 pb-2">
+                עפ"י הנחיות משרד החינוך
+            </p>
+            <ul class="list-disc list-inside text-stone-600 space-y-1 pr-1">
+                <li>השתתפות פעילה במפגשים.</li>
+                <li>ביצוע 3 משימות א-סינכרוניות.</li>
+                <li><strong>הגשת עבודה מסכמת</strong> בסוף התהליך.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Tasks Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="text-center mb-16">
+                <span class="text-emerald-600 font-bold tracking-widest text-xs uppercase mb-2 block">תהליך העבודה</span>
+                <h3 class="text-3xl font-bold text-gray-800">המשימות הא-סינכרוניות</h3>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                
+                <!-- Task 1 -->
+                <div onclick="toggleModal('modal-task1')" class="step-card bg-[#fafafa] p-8 rounded-2xl border border-stone-100 group relative overflow-hidden flex flex-col">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div class="relative z-10 flex-grow">
+                        <!-- Date Badge -->
+                        <div class="inline-block bg-emerald-100 text-emerald-800 text-sm font-bold px-3 py-1 rounded-full mb-4">
+                            <i class="far fa-calendar-alt ml-1"></i> 29.12 - 26.1
+                        </div>
+                        
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">מיקוד ושותפות</h4>
+                        <p class="text-stone-500 text-sm mb-4">זיהוי צורך אישי ומציאת שותף/ה לדרך.</p>
+                        
+                        <!-- Deliverables List -->
+                        <div class="bg-white p-4 rounded-lg border border-stone-100 shadow-sm text-sm text-stone-700">
+                            <strong class="block mb-2 text-emerald-700">להגשה:</strong>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>פסקה אישית (ה"למה" שלי)</li>
+                                <li>שם השותף/ה הנבחר/ת</li>
+                                <li>הצהרת כוונות משותפת</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-emerald-600 text-sm font-bold border-b border-emerald-200 pb-0.5 group-hover:border-emerald-600 transition-colors inline-block w-max">
+                        לפירוט ההנחיות
+                    </div>
+                </div>
+
+                <!-- Task 2 -->
+                <div onclick="toggleModal('modal-task2')" class="step-card bg-[#fafafa] p-8 rounded-2xl border border-stone-100 group relative overflow-hidden flex flex-col">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-amber-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div class="relative z-10 flex-grow">
+                        <!-- Date Badge -->
+                        <div class="inline-block bg-amber-100 text-amber-800 text-sm font-bold px-3 py-1 rounded-full mb-4">
+                            <i class="far fa-calendar-alt ml-1"></i> 9.2 - 23.3
+                        </div>
+
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">תכנון ההתנסות</h4>
+                        <p class="text-stone-500 text-sm mb-4">בניית תוכנית פעולה וקבלת משוב עמיתים.</p>
+
+                        <!-- Deliverables List -->
+                        <div class="bg-white p-4 rounded-lg border border-stone-100 shadow-sm text-sm text-stone-700">
+                            <strong class="block mb-2 text-amber-700">להגשה:</strong>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>תוכנית פעילות (שיעור/כלי)</li>
+                                <li>הגדרת מדדי הצלחה</li>
+                                <li>משוב כתוב מהשותף/ה</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-amber-600 text-sm font-bold border-b border-amber-200 pb-0.5 group-hover:border-amber-600 transition-colors inline-block w-max">
+                        לפירוט ההנחיות
+                    </div>
+                </div>
+
+                <!-- Task 3 -->
+                <div onclick="toggleModal('modal-task3')" class="step-card bg-[#fafafa] p-8 rounded-2xl border border-stone-100 group relative overflow-hidden flex flex-col">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-rose-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div class="relative z-10 flex-grow">
+                        <!-- Date Badge -->
+                        <div class="inline-block bg-rose-100 text-rose-800 text-sm font-bold px-3 py-1 rounded-full mb-4">
+                            <i class="far fa-clock ml-1"></i> יעודכן בהמשך
+                        </div>
+
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">ביצוע וסיכום</h4>
+                        <p class="text-stone-500 text-sm mb-4">יישום בכיתה, איסוף עדויות ורפלקציה.</p>
+
+                        <!-- Deliverables List -->
+                        <div class="bg-white p-4 rounded-lg border border-stone-100 shadow-sm text-sm text-stone-700">
+                            <strong class="block mb-2 text-rose-700">להגשה:</strong>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>תיאור הביצוע בפועל</li>
+                                <li>עדות (תמונה/ציטוט/תוצר)</li>
+                                <li>רפלקציה אישית וזוגית</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-rose-600 text-sm font-bold border-b border-rose-200 pb-0.5 group-hover:border-rose-600 transition-colors inline-block w-max">
+                        לפירוט ההנחיות
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer moved here -->
+            <div class="max-w-2xl mx-auto text-center">
+                <p class="italic text-stone-400 text-sm bg-stone-50 py-3 px-6 rounded-full inline-block border border-stone-100">
+                    <i class="fas fa-info-circle ml-1"></i>
+                    שימו לב: ייתכנו שינויים קלים בתכנון לאורך השנה, שכן גם אנחנו נמצאות בתהליך למידה מתמיד יחד איתכם.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Final Paper Section with Image Background -->
+    <section class="relative py-24 px-4 overflow-hidden">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1456324504439-367cee10d632?q=80&w=2070&auto=format&fit=crop" alt="Desk background" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-stone-900/70 backdrop-blur-[2px]"></div>
+        </div>
+
+        <div class="container mx-auto max-w-4xl relative z-10">
+            
+            <!-- Section Title -->
+            <div class="text-white text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">העבודה המסכמת</h2>
+                <p class="text-stone-200 text-lg leading-relaxed max-w-2xl mx-auto">
+                    הרגע בו כל החלקים מתחברים. העבודה הסופית היא איגוד ועריכה של שלושת המשימות לכדי מסמך אחד קוהרנטי המייצג את התהליך שעברתם.
+                </p>
+            </div>
+
+            <!-- The "Paper" Requirements Card -->
+            <div class="bg-white/95 backdrop-blur shadow-2xl rounded-sm border-t-4 border-emerald-600 p-8 md:p-12">
+                
+                <div class="flex justify-between items-end border-b border-gray-200 pb-4 mb-8">
+                    <h3 class="text-2xl font-bold text-gray-900">מפרט העבודה להגשה</h3>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Item 1 -->
+                    <div class="flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-900 text-white rounded font-serif font-bold">1</div>
+                        <div>
+                            <span class="font-bold text-lg block text-gray-900">שער העבודה</span>
+                            <span class="text-gray-600">שם המגיש/ה, שם השותף/ה, ת.ז., נושא העבודה, תאריך הגשה.</span>
+                        </div>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-900 text-white rounded font-serif font-bold">2</div>
+                        <div>
+                            <span class="font-bold text-lg block text-gray-900">מבוא ורקע (משימה 1)</span>
+                            <span class="text-gray-600">הצגת הצורך הפדגוגי/הדילמה ("הסיפור האישי"), הרציונל לבחירת השותף/ה, והצהרת הכוונות המשותפת.</span>
+                        </div>
+                    </div>
+
+                    <!-- Item 3 -->
+                    <div class="flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-900 text-white rounded font-serif font-bold">3</div>
+                        <div>
+                            <span class="font-bold text-lg block text-gray-900">תיאור ההתערבות (משימה 2)</span>
+                            <span class="text-gray-600">פירוט הפעילות שתוכננה, כלי המדידה שנבחרו, וסיכום המשוב שהתקבל מהעמית/ה לפני הביצוע.</span>
+                        </div>
+                    </div>
+
+                    <!-- Item 4 -->
+                    <div class="flex gap-4 items-start">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-900 text-white rounded font-serif font-bold">4</div>
+                        <div>
+                            <span class="font-bold text-lg block text-gray-900">ממצאים ודיון (משימה 3)</span>
+                            <span class="text-gray-600">תיאור הביצוע בפועל, הצגת עדויות (תמונות/דפים/ציטוטים), ניתוח הממצאים ורפלקציה מסכמת.</span>
+                        </div>
+                    </div>
+
+                    <!-- Item 5 (NEW) -->
+                    <div class="flex gap-4 items-start bg-emerald-50 p-4 -mr-4 rounded-r-lg border-r-4 border-emerald-500">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-emerald-600 text-white rounded font-serif font-bold">5</div>
+                        <div>
+                            <span class="font-bold text-lg block text-gray-900">תרומה לקהילה והדהוד הידע</span>
+                            <span class="text-gray-600">
+                                כיצד מורים אחרים יכולים ללמוד או להתפתח בעקבות התהליך שעברתם? 
+                                <br>
+                                (למשל: המלצות ליישום בכיתות נוספות, תובנות עקרוניות להוראת מחוננים, או שיתוף כלי שפותח).
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-stone-50 text-stone-400 py-12 text-center text-sm px-4 border-t border-stone-200">
+        <div class="max-w-2xl mx-auto space-y-4">
+            <div class="pt-4 font-bold text-stone-700">קמ"ל מתמטיקה למחוננים תשפ"ו</div>
+        </div>
+    </footer>
+
+
+    <!-- MODALS -->
+
+    <!-- Modal 1 -->
+    <div id="modal-task1" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="absolute w-full h-full bg-stone-900/40 backdrop-blur-sm" onclick="toggleModal('modal-task1')"></div>
+        <div class="bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8">
+            <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4">
+                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-lg font-bold">1</div>
+                <h3 class="text-2xl font-bold text-gray-800">מיקוד ושותפות</h3>
+            </div>
+            
+            <div class="space-y-5 text-stone-600 text-sm">
+                <div>
+                    <strong class="block text-gray-900 mb-1">כתיבה אישית (ה"למה"):</strong>
+                    כתבו פסקה (5-10 שורות) המתארת אתגר, חלום פדגוגי או מיומנות שבאתם לשפר. היו כנים - מה אתם רוצים להשיג?
+                </div>
+                <div>
+                    <strong class="block text-gray-900 mb-1">מציאת שותף/ה:</strong>
+                    חברו למורה נוסף מהקהילה. מישהו עם אתגר דומה, או מישהו שמשלים אתכם.
+                </div>
+                <div>
+                    <strong class="block text-gray-900 mb-1">הצהרת כוונות זוגית:</strong>
+                    כתבו יחד משפט אחד: למה בחרנו לעבוד יחד? איך ניעזר זה בזה?
+                </div>
+            </div>
+            
+            <div class="mt-8 text-left">
+                <button onclick="toggleModal('modal-task1')" class="px-5 py-2 bg-stone-100 text-stone-600 rounded-lg text-sm font-bold hover:bg-stone-200 transition">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2 -->
+    <div id="modal-task2" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="absolute w-full h-full bg-stone-900/40 backdrop-blur-sm" onclick="toggleModal('modal-task2')"></div>
+        <div class="bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8">
+             <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4">
+                <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center text-lg font-bold">2</div>
+                <h3 class="text-2xl font-bold text-gray-800">תכנון ההתנסות</h3>
+            </div>
+            
+            <div class="space-y-5 text-stone-600 text-sm">
+                <div>
+                    <strong class="block text-gray-900 mb-1">התוכנית:</strong>
+                    תכננו פעילות אחת קצרה (שיעור, משימה, כלי או שיחה) שנותנת מענה לצורך שהגדרתם.
+                </div>
+                <div>
+                    <strong class="block text-gray-900 mb-1">כלי המדידה:</strong>
+                    איך תדעו שזה הצליח? (למשל: איסוף דפי עבודה, צילום הלוח, משוב מהתלמידים).
+                </div>
+                <div>
+                    <strong class="block text-gray-900 mb-1">משוב עמיתים:</strong>
+                    שלחו לשותף/ה. השותף/ה יכתוב הערה בונה אחת או שאלה למחשבה לפני הביצוע.
+                </div>
+            </div>
+            
+             <div class="mt-8 text-left">
+                <button onclick="toggleModal('modal-task2')" class="px-5 py-2 bg-stone-100 text-stone-600 rounded-lg text-sm font-bold hover:bg-stone-200 transition">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3 -->
+    <div id="modal-task3" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="absolute w-full h-full bg-stone-900/40 backdrop-blur-sm" onclick="toggleModal('modal-task3')"></div>
+        <div class="bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8">
+             <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4">
+                <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center text-lg font-bold">3</div>
+                <h3 class="text-2xl font-bold text-gray-800">ביצוע וסיכום</h3>
+            </div>
+            
+            <div class="space-y-5 text-stone-600 text-sm">
+                <div>
+                    <strong class="block text-gray-900 mb-1">מה היה?</strong>
+                    תיאור קצר של מה שקרה בפועל בכיתה + עדות (תמונה/ציטוט).
+                </div>
+                <div>
+                    <strong class="block text-gray-900 mb-1">ניתוח:</strong>
+                    האם קיבלתם מענה לצורך המקורי? מה למדתם על התלמידים ועל עצמכם?
+                </div>
+                <div>
+                    <strong class="block text-gray-900 mb-1">רפלקציה זוגית:</strong>
+                    איך העבודה עם השותף/ה תרמה לכם?
+                </div>
+            </div>
+            
+             <div class="mt-8 text-left">
+                <button onclick="toggleModal('modal-task3')" class="px-5 py-2 bg-stone-100 text-stone-600 rounded-lg text-sm font-bold hover:bg-stone-200 transition">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Modals -->
+    <script>
+        function toggleModal(modalID){
+            const modal = document.getElementById(modalID);
+            modal.classList.toggle('opacity-0');
+            modal.classList.toggle('pointer-events-none');
+            document.body.classList.toggle('modal-active');
+        }
+
+        // Close on Escape key
+        document.onkeydown = function(evt) {
+            evt = evt || window.event;
+            var isEscape = false;
+            if ("key" in evt) {
+                isEscape = (evt.key === "Escape" || evt.key === "Esc");
+            } else {
+                isEscape = (evt.keyCode === 27);
+            }
+            if (isEscape && document.body.classList.contains('modal-active')) {
+                const activeModal = document.querySelector('.modal:not(.opacity-0)');
+                if (activeModal) {
+                    toggleModal(activeModal.id);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
