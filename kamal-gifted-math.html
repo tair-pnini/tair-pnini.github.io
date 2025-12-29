@@ -17,7 +17,7 @@
             background-color: #fafafa;
             color: #333;
         }
-        h1, h2, h3, h4 {
+        h1, h2, h3, h4, h5 {
             font-family: 'Rubik', sans-serif;
         }
         .step-card {
@@ -35,6 +35,21 @@
         }
         body.modal-active {
             overflow: hidden;
+        }
+        
+        /* Custom scrollbar for modals */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
         }
     </style>
 </head>
@@ -75,7 +90,7 @@
                 עפ"י הנחיות משרד החינוך
             </p>
             <ul class="list-disc list-inside text-stone-600 space-y-1 pr-1">
-                <li>השתתפות פעילה במפגשים.</li>
+                <li>השתתפות פעילה בלפחות 80% מהמפגשים.</li>
                 <li>ביצוע 3 משימות א-סינכרוניות.</li>
                 <li><strong>הגשת עבודה מסכמת</strong> בסוף התהליך.</li>
             </ul>
@@ -102,15 +117,15 @@
                         </div>
                         
                         <h4 class="text-xl font-bold text-gray-900 mb-3">מיקוד ושותפות</h4>
-                        <p class="text-stone-500 text-sm mb-4">זיהוי צורך אישי ומציאת שותף/ה לדרך.</p>
+                        <p class="text-stone-500 text-sm mb-4">זיהוי עמוק של צורך אישי, חקירת המצב הקיים ויצירת ברית עבודה עם עמית/ה.</p>
                         
                         <!-- Deliverables List -->
                         <div class="bg-white p-4 rounded-lg border border-stone-100 shadow-sm text-sm text-stone-700">
                             <strong class="block mb-2 text-emerald-700">להגשה:</strong>
                             <ul class="list-disc list-inside space-y-1">
-                                <li>פסקה אישית (ה"למה" שלי)</li>
-                                <li>שם השותף/ה הנבחר/ת</li>
-                                <li>הצהרת כוונות משותפת</li>
+                                <li>טקסט אישי (תמונת מצב)</li>
+                                <li>שם השותף/ה</li>
+                                <li>מסמך עקרונות השותפות</li>
                             </ul>
                         </div>
                     </div>
@@ -129,15 +144,15 @@
                         </div>
 
                         <h4 class="text-xl font-bold text-gray-900 mb-3">תכנון ההתנסות</h4>
-                        <p class="text-stone-500 text-sm mb-4">בניית תוכנית פעולה וקבלת משוב עמיתים.</p>
+                        <p class="text-stone-500 text-sm mb-4">בניית תוכנית פעולה אופרטיבית ותכנון התיעוד.</p>
 
                         <!-- Deliverables List -->
                         <div class="bg-white p-4 rounded-lg border border-stone-100 shadow-sm text-sm text-stone-700">
                             <strong class="block mb-2 text-amber-700">להגשה:</strong>
                             <ul class="list-disc list-inside space-y-1">
-                                <li>תוכנית פעילות (שיעור/כלי)</li>
-                                <li>הגדרת מדדי הצלחה</li>
-                                <li>משוב כתוב מהשותף/ה</li>
+                                <li>תוכנית פעולה מפורטת</li>
+                                <li>אופן התיעוד שנבחר</li>
+                                <li>משוב מפורט מהשותף/ה</li>
                             </ul>
                         </div>
                     </div>
@@ -156,14 +171,14 @@
                         </div>
 
                         <h4 class="text-xl font-bold text-gray-900 mb-3">ביצוע וסיכום</h4>
-                        <p class="text-stone-500 text-sm mb-4">יישום בכיתה, איסוף עדויות ורפלקציה.</p>
+                        <p class="text-stone-500 text-sm mb-4">למידה מתוך עשייה, התבוננות בתיעוד וניתוח התהליך.</p>
 
                         <!-- Deliverables List -->
                         <div class="bg-white p-4 rounded-lg border border-stone-100 shadow-sm text-sm text-stone-700">
                             <strong class="block mb-2 text-rose-700">להגשה:</strong>
                             <ul class="list-disc list-inside space-y-1">
-                                <li>תיאור הביצוע בפועל</li>
-                                <li>עדות (תמונה/ציטוט/תוצר)</li>
+                                <li>תיאור נרטיבי של הביצוע</li>
+                                <li>עדות מוחשית (תיעוד)</li>
                                 <li>רפלקציה אישית וזוגית</li>
                             </ul>
                         </div>
@@ -224,8 +239,9 @@
                     <div class="flex gap-4 items-start">
                         <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-900 text-white rounded font-serif font-bold">2</div>
                         <div>
-                            <span class="font-bold text-lg block text-gray-900">מבוא ורקע (משימה 1)</span>
-                            <span class="text-gray-600">הצגת הצורך הפדגוגי/הדילמה ("הסיפור האישי"), הרציונל לבחירת השותף/ה, והצהרת הכוונות המשותפת.</span>
+                            <span class="font-bold text-lg block text-gray-900">מבוא ורקע: תמונת המצב והשותפות</span>
+                            <span class="text-gray-500 text-xs font-bold block mb-1">(על בסיס משימה 1)</span>
+                            <span class="text-gray-600">הצגת הצורך הפדגוגי/המקצועי וה"סיפור האישי" בהרחבה. הצגת הרציונל לבחירת השותף/ה ומסמך עקרונות העבודה המשותפת ("החבר הביקורתי").</span>
                         </div>
                     </div>
 
@@ -233,8 +249,9 @@
                     <div class="flex gap-4 items-start">
                         <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-900 text-white rounded font-serif font-bold">3</div>
                         <div>
-                            <span class="font-bold text-lg block text-gray-900">תיאור ההתערבות (משימה 2)</span>
-                            <span class="text-gray-600">פירוט הפעילות שתוכננה, כלי המדידה שנבחרו, וסיכום המשוב שהתקבל מהעמית/ה לפני הביצוע.</span>
+                            <span class="font-bold text-lg block text-gray-900">ההתערבות: תכנון ותיעוד</span>
+                            <span class="text-gray-500 text-xs font-bold block mb-1">(על בסיס משימה 2)</span>
+                            <span class="text-gray-600">מתווה הפעולה שתוכנן, כיצד תכננתם לאסוף מידע (הקלטה/צילום/משוב), וסיכום המשוב המקדים של "החבר הביקורתי" (כולל שינויים שנעשו בעקבותיו).</span>
                         </div>
                     </div>
 
@@ -242,8 +259,9 @@
                     <div class="flex gap-4 items-start">
                         <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-900 text-white rounded font-serif font-bold">4</div>
                         <div>
-                            <span class="font-bold text-lg block text-gray-900">ממצאים ודיון (משימה 3)</span>
-                            <span class="text-gray-600">תיאור הביצוע בפועל, הצגת עדויות (תמונות/דפים/ציטוטים), ניתוח הממצאים ורפלקציה מסכמת.</span>
+                            <span class="font-bold text-lg block text-gray-900">ממצאים ודיון: מפגש עם המציאות</span>
+                            <span class="text-gray-500 text-xs font-bold block mb-1">(על בסיס משימה 3)</span>
+                            <span class="text-gray-600">"הסיפור שקרה" - תיאור הביצוע בפועל (דגש על רגעים בלתי צפויים). "חדר הראיות" - הצגת העדויות. ניתוח הפער שבין התכנון למציאות ותובנות מהשטח. רפלקציה מסכמת: אישית וזוגית.</span>
                         </div>
                     </div>
 
@@ -277,24 +295,39 @@
     <!-- Modal 1 -->
     <div id="modal-task1" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
         <div class="absolute w-full h-full bg-stone-900/40 backdrop-blur-sm" onclick="toggleModal('modal-task1')"></div>
-        <div class="bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8">
-            <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4">
+        <div class="bg-white w-11/12 md:max-w-xl mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8 modal-content">
+            <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4 sticky top-0 bg-white z-10">
                 <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-lg font-bold">1</div>
-                <h3 class="text-2xl font-bold text-gray-800">מיקוד ושותפות</h3>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800">מיקוד ושותפות</h3>
+                </div>
             </div>
             
-            <div class="space-y-5 text-stone-600 text-sm">
-                <div>
-                    <strong class="block text-gray-900 mb-1">כתיבה אישית (ה"למה"):</strong>
-                    כתבו פסקה (5-10 שורות) המתארת אתגר, חלום פדגוגי או מיומנות שבאתם לשפר. היו כנים - מה אתם רוצים להשיג?
-                </div>
-                <div>
-                    <strong class="block text-gray-900 mb-1">מציאת שותף/ה:</strong>
-                    חברו למורה נוסף מהקהילה. מישהו עם אתגר דומה, או מישהו שמשלים אתכם.
-                </div>
-                <div>
-                    <strong class="block text-gray-900 mb-1">הצהרת כוונות זוגית:</strong>
-                    כתבו יחד משפט אחד: למה בחרנו לעבוד יחד? איך ניעזר זה בזה?
+            <div class="space-y-6 text-stone-700">
+                <p><strong>מטרת המשימה:</strong> זיהוי עמוק של צורך אישי, חקירת המצב הקיים ויצירת ברית עבודה עם עמית/ה ("חבר ביקורתי").</p>
+                
+                <hr class="border-stone-100">
+
+                <h5 class="font-bold text-lg text-gray-900">שלב א' - כתיבת תמונת מצב אישית</h5>
+                <p class="text-sm bg-stone-50 p-2 rounded inline-block text-stone-500">להגשה עד שבועיים מהיום</p>
+                <p>כתבו טקסט שמאפשר לנו "לחיות" את הדילמה או האתגר שלכם. היעזרו בשאלות הבאות:</p>
+                <ul class="list-disc list-inside space-y-2 text-sm bg-gray-50 p-4 rounded-lg">
+                    <li><strong>האתגר/החלום:</strong> מהו הכלי, המיומנות או הפרקטיקה שחסרים לכם?</li>
+                    <li><strong>תמונת המציאות:</strong> תארו סיטואציה ספציפית (מהכיתה, מההכנות, או מחדר המורים) שבה הורגש החוסר הזה. מה קרה שם? מה הרגשתם?</li>
+                    <li><strong>ההתמודדות הנוכחית:</strong> איך אתם פועלים היום? איזה פתרונות ניסיתם ואיפה הם לא מספקים אתכם?</li>
+                    <li><strong>החזון:</strong> איך ייראה השינוי כשיקרה?</li>
+                </ul>
+
+                <h5 class="font-bold text-lg text-gray-900 mt-6">שלב ב' - יצירת השותפות והגדרת "חבר ביקורתי"</h5>
+                <p>לאחר מציאת שותף/ה, נסחו יחד את אופי העבודה. המטרה היא לשמש אחד לשנייה כ"חבר ביקורתי" (Critical Friend) – אדם שניתן לסמוך עליו שישאל שאלות מאתגרות, יציע זווית ראייה נוספת ויתמוך בתהליך.</p>
+                
+                <div class="bg-emerald-50 p-5 rounded-lg border border-emerald-100 mt-6">
+                    <h5 class="font-bold text-emerald-800 mb-2">להגשה (בסוף המשימה):</h5>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-emerald-900">
+                        <li>הטקסט האישי המלא (תמונת המצב משלב א').</li>
+                        <li>שם השותף/ה.</li>
+                        <li>מסמך עקרונות השותפות: המכנה המשותף, המטרה, ותוכנית העבודה (איך ומתי ניעזר אחד בשני).</li>
+                    </ul>
                 </div>
             </div>
             
@@ -307,24 +340,43 @@
     <!-- Modal 2 -->
     <div id="modal-task2" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
         <div class="absolute w-full h-full bg-stone-900/40 backdrop-blur-sm" onclick="toggleModal('modal-task2')"></div>
-        <div class="bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8">
-             <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4">
+        <div class="bg-white w-11/12 md:max-w-xl mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8 modal-content">
+             <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4 sticky top-0 bg-white z-10">
                 <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center text-lg font-bold">2</div>
-                <h3 class="text-2xl font-bold text-gray-800">תכנון ההתנסות</h3>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800">תכנון ההתנסות</h3>
+                </div>
             </div>
             
-            <div class="space-y-5 text-stone-600 text-sm">
-                <div>
-                    <strong class="block text-gray-900 mb-1">התוכנית:</strong>
-                    תכננו פעילות אחת קצרה (שיעור, משימה, כלי או שיחה) שנותנת מענה לצורך שהגדרתם.
+            <div class="space-y-6 text-stone-700">
+                <p><strong>מטרת המשימה:</strong> בניית תוכנית פעולה אופרטיבית ותכנון התיעוד, תוך הסתייעות בשותף לדיוק התכנון.</p>
+                
+                <hr class="border-stone-100">
+
+                <div class="space-y-4">
+                    <div>
+                        <strong class="text-gray-900 block mb-1">1. תוכנית הפעולה:</strong>
+                        <p class="text-sm">תכננו את המהלך שיתן מענה לצורך שהגדרתם. הפעולה יכולה להתרחש בכל מרחב רלוונטי לאתגר שלכם (שיעור בכיתה, שיחה אישית עם תלמיד, ישיבת צוות, או בניית כלי עבודה חדש). <br>פרטו: מה אתם הולכים לעשות?</p>
+                    </div>
+                    
+                    <div>
+                        <strong class="text-gray-900 block mb-1">2. תכנון התיעוד:</strong>
+                        <p class="text-sm">בזמן אמת קשה לשים לב להכל. עליכם להגדיר מראש מה אוספים כדי ללמוד מהתהליך: האם מקליטים? מצלמים תוצרים? כותבים יומן מסע מיד אחרי? אוספים משובים?</p>
+                    </div>
+
+                    <div>
+                        <strong class="text-gray-900 block mb-1">3. החבר הביקורתי:</strong>
+                        <p class="text-sm">שלחו את התכנון לשותף. השותף מתבקש לאתר "נקודות עיוורות": האם הפעולה באמת עונה על הצורך? האם התיעוד יספק לנו מידע משמעותי?</p>
+                    </div>
                 </div>
-                <div>
-                    <strong class="block text-gray-900 mb-1">כלי המדידה:</strong>
-                    איך תדעו שזה הצליח? (למשל: איסוף דפי עבודה, צילום הלוח, משוב מהתלמידים).
-                </div>
-                <div>
-                    <strong class="block text-gray-900 mb-1">משוב עמיתים:</strong>
-                    שלחו לשותף/ה. השותף/ה יכתוב הערה בונה אחת או שאלה למחשבה לפני הביצוע.
+
+                <div class="bg-amber-50 p-5 rounded-lg border border-amber-100 mt-6">
+                    <h5 class="font-bold text-amber-800 mb-2">להגשה:</h5>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-amber-900">
+                        <li>תוכנית הפעולה המפורטת.</li>
+                        <li>אופן התיעוד שנבחר (איך תאספו את המידע).</li>
+                        <li>משוב כתוב ומפורט שהתקבל מהשותף/ה על התכנון.</li>
+                    </ul>
                 </div>
             </div>
             
@@ -337,24 +389,48 @@
     <!-- Modal 3 -->
     <div id="modal-task3" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
         <div class="absolute w-full h-full bg-stone-900/40 backdrop-blur-sm" onclick="toggleModal('modal-task3')"></div>
-        <div class="bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8">
-             <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4">
+        <div class="bg-white w-11/12 md:max-w-xl mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[90vh] relative p-8 modal-content">
+             <div class="flex items-center gap-4 mb-6 border-b border-stone-100 pb-4 sticky top-0 bg-white z-10">
                 <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center text-lg font-bold">3</div>
-                <h3 class="text-2xl font-bold text-gray-800">ביצוע וסיכום</h3>
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800">ביצוע, התבוננות ורפלקציה</h3>
+                </div>
             </div>
             
-            <div class="space-y-5 text-stone-600 text-sm">
-                <div>
-                    <strong class="block text-gray-900 mb-1">מה היה?</strong>
-                    תיאור קצר של מה שקרה בפועל בכיתה + עדות (תמונה/ציטוט).
+            <div class="space-y-6 text-stone-700">
+                <p><strong>מטרת המשימה:</strong> למידה מתוך עשייה, התבוננות בתיעוד וניתוח התהליך.</p>
+                
+                <hr class="border-stone-100">
+
+                <div class="space-y-4">
+                    <div>
+                        <strong class="text-gray-900 block mb-1">הסיפור שקרה (המהלך):</strong>
+                        <p class="text-sm">תארו את ההתנסות כפי שהתרחשה בפועל. התמקדו בתיאור של רגעים בלתי צפויים – הפתעות, תגובות מעניינות, או דברים שהתפתחו אחרת ממה שצפיתם (לטובה או לקושי).</p>
+                    </div>
+                    
+                    <div>
+                        <strong class="text-gray-900 block mb-1">חדר הראיות:</strong>
+                        <p class="text-sm">הציגו את התיעוד שאספתם (ציטוט/תמונה/הקלטה). תנו לנתונים "לדבר" ולהמחיש את מה שקרה.</p>
+                    </div>
+
+                    <div>
+                        <strong class="text-gray-900 block mb-1">מפגש עם המציאות:</strong>
+                        <p class="text-sm">התבוננו על הפער שבין התכנון המוקדם לבין הביצוע בשטח. מה למדתם מהפער הזה? מה עבד ומה דורש דיוק נוסף?</p>
+                    </div>
+
+                    <div>
+                        <strong class="text-gray-900 block mb-1">סיכום זוגי:</strong>
+                        <p class="text-sm">קיימו שיחה רפלקטיבית עם השותף/ה. איך המבט החיצוני שלו/ה תרם להבנת האירוע?</p>
+                    </div>
                 </div>
-                <div>
-                    <strong class="block text-gray-900 mb-1">ניתוח:</strong>
-                    האם קיבלתם מענה לצורך המקורי? מה למדתם על התלמידים ועל עצמכם?
-                </div>
-                <div>
-                    <strong class="block text-gray-900 mb-1">רפלקציה זוגית:</strong>
-                    איך העבודה עם השותף/ה תרמה לכם?
+
+                <div class="bg-rose-50 p-5 rounded-lg border border-rose-100 mt-6">
+                    <h5 class="font-bold text-rose-800 mb-2">להגשה:</h5>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-rose-900">
+                        <li>תיאור נרטיבי של הביצוע.</li>
+                        <li>עדות מוחשית מהשטח (תיעוד).</li>
+                        <li>רפלקציה אישית וזוגית.</li>
+                    </ul>
                 </div>
             </div>
             
