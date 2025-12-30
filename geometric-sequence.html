@@ -2,20 +2,39 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>אתגר הסדרות - חקירה גרפית</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- הגדרות MathJax -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,600;1,700&display=swap');
         
         body {
             font-family: 'Rubik', sans-serif;
-            background-color: #f8fafc; /* Slate 50 */
-            color: #1e293b; /* Slate 800 */
+            background-color: #f8fafc;
+            color: #1e293b;
+            overscroll-behavior-y: auto; 
+            height: 100vh;
         }
 
         .math-serif {
@@ -42,38 +61,98 @@
             cursor: pointer;
         }
         .graph-point:hover {
-            r: 5;
-            filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5));
+            r: 6;
+            filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.6));
         }
 
-        /* Checkbox custom style */
-        .checkbox-wrapper input:checked + div {
-            background-color: #eff6ff;
-            border-color: #3b82f6;
-            color: #1d4ed8;
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
         }
-        .checkbox-wrapper input:checked + div svg {
-            display: block;
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Styling inputs */
+        .inline-input {
+            border: none;
+            border-bottom: 2px solid #3b82f6;
+            background: transparent;
+            padding: 2px 8px;
+            color: #1d4ed8;
+            font-weight: bold;
+            outline: none;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 1.1em;
+            min-width: 60px;
+        }
+        .inline-input::placeholder {
+            color: #94a3b8;
+            font-weight: normal;
+        }
+        .inline-input:focus {
+            border-bottom-color: #1e40af;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .inline-select {
+            appearance: none;
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid #3b82f6;
+            padding: 2px 20px 2px 4px;
+            color: #1d4ed8;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.1em;
+        }
+        .inline-select:invalid, .inline-select option[value=""] {
+            color: #94a3b8;
+            font-weight: normal;
+        }
+        .inline-select:focus {
+             background: rgba(59, 130, 246, 0.05);
         }
     </style>
 </head>
-<body class="h-screen w-screen bg-slate-50 text-slate-800 overflow-hidden">
+<body class="h-[100dvh] w-screen bg-slate-50 text-slate-800 overflow-hidden flex flex-col">
 
 <div id="root" class="h-full w-full"></div>
 
 <script type="text/babel">
 
-const { useState, useEffect, useMemo } = React;
+const { useState, useEffect, useMemo, useRef, useLayoutEffect } = React;
 
-// --- רכיב עזר לכתיב מתמטי ---
-const MathText = ({ children, sub }) => (
-    <span className="math-serif font-bold">
-        {children}
-        {sub && <sub className="not-italic text-[0.7em] ml-0.5">{sub}</sub>}
-    </span>
-);
+// --- Components Helpers ---
 
-// --- אייקונים ---
+const MathText = ({ children, sub }) => {
+    const containerRef = useRef(null);
+    useLayoutEffect(() => {
+        if (window.MathJax && window.MathJax.typesetPromise && containerRef.current) {
+            window.MathJax.typesetPromise([containerRef.current]).catch((err) => console.log(err));
+        }
+    }, [children, sub]);
+    return (
+        <span ref={containerRef} className="math-serif font-bold inline-block" dir="ltr">
+            {children}
+            {sub && <sub className="not-italic text-[0.7em] ml-0.5">{sub}</sub>}
+        </span>
+    );
+};
+
 const Icons = {
     Menu: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
     Check: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="20 6 9 17 4 12"/></svg>,
@@ -84,7 +163,10 @@ const Icons = {
     Lock: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
     Chart: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>,
     Calculator: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>,
-    Info: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    Info: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+    ArrowRight: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+    Book: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+    X: (props) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
 };
 
 const Icon = ({ name, size = 20, className = "" }) => {
@@ -93,10 +175,9 @@ const Icon = ({ name, size = 20, className = "" }) => {
     return <IconComponent width={size} height={size} className={className} />;
 };
 
-// --- עזרים לחישוב ---
 const parseVal = (val) => {
     if (typeof val === 'number') return val;
-    if (val === "?") return null;
+    if (!val || val === "?") return null;
     if (val.includes('/')) {
         const [n, d] = val.split('/');
         return parseInt(n) / parseInt(d);
@@ -104,912 +185,599 @@ const parseVal = (val) => {
     return parseFloat(val);
 };
 
-// פונקציית עזר לבדיקת תשובה סלחנית
 const checkAnswer = (input, validAnswers) => {
+    if (!input) return false;
     const cleanInput = input.trim().toLowerCase();
-    
-    // בדיקה ישירה של מחרוזות
     if (validAnswers.includes(cleanInput)) return true;
-
-    // ניסיון המרה למספר והשוואה (עם טווח שגיאה קטן)
     try {
         const inputNum = parseVal(cleanInput);
         if (isNaN(inputNum)) return false;
-
         for (let ans of validAnswers) {
             const ansNum = parseVal(ans);
-            if (!isNaN(ansNum) && Math.abs(inputNum - ansNum) < 0.01) {
-                return true;
-            }
+            if (!isNaN(ansNum) && Math.abs(inputNum - ansNum) < 0.01) return true;
         }
-    } catch (e) {
-        return false;
-    }
+    } catch (e) { return false; }
     return false;
 };
 
-// --- נתונים ---
 const riddlesData = [
     {
-        id: 1,
-        title: "חידה מספר 1",
-        sequence: [
-            { n: 1, val: "2" },
-            { n: 2, val: "3" },
-            { n: 3, val: "6" },
-            { n: 4, val: "7" },
-            { n: 5, val: "?" }
-        ],
-        targetN: 5,
-        answer: ["8", "שמונה"],
-        hints: [
-            "נסו לומר את המספרים בטור הימני (הערך) בקול רם.",
-            "הקשיבו לצליל הראשון של כל מספר...",
-            "שתיים, שלוש, שש, שבע... מה המשותף ומה הבא בתור?"
-        ],
+        id: 1, section: "חלק ראשון - שעשועי חשיבה", title: "חידה מספר 1",
+        sequence: [{ n: 1, val: "2" }, { n: 2, val: "3" }, { n: 3, val: "6" }, { n: 4, val: "7" }, { n: 5, val: "?" }],
+        targetN: 5, answer: ["8", "שמונה"],
+        hints: ["נסו לומר את המספרים בטור הימני (הערך) בקול רם.", "הקשיבו לצליל הראשון של כל מספר...", "שתיים, שלוש, שש, שבע... מה המשותף ומה הבא בתור?"],
         explanation: "כל המספרים מתחילים באות ש'. המספר הבא שמתחיל ב-ש' הוא 8."
     },
     {
-        id: 2,
-        title: "חידה מספר 2",
-        sequence: [
-            { n: 1, val: "?" },
-            { n: 2, val: "26" },
-            { n: 3, val: "38" },
-            { n: 4, val: "62" },
-            { n: 5, val: "74" },
-            { n: 6, val: "102" },
-            { n: 7, val: "102" }
-        ],
-        targetN: 1, 
-        answer: ["18", "22"],
-        graphConfig: { stepY: 20 },
-        hints: [
-            "הסתכלו על ההפרש בין איבר בסדרה לבין זה שבא אחריו.",
-            <>האיבר <MathText sub="2">a</MathText> הוא 26 וההפרש בינו לבין <MathText sub="3">a</MathText> הוא 12. מה הקשר בין 26 לבין 12?</>,
-            "ההפרש הוא מכפלת הספרות של המספר הקודם. כדי למצוא את הראשון, צריך מספר שאם נוסיף לו את מכפלת ספרותיו נקבל 26."
-        ],
+        id: 2, section: "חלק ראשון - שעשועי חשיבה", title: "חידה מספר 2",
+        sequence: [{ n: 1, val: "?" }, { n: 2, val: "26" }, { n: 3, val: "38" }, { n: 4, val: "62" }, { n: 5, val: "74" }, { n: 6, val: "102" }, { n: 7, val: "102" }],
+        targetN: 1, answer: ["18", "22"], graphConfig: { stepY: 20 },
+        hints: ["הסתכלו על ההפרש בין איבר בסדרה לבין זה שבא אחריו.", <>האיבר <MathText sub="2">a</MathText> הוא 26 וההפרש בינו לבין <MathText sub="3">a</MathText> הוא 12. מה הקשר בין 26 לבין 12?</>, "ההפרש הוא מכפלת הספרות של המספר הקודם. כדי למצוא את הראשון, צריך מספר שאם נוסיף לו את מכפלת ספרותיו נקבל 26."],
         explanation: "החוקיות היא להוסיף למספר את מכפלת ספרותיו. 18 ועוד (1 כפול 8) שווה 26. (גם 22 היא תשובה נכונה: 22 ועוד 2 כפול 2 שווה 26)."
     },
     {
-        id: 3,
-        title: "חידה מספר 3",
-        sequence: [
-            { n: 1, val: "3" },
-            { n: 2, val: "13" },
-            { n: 3, val: "1113" },
-            { n: 4, val: "3113" },
-            { n: 5, val: "?" }
-        ],
-        targetN: 5,
-        answer: ["132113"],
-        hints: [
-            "אל תחשבו מתמטיקה, תחשבו תיאור מילולי.",
-            "קראו את המספר בשורה הקודמת משמאל לימין - כאילו אתם מקריאים רשימת מלאי.",
-            "בשורה 4 רואים: שלוש פעמים 1, ואז פעם אחת 3. איך כותבים את זה?"
-        ],
-        explanation: "סדרת Look and Say. קוראים את 3113: 'פעם אחת 3 (13), פעמיים 1 (21), פעם אחת 3 (13)' -> 132113.",
-        hideGraph: true 
+        id: 3, section: "חלק ראשון - שעשועי חשיבה", title: "חידה מספר 3",
+        sequence: [{ n: 1, val: "3" }, { n: 2, val: "13" }, { n: 3, val: "1113" }, { n: 4, val: "3113" }, { n: 5, val: "?" }],
+        targetN: 5, answer: ["132113"],
+        hints: ["אל תחשבו מתמטיקה, תחשבו תיאור מילולי.", "קראו את המספר בשורה הקודמת משמאל לימין - כאילו אתם מקריאים רשימת מלאי.", "בשורה 4 רואים: שלוש פעמים 1, ואז פעם אחת 3. איך כותבים את זה?"],
+        explanation: "סדרת Look and Say. קוראים את 3113: 'פעם אחת 3 (13), פעמיים 1 (21), פעם אחת 3 (13)' -> 132113."
     },
     {
-        id: 4,
-        title: "חידה מספר 4",
-        sequence: [
-            { n: 1, val: "1" },
-            { n: 2, val: "1" },
-            { n: 3, val: "2" },
-            { n: 4, val: "3" },
-            { n: 5, val: "5" },
-            { n: 6, val: "8" },
-            { n: 7, val: "?" }
-        ],
-        targetN: 7,
-        answer: ["13"],
-        hints: [
-            "הסתכלו על ההפרש בין כל איבר לאיבר הבא אחריו.",
-            "זו הסדרה המפורסמת ביותר בעולם."
-        ],
+        id: 4, section: "חלק ראשון - שעשועי חשיבה", title: "חידה מספר 4",
+        sequence: [{ n: 1, val: "1" }, { n: 2, val: "1" }, { n: 3, val: "2" }, { n: 4, val: "3" }, { n: 5, val: "5" }, { n: 6, val: "8" }, { n: 7, val: "?" }],
+        targetN: 7, answer: ["13"],
+        hints: ["הסתכלו על ההפרש בין כל איבר לאיבר הבא אחריו.", "זו הסדרה המפורסמת ביותר בעולם."],
         explanation: "סדרת פיבונאצ'י. כל איבר הוא סכום של שני קודמיו. 5+8=13."
     },
     {
-        id: 5,
-        title: "חידה מספר 5",
-        sequence: [
-            { n: 1, val: "2" },
-            { n: 2, val: "1" },
-            { n: 3, val: "3" },
-            { n: 4, val: "4" },
-            { n: 5, val: "?" }
-        ],
-        targetN: 5,
-        answer: ["7"],
-        hints: [
-            "תוכלו לשאוב השראה מהחוקיות של הסדרה הקודמת.",
-            <><MathText sub="1">a</MathText> + <MathText sub="2">a</MathText> = ?</>,
-            <><MathText sub="2">a</MathText> + <MathText sub="3">a</MathText> = ?</>
-        ],
-        explanation: "סדרת לוקאס. החוקיות זהה לפיבונאצ'י (סכום שני הקודמים), אך ההתחלה שונה. 3+4=7.",
+        id: 5, section: "חלק ראשון - שעשועי חשיבה", title: "חידה מספר 5",
+        sequence: [{ n: 1, val: "2" }, { n: 2, val: "1" }, { n: 3, val: "3" }, { n: 4, val: "4" }, { n: 5, val: "7" }, { n: 6, val: "?" }],
+        targetN: 6, answer: ["11"],
+        hints: ["תוכלו לשאוב השראה מהחוקיות של הסדרה הקודמת.", <><MathText sub="1">a</MathText> + <MathText sub="2">a</MathText> = ?</>, <><MathText sub="2">a</MathText> + <MathText sub="3">a</MathText> = ?</>],
+        explanation: "סדרת לוקאס. החוקיות זהה לפיבונאצ'י (סכום שני הקודמים), אך ההתחלה שונה. 4+7=11.",
         bonus: "הידעת? סכום 10 האיברים הראשונים שווה ל-11 פעמים האיבר השביעי. נסו להוכיח זאת אלגברית."
     },
     {
-        id: 6,
-        title: "חידה מספר 6",
-        type: 'geometric',
-        qAnswer: "2",
-        sequence: [
-            { n: 1, val: "1/4" },
-            { n: 2, val: "1/2" },
-            { n: 3, val: "1" },
-            { n: 4, val: "2" },
-            { n: 5, val: "?" }
-        ],
-        targetN: 5,
-        graphConfig: { stepY: 0.25 },
-        answer: ["4"],
-        hints: [
-            "במה כופלים כל מספר כדי לקבל את הבא?",
-            "פי כמה גדלנו בכל צעד?"
-        ],
-        explanation: "סדרה הנדסית עם מנה 2."
-    },
-    {
-        id: 7,
-        title: "חידה מספר 7",
-        type: 'geometric',
-        qAnswer: ["1/3", "0.33", "0.333"],
-        sequence: [
-            { n: 1, val: "27" },
-            { n: 2, val: "9" },
-            { n: 3, val: "3" },
-            { n: 4, val: "1" },
-            { n: 5, val: "?" }
-        ],
-        targetN: 5,
-        graphConfig: { stepY: 10 },
-        answer: ["1/3", "0.333", "0.33"],
-        hints: [
-            "אנחנו מתכווצים. פי כמה קטן המספר בכל צעד?",
-            "מחלקים ב-3 כל פעם."
-        ],
+        id: 6, section: "חלק שני - סדרה הנדסית", title: "חידה מספר 6", type: 'geometric', qAnswer: ["1/3", "0.33", "0.333"],
+        sequence: [{ n: 1, val: "27" }, { n: 2, val: "9" }, { n: 3, val: "3" }, { n: 4, val: "1" }, { n: 5, val: "?" }],
+        targetN: 5, graphConfig: { stepY: 10 }, answer: ["1/3", "0.333", "0.33"],
+        hints: ["אנחנו מתכווצים. פי כמה קטן המספר בכל צעד?", "מחלקים ב-3 כל פעם."],
         explanation: "סדרה הנדסית עם מנה 1/3."
     },
     {
-        id: 8,
-        title: "חידה מספר 8",
-        type: 'geometric',
-        qAnswer: "-2",
-        sequence: [
-            { n: 1, val: "2" },
-            { n: 2, val: "-4" },
-            { n: 3, val: "8" },
-            { n: 4, val: "-16" },
-            { n: 5, val: "?" }
-        ],
-        targetN: 5,
-        graphConfig: { stepY: 4 },
-        answer: ["32"],
-        hints: [
-            "שימו לב לסימנים ולמספרים בנפרד.",
-            "במה כופלים כדי להפוך חיובי לשלילי ושלילי לחיובי?",
-            "המנה היא מספר שלילי."
-        ],
-        explanation: "סדרה הנדסית עם מנה -2. מינוס 16 כפול מינוס 2 שווה 32."
+        id: 7, section: "חלק שני - סדרה הנדסית", title: "חידה מספר 7", type: 'geometric', qAnswer: "2",
+        sequence: [{ n: 1, val: "1/4" }, { n: 2, val: "1/2" }, { n: 3, val: "1" }, { n: 4, val: "2" }, { n: 5, val: "4" }],
+        targetN: 10, graphConfig: { stepY: 0.25 }, answer: ["128"],
+        hints: ["מצאו את האיבר הבא (החמישי) קודם, ואז המשיכו.", "במה כופלים כל מספר כדי לקבל את הבא?", "כדי למצוא את האיבר העשירי, צריך להכפיל ב-2 עוד כמה פעמים..."],
+        explanation: "סדרה הנדסית עם מנה 2. האיבר העשירי הוא 128."
     },
     {
-        id: 9,
-        title: "חידה מספר 9",
-        type: 'geometric',
-        qAnswer: ["0.5", "1/2"],
-        sequence: [
-            { n: 1, val: "-16" },
-            { n: 2, val: "-8" },
-            { n: 3, val: "-4" },
-            { n: 4, val: "-2" },
-            { n: 5, val: "?" }
-        ],
-        targetN: 5,
-        graphConfig: { stepY: 5 },
-        answer: ["-1"],
-        hints: [
-            "שימו לב שהסימן (מינוס) נשמר לאורך כל הדרך.",
-            "הערך המוחלט של המספרים הולך וקטן פי 2.",
-            "במה כופלים -16 כדי לקבל -8?"
-        ],
+        id: 8, section: "חלק שני - סדרה הנדסית", title: "חידה מספר 8", type: 'geometric', qAnswer: "-2",
+        sequence: [{ n: 1, val: "2" }, { n: 2, val: "-4" }, { n: 3, val: "8" }, { n: 4, val: "-16" }, { n: 5, val: "32" }],
+        targetN: 10, graphConfig: { stepY: 4 }, answer: ["-1024"],
+        hints: ["שימו לב לסימנים ולמספרים בנפרד.", "במה כופלים כדי להפוך חיובי לשלילי ושלילי לחיובי?", "מצאו את החוקיות וחשבו את האיבר העשירי."],
+        explanation: "סדרה הנדסית עם מנה -2. האיבר העשירי הוא -1024."
+    },
+    {
+        id: 9, section: "חלק שני - סדרה הנדסית", title: "חידה מספר 9", type: 'geometric', qAnswer: ["0.5", "1/2"],
+        sequence: [{ n: 1, val: "-16" }, { n: 2, val: "-8" }, { n: 3, val: "-4" }, { n: 4, val: "-2" }, { n: 5, val: "?" }],
+        targetN: 5, graphConfig: { stepY: 5 }, answer: ["-1"],
+        hints: ["שימו לב שהסימן (מינוס) נשמר לאורך כל הדרך.", "הערך המוחלט של המספרים הולך וקטן פי 2.", "במה כופלים -16 כדי לקבל -8?"],
         explanation: <>סדרה הנדסית עם איבר ראשון שלילי ומנה חיובית (<MathText>q</MathText>=0.5). לכן הסדרה כולה שלילית ועולה (מתקרבת לאפס).</>
     },
     {
-        id: 10,
-        title: "חידה מספר 10",
-        type: 'geometric',
-        qAnswer: "2",
-        sequence: [
-            { n: 1, val: "?" },
-            { n: 2, val: "?" },
-            { n: 3, val: "3" },
-            { n: 4, val: "6" },
-            { n: 5, val: "12" }
-        ],
-        targetN: 1,
-        revealedPoints: [{ n: 2, val: "1.5" }], 
-        graphConfig: { stepY: 2 },
-        answer: ["0.75", "3/4"],
-        hints: [
-            <>נתון האיבר השלישי (3) והרביעי (6). מה המנה (<MathText>q</MathText>)?</>,
-            <>כדי ללכת אחורה (מ-<MathText sub="3">a</MathText> ל-<MathText sub="2">a</MathText>), צריך לחלק ב-<MathText>q</MathText>.</>,
-            "תחלקו ב-2 פעמיים."
-        ],
+        id: 10, section: "חלק שני - סדרה הנדסית", title: "חידה מספר 10", type: 'geometric', qAnswer: "2",
+        sequence: [{ n: 1, val: "?" }, { n: 2, val: "?" }, { n: 3, val: "3" }, { n: 4, val: "6" }, { n: 5, val: "12" }],
+        targetN: 1, revealedPoints: [{ n: 2, val: "1.5" }], graphConfig: { stepY: 2 }, answer: ["0.75", "3/4"],
+        hints: [<>נתון האיבר השלישי (3) והרביעי (6). מה המנה (<MathText>q</MathText>)?</>, <>כדי ללכת אחורה (מ-<MathText sub="3">a</MathText> ל-<MathText sub="2">a</MathText>), צריך לחלק ב-<MathText>q</MathText>.</>, "תחלקו ב-2 פעמיים."],
         explanation: <>המנה היא 2. לכן <MathText sub="2">a</MathText> = 3/2 = 1.5, ו-<MathText sub="1">a</MathText> = 1.5/2 = 0.75.</>
     }
 ];
 
-// --- קומפוננטת גרף (Desmos Style) ---
-const SequenceGraph = ({ sequence, isSolved, answer, targetN, revealedPoints, graphConfig }) => {
+const FunFunctionDiagram = () => (
+    <div className="flex flex-col items-center justify-center py-6 px-4 bg-white rounded-xl border border-slate-100 my-4 shadow-sm" dir="ltr">
+        <div className="flex w-full justify-between px-10 mb-2 font-bold text-slate-500">
+            <span className="text-blue-500">תחום</span>
+            <span className="text-purple-500">טווח</span>
+        </div>
+        <svg width="280" height="180" viewBox="0 0 280 180">
+             <defs>
+                <marker id="arrowhead-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#3b82f6" />
+                </marker>
+            </defs>
+            <ellipse cx="60" cy="90" rx="40" ry="85" fill="#f0f9ff" stroke="#bae6fd" strokeWidth="2" />
+            <ellipse cx="220" cy="90" rx="40" ry="85" fill="#fdf4ff" stroke="#e879f9" strokeWidth="2" />
+            <text x="60" y="50" textAnchor="middle" fontSize="24" dominantBaseline="middle">👦🏾</text>
+            <text x="60" y="90" textAnchor="middle" fontSize="24" dominantBaseline="middle">👧🏾</text>
+            <text x="60" y="130" textAnchor="middle" fontSize="24" dominantBaseline="middle">🧑🏾</text>
+            <text x="220" y="50" textAnchor="middle" fontSize="24" dominantBaseline="middle">🍕</text>
+            <text x="220" y="90" textAnchor="middle" fontSize="24" dominantBaseline="middle">🍦</text>
+            <text x="220" y="130" textAnchor="middle" fontSize="24" dominantBaseline="middle">🥦</text>
+            <path d="M80,50 Q150,30 195,45" fill="none" stroke="#3b82f6" strokeWidth="2" markerEnd="url(#arrowhead-blue)" />
+            <path d="M80,90 Q150,70 195,55" fill="none" stroke="#3b82f6" strokeWidth="2" markerEnd="url(#arrowhead-blue)" />
+            <path d="M80,130 Q150,120 195,95" fill="none" stroke="#3b82f6" strokeWidth="2" markerEnd="url(#arrowhead-blue)" />
+        </svg>
+    </div>
+);
+
+const NumberSetsModal = ({ onClose }) => {
+    useEffect(() => {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise().catch(err => console.log('MathJax error:', err));
+        }
+    }, []);
+
+    return (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] fade-in-up">
+                <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center sticky top-0 z-10">
+                    <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+                        <Icon name="Brain" className="text-blue-500" />
+                        קבוצות המספרים
+                    </h3>
+                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2 transition-colors"><Icon name="X" /></button>
+                </div>
+                <div className="p-6 overflow-y-auto custom-scroll relative bg-white">
+                    <div className="absolute left-8 top-6 bottom-6 w-0.5 bg-slate-200"></div>
+                    <div className="space-y-8 relative">
+                        <div className="flex gap-4 relative">
+                            <div className="w-16 h-16 rounded-full bg-green-100 border-4 border-white shadow-sm flex flex-col items-center justify-center shrink-0 z-10">
+                                <span className="font-serif font-bold text-xl text-green-700" dir="ltr">{'\\(\\mathbb{N}\\)'}</span>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-green-100 shadow-sm flex-1">
+                                <div className="flex justify-between items-start flex-col sm:flex-row">
+                                    <h4 className="font-bold text-slate-800">
+                                        הטבעיים <span className="text-xs text-slate-400 font-normal uppercase mx-1">Naturals</span>
+                                    </h4>
+                                    <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full font-bold" dir="ltr">\(\{1, 2, 3, \dots\}\)</span>
+                                </div>
+                                <p className="text-sm text-slate-600 mt-2">משמשים לספירה ומנייה.</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-4 relative">
+                            <div className="w-16 h-16 rounded-full bg-blue-100 border-4 border-white shadow-sm flex flex-col items-center justify-center shrink-0 z-10">
+                                <span className="font-serif font-bold text-xl text-blue-700" dir="ltr">{'\\(\\mathbb{Z}\\)'}</span>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm flex-1">
+                                <div className="flex justify-between items-start flex-col sm:flex-row">
+                                    <h4 className="font-bold text-slate-800">
+                                        השלמים <span className="text-xs text-slate-400 font-normal uppercase mx-1">Integers</span>
+                                    </h4>
+                                    <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-bold" dir="ltr">{'\\{\\dots, -2, -1, 0, 1, 2, \\dots\\}'}</span>
+                                </div>
+                                <p className="text-sm text-slate-600 mt-2">
+                                    הטבעיים, האפס והמספרים השליליים.
+                                    <br/>
+                                    הוספנו ל-<span dir="ltr">{'\\(\\mathbb{N}\\)'}</span> את הנגדיים כדי לקבל סגירות לחיסור (מה התוצאה של <span dir="ltr">{'\\(2-5\\)'}</span>?).
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex gap-4 relative">
+                            <div className="w-16 h-16 rounded-full bg-yellow-100 border-4 border-white shadow-sm flex flex-col items-center justify-center shrink-0 z-10">
+                                <span className="font-serif font-bold text-xl text-yellow-700" dir="ltr">{'\\(\\mathbb{Q}\\)'}</span>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-yellow-100 shadow-sm flex-1">
+                                <div className="flex justify-between items-start flex-col sm:flex-row gap-2">
+                                    <h4 className="font-bold text-slate-800">
+                                        הרציונליים <span className="text-xs text-slate-400 font-normal uppercase mx-1">Rationals</span>
+                                    </h4>
+                                    <span className="text-xs bg-yellow-50 text-yellow-700 px-2 py-1 rounded-full font-bold" dir="ltr">{'\\(\\left\\{ \\frac{m}{n} \\mid m,n \\in \\mathbb{Z}, ~ n \\neq 0 \\right\\}\\)'}</span>
+                                </div>
+                                <p className="text-sm text-slate-600 mt-2">
+                                    הוספנו ל-<span dir="ltr">{'\\(\\mathbb{Z}\\)'}</span> את השברים כדי לקבל סגירות לחילוק.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex gap-4 relative">
+                            <div className="w-16 h-16 rounded-full bg-purple-100 border-4 border-white shadow-sm flex flex-col items-center justify-center shrink-0 z-10">
+                                <span className="font-serif font-bold text-xl text-purple-700" dir="ltr">{'\\(\\mathbb{R}\\)'}</span>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-purple-100 shadow-sm flex-1">
+                                <div className="flex justify-between items-start flex-col sm:flex-row gap-2">
+                                    <h4 className="font-bold text-slate-800">
+                                        הממשיים <span className="text-xs text-slate-400 font-normal uppercase mx-1">Reals</span>
+                                    </h4>
+                                    <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full font-bold" dir="ltr">{'\\(\\{ x \\mid -\\infty < x < \\infty \\}\\)'}</span>
+                                </div>
+                                <div className="text-sm text-slate-600 mt-2">
+                                    הוספנו ל-<span dir="ltr">{'\\(\\mathbb{Q}\\)'}</span> את האי-רציונליים (כמו <span dir="ltr">{'\\(\\pi, \\sqrt{2}\\)'}</span>) ואת המספרים הטרנסצנדנטיים כדי למלא את "החורים" וליצור <span className="font-bold text-purple-600">רצף מלא על הציר</span>.
+                                    <div className="mt-2 text-xs bg-purple-50 p-2 rounded text-purple-800 border-r-2 border-purple-200">
+                                        <strong>הידעת?!</strong> ההגדרה הרשמית של הקבוצה היא בעזרת גבולות של סדרות רציונליות.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex gap-4 relative">
+                            <div className="w-16 h-16 rounded-full bg-pink-100 border-4 border-white shadow-sm flex flex-col items-center justify-center shrink-0 z-10">
+                                <span className="font-serif font-bold text-xl text-pink-700" dir="ltr">{'\\(\\mathbb{C}\\)'}</span>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-pink-100 shadow-sm flex-1">
+                                <div className="flex justify-between items-start flex-col sm:flex-row gap-2">
+                                    <h4 className="font-bold text-slate-800">
+                                        המרוכבים <span className="text-xs text-slate-400 font-normal uppercase mx-1">Complex</span>
+                                    </h4>
+                                    <span className="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full font-bold" dir="ltr">{'\\(\\{ a+bi \\mid a,b \\in \\mathbb{R} \\}\\)'}</span>
+                                </div>
+                                <p className="text-sm text-slate-600 mt-2">
+                                    <span className="text-xs opacity-70">(כאשר <span dir="ltr">{'\\(i^2 = -1\\)'}</span>)</span>
+                                    <br/>
+                                     הוספנו ל-<span dir="ltr">{'\\(\\mathbb{R}\\)'}</span> את המספר המדומה וצירופים לינאריים שכוללים אותו כדי לאפשר <span className="font-bold text-pink-600">הוצאת שורש למספר שלילי</span> וסגירות אלגברית מלאה.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-4 bg-slate-50 border-t border-slate-100 text-center sticky bottom-0 z-10">
+                    <button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-full text-sm transition-colors shadow-lg">סגור</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const Header = ({ onToggleSidebar }) => (
+    <header className="bg-white border-b border-slate-200 shadow-sm z-20 flex items-center justify-between px-4 py-4 md:px-8">
+        <div className="flex items-center gap-4">
+            <button onClick={onToggleSidebar} className="md:hidden text-slate-600 hover:text-slate-800 focus:outline-none"><Icon name="Menu" size={24} /></button>
+            <h1 className="text-xl md:text-2xl font-bold text-slate-800 leading-none">סדרות - פעילות מבוא לסדרה הנדסית</h1>
+        </div>
+    </header>
+);
+
+const Footer = () => (
+    <footer className="bg-white border-t border-slate-200 p-3 text-center z-10 w-full shrink-0">
+        <div className="text-xs text-slate-500 leading-relaxed">
+            נוצר ע"י <a href="https://tair-pnini.github.io" target="_blank" className="text-blue-600 hover:text-blue-800 font-bold underline transition-colors">תאיר פניני</a> | מוזמנים להשתמש ולהנות. אם לקחתם השראה נא תנו קרדיט.
+            <span className="mx-2 text-slate-300">|</span>
+            © כל הזכויות שמורות
+        </div>
+    </footer>
+);
+
+const WelcomeScreen = ({ onStart }) => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const [showSets, setShowSets] = useState(false);
+    const [visitedSlides, setVisitedSlides] = useState(new Set([0]));
+    const [domainChoice, setDomainChoice] = useState("");
+    const [naturalInput, setNaturalInput] = useState("");
+    const [isDomainSolved, setIsDomainSolved] = useState(false);
+    const [showDomainError, setShowDomainError] = useState(false);
+    const [quizAnswers, setQuizAnswers] = useState({ ordinal: "", val: "" });
+    const [showQuizError, setShowQuizError] = useState(false);
+    const [isQuizSolved, setIsQuizSolved] = useState(false);
+
+    useEffect(() => {
+        setVisitedSlides(prev => new Set(prev).add(currentSlide));
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise().catch(e => {});
+        }
+    }, [currentSlide, isDomainSolved, isQuizSolved]);
+
+    const checkDomain = (e) => {
+        e.preventDefault();
+        const isChoiceCorrect = domainChoice === "domain";
+        const isTextCorrect = naturalInput.trim().includes("טבעי") || naturalInput.trim().toLowerCase().includes("natural") || naturalInput.trim().includes("N");
+        if (isChoiceCorrect && isTextCorrect) { setIsDomainSolved(true); setShowDomainError(false); } else { setShowDomainError(true); }
+    };
     
-    // עיבוד נתונים
+    const checkQuiz = (e) => {
+        e.preventDefault();
+        const ord = quizAnswers.ordinal.trim();
+        const val = quizAnswers.val.trim();
+        const isOrdCorrect = ord === "5" || ord.includes("חמישי") || ord.includes("5");
+        const isValCorrect = val === "100";
+        if (isOrdCorrect && isValCorrect) { setIsQuizSolved(true); setShowQuizError(true); setTimeout(() => setShowQuizError(false), 2000); } else { setShowQuizError(true); }
+    };
+
+    const nextSlide = () => { if (currentSlide < 3) setCurrentSlide(prev => prev + 1); };
+    const prevSlide = () => { if (currentSlide > 0) setCurrentSlide(prev => prev - 1); };
+    const canStart = isDomainSolved && isQuizSolved && visitedSlides.size >= 4;
+
+    const slides = [
+        <div className="w-full px-4 text-center animate-in fade-in py-10 md:py-16">
+             <div className="inline-block bg-blue-100 p-4 rounded-full text-blue-600 shadow-sm mb-6"><Icon name="Brain" size={48} /></div>
+            <h1 className="text-3xl md:text-5xl font-bold text-slate-800 mb-6 leading-tight">ברוכים הבאים לעולם הסדרות</h1>
+            <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed mb-8">בחיים, סדרה זה משהו שעושים עליו בינג' בנטפליקס. <br/>במתמטיקה, זה קצת אחרת (אבל עדיין ממכר). <br/><span className="text-base mt-3 block font-medium opacity-80 bg-blue-50 inline-block px-4 py-1 rounded-full">לפני שנתחיל לפצח חידות, בואו ניישר קו על השפה המתמטית.</span></p>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 text-right w-full max-w-2xl mx-auto">
+                <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2"><span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>מה זו בכלל סדרה?</h2>
+                <p className="text-slate-700 leading-relaxed mb-4">סדרה היא <strong>קבוצה סדורה</strong> של איברים. במה היא שונה מ"סתם" קבוצה של מספרים?</p>
+                <ul className="space-y-3">
+                    <li className="flex gap-3 items-start p-3 bg-slate-50 rounded-lg"><Icon name="Check" className="text-green-500 mt-1 shrink-0" size={20} /><div><strong className="block text-slate-800">הסדר קובע</strong><span className="text-slate-500 text-sm">הן שונות, למרות שיש בהן אותן איברים, זה משום ש<strong>הסדר</strong> של האיברים שונה.<br/><span className="text-xs bg-white px-1 border rounded mt-1 inline-block" dir="ltr">(1, 2, 3) ≠ (3, 2, 1)</span></span></div></li>
+                    <li className="flex gap-3 items-start p-3 bg-slate-50 rounded-lg"><Icon name="Check" className="text-green-500 mt-1 shrink-0" size={20} /><div><strong className="block text-slate-800">מותרת חזרה</strong><span className="text-slate-500 text-sm">בקבוצה רגילה נכתוב כל איבר רק פעם אחת, בעוד שבסדרה אותו איבר יכול להופיע כמה פעמים במיקומים שונים.<br/><span className="text-xs bg-white px-1 border rounded mt-1 inline-block">למשל (1, 1, 1) היא סדרה חוקית (אם כי משעממת למדי).</span></span></div></li>
+                </ul>
+            </div>
+        </div>,
+        <div className="w-full px-4 animate-in fade-in py-10 md:py-16">
+             <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 w-full max-w-2xl mx-auto relative overflow-hidden">
+                 <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><span className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>ההגדרה המתמטית</h2>
+                    <button onClick={() => setShowSets(true)} className="text-xs text-blue-600 hover:text-blue-800 font-bold underline flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-full transition-colors"><Icon name="Info" size={14} />תזכורת: קבוצות מספרים</button>
+                </div>
+                <div className="flex flex-col gap-6 items-center">
+                    <div className="w-full">
+                        {!isDomainSolved ? (
+                            <form onSubmit={checkDomain} className="text-xl text-slate-800 leading-loose text-center">
+                                <span className="inline-block">מבחינה מתמטית, ניתן להגדיר סדרה כפונקציה.</span><br /><span className="inline-block mt-4">ה</span>
+                                <span className="relative inline-block mx-1 align-baseline"><select value={domainChoice} onChange={(e) => setDomainChoice(e.target.value)} className="inline-select" required><option value="" disabled>...</option><option value="domain">תחום</option><option value="range">טווח</option></select><span className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">▼</span></span>
+                                <span className="inline-block">של הפונקציה הוא קבוצת המספרים ה</span><input type="text" className="inline-input" placeholder="..." value={naturalInput} onChange={(e) => setNaturalInput(e.target.value)} /><span className="inline-block">.</span>
+                                <div className="mt-6"><button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-full font-bold shadow-md transition-transform active:scale-95 text-base">בדיקה</button></div>
+                            </form>
+                        ) : (
+                            <div className="text-center"><p className="text-xl text-slate-800 leading-loose">מבחינה מתמטית, ניתן להגדיר סדרה כפונקציה.<br/>ה<strong>תחום</strong> של הפונקציה הוא קבוצת המספרים ה<strong>טבעיים</strong>.</p><div className="bg-green-50 text-green-700 p-2 rounded-lg text-base animate-in zoom-in border border-green-200 inline-block mt-3 font-bold"><Icon name="Check" size={18} className="inline mr-1"/> נכון מאוד!</div></div>
+                        )}
+                        {showDomainError && !isDomainSolved && <div className="mt-4 bg-red-50 border border-red-100 rounded-xl p-4 text-red-600 text-base text-center leading-snug animate-in fade-in shadow-sm relative"><div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-red-50 border-t border-l border-red-100 transform rotate-45"></div><strong>לא מדויק.</strong> פונקציה מתאימה לכל איבר בתחום - איבר בטווח.<br/> איזו התאמה אנחנו עושים בסדרות?</div>}
+                    </div>
+                    <div className="shrink-0 w-full max-w-sm"><FunFunctionDiagram /></div>
+                    <p className="text-xs text-slate-400 self-start mt-2">* ההגדרה מדויקת רק אם מתייחסים לסדרות אינסופיות.</p>
+                </div>
+            </div>
+        </div>,
+        <div className="w-full px-4 animate-in fade-in py-10 md:py-16">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 w-full max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold text-slate-800 mb-8 flex items-center gap-2"><span className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>המילון (מושגי יסוד)</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="p-5 border border-slate-100 bg-slate-50 rounded-xl relative overflow-hidden group"><div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div><div className="text-4xl mb-3 text-blue-600 font-serif italic font-bold">n</div><h3 className="font-bold text-lg mb-2 text-slate-800">האינדקס (המיקום)</h3><p className="text-sm text-slate-600 leading-relaxed">המיקום הסידורי של האיבר. האינדקס עונה על השאלה "איפה נמצא האיבר?" זהו תמיד מספר טבעי (ראשון, שני, עשירי...).</p></div>
+                    <div className="p-5 border border-slate-100 bg-slate-50 rounded-xl relative overflow-hidden group"><div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div><div className="text-4xl mb-3 text-purple-600 font-serif italic font-bold">a<sub>n</sub></div><h3 className="font-bold text-lg mb-2 text-slate-800">ערך האיבר</h3><p className="text-sm text-slate-600 leading-relaxed">האות (במקרה זה $a$) מציינת את שם הסדרה, והמספר הקטן מציין את האינדקס. הכתיבה הזו מתייחסת לערך של האיבר במיקום ה-$n$ (או - האיבר הכללי)</p></div>
+                </div>
+                <div className="border-t border-slate-100 pt-6">
+                    <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><Icon name="Lightbulb" className="text-yellow-500" size={20} />בדיקת הבנה:</h3>
+                    <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-100 text-center">
+                        <div className="text-xl font-bold text-slate-800 mb-4">נתון: <span className="math-serif text-3xl mx-2 bg-white px-3 py-1 rounded shadow-sm inline-block">a<sub>5</sub> = 100</span></div>
+                        {!isQuizSolved ? (
+                            <form onSubmit={checkQuiz} className="flex flex-col gap-4 items-center justify-center">
+                                <div className="flex flex-wrap items-center justify-center gap-3 text-lg text-slate-700"><span>כלומר, האיבר ה-</span><input type="text" className="w-16 px-2 py-1 rounded border border-slate-300 text-center font-bold bg-white focus:outline-none focus:border-yellow-500" placeholder="?" value={quizAnswers.ordinal} onChange={(e) => setQuizAnswers(prev => ({ ...prev, ordinal: e.target.value }))} /><span>הוא</span><input type="number" className="w-20 px-2 py-1 rounded border border-slate-300 text-center font-bold bg-white focus:outline-none focus:border-yellow-500" placeholder="?" value={quizAnswers.val} onChange={(e) => setQuizAnswers(prev => ({ ...prev, val: e.target.value }))} /></div>
+                                <button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-white px-8 py-2 rounded-full font-bold shadow-sm text-sm mt-2">בדוק</button>
+                            </form>
+                        ) : (
+                            <div className="text-green-700 font-bold flex flex-col items-center gap-2 animate-in zoom-in"><div className="bg-green-100 p-2 rounded-full"><Icon name="Check" size={20} /></div><span className="text-lg">בול! האיבר ה-5 הוא 100.</span></div>
+                        )}
+                        {showQuizError && !isQuizSolved && <p className="text-red-500 text-sm mt-3 font-bold animate-pulse">נסו שוב. מהו המיקום ומהו הערך?</p>}
+                    </div>
+                </div>
+            </div>
+        </div>,
+        <div className="w-full px-4 animate-in fade-in py-10 md:py-16">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 w-full max-w-2xl mx-auto text-center">
+                <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center justify-center gap-2"><span className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">4</span>סוגי סדרות שנפגוש:</h2>
+                <div className="text-right space-y-4 text-slate-700 mb-10 bg-slate-50 p-6 rounded-xl">
+                    <ul className="space-y-2 list-disc list-inside"><li>סדרה עם נוסחה ברורה לפי האיברים הקודמים</li><li>סדרה עם נוסחה ברורה לפי המיקום של האיבר</li><li>סדרה עם תיאור מילולי של החוקיות</li><li>ויש גם 'סתם' סדרות אקראיות (אבל תמיד - נדע לכל מיקום מה ערך האיבר)</li></ul>
+                    <ul className="space-y-2 list-disc list-inside mt-6 pt-4 border-t border-slate-200"><li>סדרה סופית (מספר סופי של איברים. לרוב יסומן <MathText>n</MathText>)</li><li>סדרה אינסופית (חוקיות ברורה שמגדירה אינסוף איברים)</li></ul>
+                </div>
+            </div>
+        </div>
+    ];
+
+    return (
+        <div className="flex flex-col h-full bg-slate-50 relative overflow-hidden">
+            {showSets && <NumberSetsModal onClose={() => setShowSets(false)} />}
+            <div className="flex-1 overflow-y-auto custom-scroll relative flex flex-col items-center">
+                <div className="w-full max-w-4xl mx-auto flex-1 flex flex-col justify-center min-h-full py-12">{slides[currentSlide]}</div>
+            </div>
+            <div className="bg-white border-t border-slate-200 p-4 shrink-0 z-10 flex flex-col gap-4 items-center">
+                <div className="w-full max-w-md mx-auto">
+                    <button onClick={canStart ? onStart : null} disabled={!canStart} className={`w-full text-lg font-bold py-3 px-6 rounded-full shadow-lg transition-all flex items-center justify-center gap-3 ${canStart ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:scale-105 text-white cursor-pointer transform' : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'}`}>
+                        {canStart ? (<>התחל באתגר <Icon name="ArrowRight" /></>) : (<span className="text-sm font-normal flex items-center gap-2"><Icon name="Lock" size={14} />השלימו את המשימות כדי לעבור לאתגרי הפיצוח!</span>)}
+                    </button>
+                </div>
+                <div className="flex items-center justify-between w-full max-w-2xl">
+                    <button onClick={prevSlide} disabled={currentSlide === 0} className={`p-3 rounded-full transition-colors ${currentSlide === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-100'}`}><Icon name="ChevronRight" size={32} /></button>
+                    <div className="flex gap-2">{slides.map((_, i) => (<div key={i} className={`w-3 h-3 rounded-full transition-all duration-300 ${i === currentSlide ? 'bg-blue-600 w-8' : 'bg-slate-300'}`} />))}</div>
+                    <button onClick={nextSlide} disabled={currentSlide === slides.length - 1} className={`p-3 rounded-full transition-colors ${currentSlide === slides.length - 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-100'}`}><Icon name="ChevronLeft" size={32} /></button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const SequenceGraph = ({ sequence, isSolved, answer, targetN, revealedPoints, graphConfig }) => {
     const dataPoints = useMemo(() => {
-        const points = sequence
-            .filter(p => p.val !== "?")
-            .map(p => ({ x: p.n, y: parseVal(p.val) }));
-        
-        // הוספת נקודת הפתרון אם נפתר
+        const points = sequence.filter(p => p.val !== "?").map(p => ({ x: p.n, y: parseVal(p.val) }));
         if (isSolved && answer) {
             const ansVal = parseVal(answer[0]);
-            // בדיקה אם הנקודה כבר קיימת
-            if (!points.some(p => p.x === targetN)) {
-                points.push({ x: targetN, y: ansVal, isNew: true });
-            } else {
-                const idx = points.findIndex(p => p.x === targetN);
-                if (idx !== -1) points[idx].isNew = true;
-            }
-
-            // הוספת נקודות שנחשפו (אם יש)
-            if (revealedPoints) {
-                revealedPoints.forEach(rp => {
-                    const rpVal = parseVal(rp.val);
-                    if (!points.some(p => p.x === rp.n)) {
-                        points.push({ x: rp.n, y: rpVal, isNew: true });
-                    } else {
-                        const idx = points.findIndex(p => p.x === rp.n);
-                        if (idx !== -1) points[idx].isNew = true;
-                    }
-                });
-            }
+            if (!points.some(p => p.x === targetN)) points.push({ x: targetN, y: ansVal, isNew: true });
+            else { const idx = points.findIndex(p => p.x === targetN); if (idx !== -1) points[idx].isNew = true; }
+            if (revealedPoints) { revealedPoints.forEach(rp => { const rpVal = parseVal(rp.val); if (!points.some(p => p.x === rp.n)) points.push({ x: rp.n, y: rpVal, isNew: true }); else { const idx = points.findIndex(p => p.x === rp.n); if (idx !== -1) points[idx].isNew = true; } }); }
         }
         return points.sort((a, b) => a.x - b.x);
     }, [sequence, isSolved, answer, targetN, revealedPoints]);
 
-    // חישוב גבולות
-    const padding = 40;
-    const width = 400; // viewBox units
-    const height = 250;
-    
-    const xValues = dataPoints.map(p => p.x);
-    const yValues = dataPoints.map(p => p.y);
-    
-    const minX = Math.min(0, ...xValues); 
-    const maxX = Math.max(...xValues) + 1;
-    
-    // אם אין מספרים שליליים בנתונים, נתחיל את ציר ה-Y מ-0
-    let minY = Math.min(...yValues) >= 0 ? 0 : Math.min(...yValues);
-    let maxY = Math.max(...yValues);
-    
-    // התאמה לטווח שטוח או קטן
-    if (maxY === minY) {
-        maxY += 5;
-        // אם 0, נאפשר ירידה מתחת, אחרת נשארים ב-0
-        if (minY !== 0) minY -= 5;
-    } else {
-        const span = maxY - minY;
-        maxY += span * 0.1;
-        // רק אם כבר יש שליליים או שאנחנו ב-0, נרחיב למטה. אם הכל חיובי ומתחיל מ-0, נשאיר 0.
-        if (minY < 0) {
-             minY -= span * 0.1;
-        }
-    }
-
-    
-    // Margin לגרף
-    const domainX = maxX - minX;
-    const domainY = maxY - minY;
-
+    const padding = 40; const width = 400; const height = 250;
+    const xValues = dataPoints.map(p => p.x); const yValues = dataPoints.map(p => p.y);
+    const minX = Math.min(0, ...xValues); const maxX = Math.max(...xValues) + 1;
+    let minY = Math.min(...yValues) >= 0 ? 0 : Math.min(...yValues); let maxY = Math.max(...yValues);
+    if (maxY === minY) { maxY += 5; if (minY !== 0) minY -= 5; } else { const span = maxY - minY; maxY += span * 0.1; if (minY < 0) minY -= span * 0.1; }
+    const domainX = maxX - minX; const domainY = maxY - minY; const safeDomainY = domainY === 0 ? 1 : domainY;
     const getX = (val) => padding + ((val - minX) / domainX) * (width - 2 * padding);
-    const getY = (val) => height - padding - ((val - minY) / domainY) * (height - 2 * padding);
-
-    // יצירת קווי רשת (Grid) - רק שלמים בציר X
-    const xTicks = [];
-    for (let i = Math.ceil(minX); i <= Math.floor(maxX); i++) {
-        xTicks.push(i);
-    }
-    
-    // Y Ticks - חישוב צעדים לפי קונפיגורציה או ברירת מחדל
-    const yTicks = [];
-    let stepY = 1;
-    
-    if (graphConfig && graphConfig.stepY) {
-        stepY = graphConfig.stepY;
-    } else {
-        const rawStep = domainY / 5;
-        stepY = Math.max(1, Math.ceil(rawStep));
-    }
-    
-    // מייצרים טיקים בצעדים
-    // מוצאים נקודת התחלה "עגולה" ביחס ל-stepY
-    // למשל אם minY הוא -16 וstep הוא 5, נרצה להתחיל מ- -15 או -20.
-    // עדיף להתחיל מ-0 וללכת לשני הכיוונים.
-    
-    // הוספת 0 תמיד
-    // הוספת חיוביים
-    for (let val = 0; val <= maxY; val += stepY) {
-        if (!yTicks.includes(val)) yTicks.push(val);
-    }
-    // הוספת שליליים
-    for (let val = -stepY; val >= minY; val -= stepY) {
-        if (!yTicks.includes(val)) yTicks.push(val);
-    }
-    
-    yTicks.sort((a, b) => a - b);
-
-    // חיתוך ערכים מחוץ לטווח הגרפי הממשי (קצת יותר מ-minY/maxY זה בסדר לתצוגה)
-    const displayTicks = yTicks.filter(t => t >= minY && t <= maxY);
-
-    // X Axis Labels Y Position
-    // אם ציר ה-X (ערך 0) נמצא בתוך הגרף, נמקם את המספרים קצת מתחתיו.
-    // אם ציר ה-X הוא בתחתית, נמקם בתחתית.
-    let xAxisLabelY = getY(0) + 15;
-    // נדאג שלא יצא מגבולות הגרף התחתונים
-    if (xAxisLabelY > height - 5) xAxisLabelY = height - 5; 
+    const getY = (val) => height - padding - ((val - minY) / safeDomainY) * (height - 2 * padding);
+    const xTicks = []; for (let i = Math.ceil(minX); i <= Math.floor(maxX); i++) xTicks.push(i);
+    const yTicks = []; let stepY = graphConfig && graphConfig.stepY ? graphConfig.stepY : Math.max(1, Math.ceil(domainY / 5));
+    for (let val = 0; val <= maxY; val += stepY) if (!yTicks.some(t => Math.abs(t - val) < 0.001)) yTicks.push(val);
+    for (let val = -stepY; val >= minY; val -= stepY) if (!yTicks.some(t => Math.abs(t - val) < 0.001)) yTicks.push(val);
+    yTicks.sort((a, b) => a - b); const displayTicks = yTicks.filter(t => t >= minY - 0.1 && t <= maxY + 0.1);
+    let xAxisLabelY = getY(0) + 15; if (xAxisLabelY > height - 5) xAxisLabelY = height - 5;
 
     return (
         <div className="w-full bg-white rounded-lg border border-slate-200 overflow-hidden mt-6">
             <div className="text-xs text-slate-400 font-bold px-4 pt-3 pb-1">גרף הסדרה</div>
             <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
-                <defs>
-                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-                        <path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
-                    </marker>
-                </defs>
-
-                {/* Grid Background */}
+                <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#64748b" /></marker></defs>
                 <rect x="0" y="0" width={width} height={height} fill="white" />
-                
-                {/* Grid Lines Y */}
-                {displayTicks.map((tick, i) => (
-                    <g key={`y-${i}`}>
-                        <line x1={padding} y1={getY(tick)} x2={width - padding} y2={getY(tick)} stroke="#e2e8f0" strokeWidth="1" />
-                        <text x={padding - 12} y={getY(tick) + 3} textAnchor="end" fontSize="10" fill="#94a3b8" className="math-serif">
-                            {Number.isInteger(tick) ? tick : tick.toFixed(2).replace(/\.?0+$/, '')}
-                        </text>
-                    </g>
-                ))}
-
-                {/* Grid Lines X */}
-                {xTicks.map((tick, i) => (
-                    <g key={`x-${i}`}>
-                        <line x1={getX(tick)} y1={padding} x2={getX(tick)} y2={height - padding} stroke="#e2e8f0" strokeWidth="1" />
-                        <text x={getX(tick)} y={xAxisLabelY} textAnchor="middle" fontSize="10" fill="#94a3b8" className="math-serif">
-                            {tick}
-                        </text>
-                    </g>
-                ))}
-
-                {/* Axes with Arrows */}
-                {/* Y Axis - Points UP */}
+                {displayTicks.map((tick, i) => (<g key={`y-${i}`}><line x1={padding} y1={getY(tick)} x2={width - padding} y2={getY(tick)} stroke="#e2e8f0" strokeWidth="1" /><text x={padding - 12} y={getY(tick) + 3} textAnchor="end" fontSize="10" fill="#94a3b8" className="math-serif">{Number.isInteger(tick) ? tick : tick.toFixed(1)}</text></g>))}
+                {xTicks.map((tick, i) => (<g key={`x-${i}`}><line x1={getX(tick)} y1={padding} x2={getX(tick)} y2={height - padding} stroke="#e2e8f0" strokeWidth="1" /><text x={getX(tick)} y={xAxisLabelY} textAnchor="middle" fontSize="10" fill="#94a3b8" className="math-serif">{tick}</text></g>))}
                 <line x1={getX(0) < padding ? padding : getX(0)} y1={height - padding} x2={getX(0) < padding ? padding : getX(0)} y2={padding} stroke="#64748b" strokeWidth="2" markerEnd="url(#arrow)" />
-                {/* X Axis */}
                 <line x1={padding} y1={getY(0) > height - padding ? height - padding : getY(0)} x2={width - padding} y2={getY(0) > height - padding ? height - padding : getY(0)} stroke="#64748b" strokeWidth="2" markerEnd="url(#arrow)" />
-
-                {/* Axis Labels */}
                 <text x={width - padding + 15} y={getY(0) + 3} className="math-serif font-bold italic" fontSize="12" fill="#475569">n</text>
                 <text x={getX(0) - 10} y={padding - 5} className="math-serif font-bold italic" fontSize="12" textAnchor="end" fill="#475569">a<tspan dy="3" fontSize="9">n</tspan></text>
-
-                {/* Points */}
-                {dataPoints.map((p, i) => (
-                    <circle 
-                        key={i}
-                        cx={getX(p.x)} 
-                        cy={getY(p.y)} 
-                        r={p.isNew ? 5 : 3.5}
-                        fill={p.isNew ? "#22c55e" : "#3b82f6"} // Green for answer, Blue for data
-                        stroke="white"
-                        strokeWidth="1.5"
-                        className="graph-point"
-                    >
-                        <title>({p.x}, {p.y})</title>
-                    </circle>
-                ))}
+                {dataPoints.map((p, i) => (<circle key={i} cx={getX(p.x)} cy={getY(p.y)} r={p.isNew ? 5 : 3.5} fill={p.isNew ? "#22c55e" : "#3b82f6"} stroke="white" strokeWidth="1.5" className="graph-point"><title>({p.x}, {p.y})</title></circle>))}
             </svg>
         </div>
     );
 };
 
-// --- קומפוננטת רפלקציה קבועה ---
 const ReflectionSection = ({ values, onUpdate }) => {
-    // values = { q1: null/'yes'/'no', q2: null/'yes'/'no' }
-
     const ButtonGroup = ({ value, onChange }) => (
-        <div className="flex gap-2">
-            <button 
-                onClick={() => onChange('yes')}
-                className={`px-3 py-1 text-sm rounded-md transition-all border ${value === 'yes' ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
-            >
-                כן
-            </button>
-            <button 
-                onClick={() => onChange('no')}
-                className={`px-3 py-1 text-sm rounded-md transition-all border ${value === 'no' ? 'bg-slate-600 text-white border-slate-600 shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
-            >
-                לא
-            </button>
+        <div className="flex gap-2 shrink-0">
+            <button onClick={() => onChange('yes')} className={`w-8 h-8 rounded-full text-xs font-bold transition-all border flex items-center justify-center ${value === 'yes' ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}>כן</button>
+            <button onClick={() => onChange('no')} className={`w-8 h-8 rounded-full text-xs font-bold transition-all border flex items-center justify-center ${value === 'no' ? 'bg-slate-600 text-white border-slate-600 shadow-sm' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}>לא</button>
         </div>
     );
-
     return (
         <div className="bg-slate-100/50 border border-slate-200 p-4 rounded-xl mt-8">
-            <div className="flex items-center gap-2 mb-4 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                <Icon name="Brain" size={14} />
-                רפלקציה עצמית (סמנו לעצמכם לטובת הדיון בכיתה)
+            <div className="mb-3 text-slate-500 text-xs font-bold uppercase tracking-wider">סמנו לעצמכם לטובת הדיון בכיתה - האם לדעתכם ניתן:</div>
+            <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3"><span className="text-sm text-slate-700 leading-tight">לכתוב הגדרה מתמטית בהירה לסדרה</span><ButtonGroup value={values?.q1} onChange={(val) => onUpdate('q1', val)} /></div>
+                <div className="flex items-center justify-between gap-3"><span className="text-sm text-slate-700 leading-tight">לכתוב נוסחה פשוטה לחישוב איבר כללי בסדרה</span><ButtonGroup value={values?.q2} onChange={(val) => onUpdate('q2', val)} /></div>
             </div>
-            
-            <div className="space-y-4">
-                <div className="flex items-center justify-between gap-4">
-                    <span className="text-sm text-slate-600 leading-tight">
-                        האם לדעתכם ניתן לכתוב <strong>הגדרה מתמטית בהירה</strong> לסדרה?
-                    </span>
-                    <ButtonGroup value={values?.q1} onChange={(val) => onUpdate('q1', val)} />
-                </div>
+        </div>
+    );
+};
 
-                <div className="flex items-center justify-between gap-4">
-                    <span className="text-sm text-slate-600 leading-tight">
-                        האם לדעתכם ניתן לכתוב <strong>נוסחה פשוטה</strong> לחישוב איבר כללי בסדרה?
-                    </span>
-                    <ButtonGroup value={values?.q2} onChange={(val) => onUpdate('q2', val)} />
+const Sidebar = ({ riddles, progress, currentId, onSelect, isOpen, toggleSidebar }) => {
+    const solvedCount = Object.values(progress).filter(p => p.completed).length;
+    const groupedRiddles = useMemo(() => { const groups = {}; riddles.forEach(r => { const section = r.section || "כללי"; if (!groups[section]) groups[section] = []; groups[section].push(r); }); return groups; }, [riddles]);
+
+    return (
+        <div className={`fixed inset-y-0 right-0 z-30 w-72 bg-white border-l border-slate-200 shadow-xl transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:flex flex-col md:shadow-none top-[60px] md:top-0 h-[calc(100%-60px)] md:h-full ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                <div className="flex justify-between items-center mb-4"><h2 className="text-lg font-bold text-slate-800 flex items-center gap-2"><Icon name="Brain" className="text-blue-500" /> מפת הדרך</h2></div>
+                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between text-sm text-slate-600 mb-2 font-medium"><span>הושלמו</span><span className="text-blue-600 font-bold">{solvedCount} מתוך {riddles.length}</span></div>
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div className="bg-blue-500 h-full transition-all duration-500 rounded-full" style={{ width: `${(solvedCount / riddles.length) * 100}%` }}></div></div>
+                </div>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scroll p-4 space-y-6 pb-20 md:pb-4">
+                {Object.entries(groupedRiddles).map(([section, items]) => (
+                    <div key={section}>
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">{section}</h3>
+                        <div className="space-y-2">
+                            {items.map((riddle) => {
+                                const status = progress[riddle.id] || { completed: false };
+                                const isActive = currentId === riddle.id;
+                                return (
+                                    <button key={riddle.id} onClick={() => { onSelect(riddle.id); if (window.innerWidth < 768) toggleSidebar(); }} className={`w-full text-right p-3 rounded-lg text-sm transition-all duration-200 flex items-center justify-between ${isActive ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200 shadow-sm' : status.completed ? 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50' : 'bg-white text-slate-600 border border-transparent hover:bg-slate-50'}`}>
+                                        <span className="flex items-center gap-2"><span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${isActive ? 'bg-blue-200 text-blue-800' : 'bg-slate-100 text-slate-500'}`}>{riddle.id}</span>{riddle.title}</span>
+                                        {status.completed && <Icon name="Check" size={16} className="text-green-500" />}
+                                        {!status.completed && !isActive && <Icon name="Lock" size={14} className="text-slate-300" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const MainContent = ({ riddle, status, onSolve, onHintReveal, onNext, onPrev, onReflectionUpdate }) => {
+    const [input, setInput] = useState("");
+    const [qInput, setQInput] = useState("");
+    const [errorState, setErrorState] = useState(false);
+    const [phase, setPhase] = useState('solving_term'); 
+
+    useEffect(() => { setInput(""); setQInput(""); setErrorState(false); setPhase(status?.completed ? 'success' : 'solving_term'); }, [riddle.id, status]);
+
+    const handleTermSubmit = (e) => { e.preventDefault(); const cleanInput = input.trim().toLowerCase(); if (checkAnswer(cleanInput, riddle.answer)) { if (status?.completed) { } else if (riddle.type === 'geometric') { setPhase('solving_q'); setErrorState(false); } else { setPhase('success'); onSolve(riddle.id); } } else { setErrorState(true); setTimeout(() => setErrorState(false), 800); } };
+    const handleQSubmit = (e) => { e.preventDefault(); const cleanInput = qInput.trim().toLowerCase(); const validAnswers = Array.isArray(riddle.qAnswer) ? riddle.qAnswer : [riddle.qAnswer]; if (checkAnswer(cleanInput, validAnswers)) { setPhase('success'); onSolve(riddle.id); } else { setErrorState(true); setTimeout(() => setErrorState(false), 800); } };
+    const isSolved = phase === 'success';
+    const hintsShown = status?.hintsRevealed || 0;
+
+    return (
+        <div className="flex-1 h-full overflow-y-auto custom-scroll flex flex-col relative bg-slate-50">
+            <div className="p-4 md:p-10 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-start pt-12 md:pt-16 pb-20">
+                <div className="flex flex-col gap-6 order-2 lg:order-1">
+                    <div className="mb-2"><h2 className="text-2xl font-bold text-slate-800">{riddle.title}</h2></div>
+                    {phase === 'solving_term' && (
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                            <label className="block text-sm font-bold text-slate-700 mb-3">השלימו את האיבר החסר:</label>
+                            <form onSubmit={handleTermSubmit} className="flex items-center gap-3" dir="ltr">
+                                <span className="math-serif text-2xl text-slate-600 italic font-bold">a<sub className="not-italic text-sm">{riddle.targetN}</sub> =</span>
+                                <input type="text" inputMode="decimal" value={input} onChange={(e) => setInput(e.target.value)} className={`w-32 bg-slate-50 border-b-2 px-2 py-1 text-2xl font-bold text-slate-800 outline-none transition-all text-center math-serif ${errorState ? 'border-red-400 bg-red-50 text-red-600' : 'border-slate-300 focus:border-blue-500'}`} placeholder="?" autoFocus autoComplete="off" />
+                                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md transition-transform active:scale-95 ml-2">בדיקה</button>
+                            </form>
+                            {errorState && <p className="text-sm text-red-500 mt-2 font-medium" dir="rtl">נסו שוב...</p>}
+                        </div>
+                    )}
+                    {phase === 'solving_q' && (
+                        <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl shadow-sm animate-in fade-in slide-in-from-bottom-2">
+                             <div className="flex items-center gap-2 mb-2 text-indigo-700 font-bold"><Icon name="Calculator" size={18} /><span>פיצחתם את האיבר!</span></div>
+                            <p className="text-slate-700 text-sm leading-relaxed mb-4">זוהי סדרה הנדסית! כל איבר בה (החל מ-<MathText sub="2">a</MathText>) גדול פי <MathText>q</MathText> מהאיבר הקודם לו.</p>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">מהו <MathText>q</MathText> במקרה זה?</label>
+                            <form onSubmit={handleQSubmit} className="flex items-center gap-3" dir="ltr">
+                                <span className="math-serif text-2xl text-slate-600 italic font-bold">q =</span>
+                                <input type="text" inputMode="decimal" value={qInput} onChange={(e) => setQInput(e.target.value)} className={`w-32 bg-white border-b-2 px-2 py-1 text-2xl font-bold text-slate-800 outline-none transition-all text-center math-serif ${errorState ? 'border-red-400 bg-red-50 text-red-600' : 'border-indigo-300 focus:border-indigo-500'}`} placeholder="?" autoFocus autoComplete="off" />
+                                <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md transition-transform active:scale-95 ml-2">בדיקה</button>
+                            </form>
+                             {errorState && <p className="text-sm text-red-500 mt-2 font-medium" dir="rtl">ערך ה-q אינו נכון. נסו שוב.</p>}
+                        </div>
+                    )}
+                    {phase === 'success' && (
+                        <div className="bg-green-50 border border-green-100 p-6 rounded-2xl shadow-sm animate-in fade-in slide-in-from-bottom-4">
+                            <div className="flex items-center gap-3 mb-3"><div className="bg-green-100 p-2 rounded-full text-green-600"><Icon name="Check" size={20} /></div><h3 className="font-bold text-green-800 text-lg">מצוין!</h3></div>
+                            <p className="text-slate-700 leading-relaxed mb-4">{riddle.explanation}</p>
+                            {riddle.bonus && <div className="mt-2 pt-3 border-t border-green-200 text-sm text-green-800 bg-green-100/50 p-3 rounded-lg"><strong>✨ בונוס למחשבה:</strong> {riddle.bonus}</div>}
+                            <div className="flex gap-3 mt-4"><button onClick={onNext} className="text-green-700 font-bold hover:underline flex items-center gap-1 text-sm">לחידה הבאה <Icon name="ChevronLeft" size={16} /></button></div>
+                        </div>
+                    )}
+                    {(phase === 'solving_term' || phase === 'solving_q') && (
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between"><h3 className="text-sm font-bold text-slate-400 uppercase tracking-wide">עזרה ורמזים</h3>{hintsShown < riddle.hints.length && <button onClick={() => onHintReveal(riddle.id)} className="text-xs bg-white border border-slate-200 text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-full font-medium transition-colors flex items-center gap-1 shadow-sm"><Icon name="Lightbulb" size={14} /> קבל/י רמז</button>}</div>
+                            {hintsShown > 0 && <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">{riddle.hints.slice(0, hintsShown).map((hint, i) => <div key={i} className="bg-yellow-50 border border-yellow-100 p-4 rounded-xl text-slate-700 text-sm shadow-sm flex gap-3"><div className="bg-yellow-100 w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-yellow-700 text-xs font-bold">{i + 1}</div><p>{hint}</p></div>)}</div>}
+                        </div>
+                    )}
+                    <ReflectionSection values={status?.reflection} onUpdate={(key, val) => onReflectionUpdate(riddle.id, key, val)} />
+                    <div className="flex justify-between pt-6 border-t border-slate-100"><button onClick={onPrev} className="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"><Icon name="ChevronRight" size={16} /> הקודם</button><button onClick={onNext} className="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">הבא <Icon name="ChevronLeft" size={16} /></button></div>
+                </div>
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 order-1 lg:order-2">
+                    <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-3"><h2 className="font-bold text-slate-700">הסדרה הנתונה</h2><span className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">חקירה</span></div>
+                    <div className="max-h-60 overflow-y-auto custom-scroll pr-2">
+                         <div className="flex justify-between px-3 text-xl text-slate-500 font-bold mb-2 tracking-wider math-serif" dir="ltr"><span>n</span><span>a<sub>n</sub></span></div>
+                        <div className="space-y-1">
+                            {riddle.sequence.map((item, idx) => (
+                                <div key={idx} className="flex items-center justify-between px-3 py-2 rounded bg-slate-50 border border-slate-100 text-sm" dir="ltr">
+                                    <div className="font-bold text-slate-500 math-serif italic">{item.n}</div>
+                                    <div className="text-slate-300 text-xs">➜</div>
+                                    <div className={`font-bold math-serif ${item.val === "?" ? "text-blue-600" : "text-slate-700"}`}>{item.val === "?" && isSolved ? (riddle.id === 10 && item.n === 2 ? "1.5" : (riddle.id === 2 && item.n === 1 ? riddle.answer[0] : item.val)) : item.val}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    {!riddle.hideGraph && <SequenceGraph sequence={riddle.sequence} isSolved={isSolved} answer={riddle.answer} targetN={riddle.targetN} revealedPoints={riddle.revealedPoints} graphConfig={riddle.graphConfig} />}
                 </div>
             </div>
         </div>
     );
 };
 
-// --- רכיבים ראשיים ---
-
-function Header({ onToggleSidebar }) {
-    return (
-        <header className="bg-white border-b border-slate-200 shadow-sm z-20 flex items-center justify-between px-4 py-4 md:px-8">
-            <div className="flex items-center gap-4">
-                <button 
-                    onClick={onToggleSidebar}
-                    className="md:hidden text-slate-600 hover:text-slate-800 focus:outline-none"
-                >
-                    <Icon name="Menu" size={24} />
-                </button>
-                <h1 className="text-xl md:text-2xl font-bold text-slate-800 leading-none">סדרות - פעילות מבוא לסדרה הנדסית</h1>
-            </div>
-        </header>
-    );
-}
-
-function Footer() {
-    return (
-        <footer className="bg-white border-t border-slate-200 p-3 text-center z-10 w-full shrink-0">
-            <div className="text-xs text-slate-500 leading-relaxed">
-                נוצר ע"י <a href="https://tair-pnini.github.io" target="_blank" className="text-blue-600 hover:text-blue-800 font-bold underline transition-colors">תאיר פניני</a> | מוזמנים להשתמש ולהנות. אם לקחתם השראה נא תנו קרדיט.
-                <span className="mx-2 text-slate-300">|</span>
-                © כל הזכויות שמורות
-            </div>
-        </footer>
-    );
-}
-
-function Sidebar({ riddles, progress, currentId, onSelect, isOpen, toggleSidebar }) {
-    const solvedCount = Object.values(progress).filter(p => p.completed).length;
-    
-    return (
-        <div className={`
-            fixed inset-y-0 right-0 z-30 w-72 bg-white border-l border-slate-200 shadow-xl transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:flex flex-col md:shadow-none top-[60px] md:top-0 h-[calc(100%-60px)] md:h-full
-            ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        `}>
-            
-            {/* Sub-Header / Status */}
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <Icon name="Brain" className="text-blue-500" />
-                        מפת הדרך
-                    </h2>
-                </div>
-                
-                {/* Progress */}
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                    <div className="flex justify-between text-sm text-slate-600 mb-2 font-medium">
-                        <span>הושלמו</span>
-                        <span className="text-blue-600 font-bold">{solvedCount} מתוך {riddles.length}</span>
-                    </div>
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div 
-                            className="bg-blue-500 h-full transition-all duration-500 rounded-full" 
-                            style={{ width: `${(solvedCount / riddles.length) * 100}%` }}
-                        ></div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Riddle List */}
-            <div className="flex-1 overflow-y-auto custom-scroll p-4 space-y-2 pb-20 md:pb-4">
-                {riddles.map((riddle) => {
-                    const status = progress[riddle.id] || { completed: false };
-                    const isActive = currentId === riddle.id;
-                    
-                    return (
-                        <button
-                            key={riddle.id}
-                            onClick={() => {
-                                onSelect(riddle.id);
-                                if (window.innerWidth < 768) toggleSidebar();
-                            }}
-                            className={`
-                                w-full text-right p-3 rounded-lg text-sm transition-all duration-200 flex items-center justify-between
-                                ${isActive 
-                                    ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200 shadow-sm' 
-                                    : status.completed
-                                        ? 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50' 
-                                        : 'bg-white text-slate-600 border border-transparent hover:bg-slate-50'}
-                            `}
-                        >
-                            <span className="flex items-center gap-2">
-                                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${isActive ? 'bg-blue-200 text-blue-800' : 'bg-slate-100 text-slate-500'}`}>
-                                    {riddle.id}
-                                </span>
-                                {riddle.title}
-                            </span>
-                            {status.completed && (
-                                <Icon name="Check" size={16} className="text-green-500" />
-                            )}
-                            {!status.completed && !isActive && (
-                                <Icon name="Lock" size={14} className="text-slate-300" />
-                            )}
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
-
-function MainContent({ riddle, status, onSolve, onHintReveal, onNext, onPrev, onReflectionUpdate }) {
-    const [input, setInput] = useState("");
-    const [qInput, setQInput] = useState("");
-    const [errorState, setErrorState] = useState(false);
-    
-    const [phase, setPhase] = useState('solving_term'); 
-
-    useEffect(() => {
-        setInput("");
-        setQInput("");
-        setErrorState(false);
-        setPhase(status?.completed ? 'success' : 'solving_term');
-    }, [riddle.id, status]);
-
-    const handleTermSubmit = (e) => {
-        e.preventDefault();
-        const cleanInput = input.trim().toLowerCase();
-        
-        if (checkAnswer(cleanInput, riddle.answer)) {
-            if (status?.completed) {
-                // Already done
-            } else if (riddle.type === 'geometric') {
-                setPhase('solving_q');
-                setErrorState(false);
-            } else {
-                setPhase('success');
-                onSolve(riddle.id);
-            }
-        } else {
-            setErrorState(true);
-            setTimeout(() => setErrorState(false), 800);
-        }
-    };
-
-    const handleQSubmit = (e) => {
-        e.preventDefault();
-        const cleanInput = qInput.trim().toLowerCase();
-        
-        const validAnswers = Array.isArray(riddle.qAnswer) ? riddle.qAnswer : [riddle.qAnswer];
-        
-        if (checkAnswer(cleanInput, validAnswers)) {
-            setPhase('success');
-            onSolve(riddle.id);
-        } else {
-            setErrorState(true);
-            setTimeout(() => setErrorState(false), 800);
-        }
-    };
-
-    const isSolved = phase === 'success';
-    const hintsShown = status?.hintsRevealed || 0;
-
-    return (
-        <div className="flex-1 h-full overflow-y-auto custom-scroll flex flex-col relative bg-slate-50">
-            
-            <div className="p-4 md:p-10 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-start pt-8 md:pt-10 pb-20">
-                
-                {/* Interaction Area (Right on Desktop, Second on Mobile) */}
-                <div className="flex flex-col gap-6 order-2 lg:order-1">
-                    
-                    <div className="mb-2">
-                        <h2 className="text-2xl font-bold text-slate-800">{riddle.title}</h2>
-                    </div>
-
-                    {/* Phase 1: Term Answer */}
-                    {phase === 'solving_term' && (
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-                            <label className="block text-sm font-bold text-slate-700 mb-3">השלימו את האיבר החסר:</label>
-                            <form onSubmit={handleTermSubmit} className="flex items-center gap-3" dir="ltr">
-                                <span className="math-serif text-2xl text-slate-600 italic font-bold">
-                                    a<sub className="not-italic text-sm">{riddle.targetN}</sub> =
-                                </span>
-                                <input
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    className={`
-                                        w-32 bg-slate-50 border-b-2 px-2 py-1 text-2xl font-bold text-slate-800 outline-none transition-all text-center math-serif
-                                        ${errorState ? 'border-red-400 bg-red-50 text-red-600' : 'border-slate-300 focus:border-blue-500'}
-                                    `}
-                                    placeholder="?"
-                                    autoFocus
-                                    autoComplete="off"
-                                />
-                                <button 
-                                    type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md transition-transform active:scale-95 ml-2"
-                                >
-                                    בדיקה
-                                </button>
-                            </form>
-                            {errorState && <p className="text-sm text-red-500 mt-2 font-medium" dir="rtl">נסו שוב...</p>}
-                        </div>
-                    )}
-
-                    {/* Phase 2: Q Answer */}
-                    {phase === 'solving_q' && (
-                        <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl shadow-sm animate-in fade-in slide-in-from-bottom-2">
-                             <div className="flex items-center gap-2 mb-2 text-indigo-700 font-bold">
-                                <Icon name="Calculator" size={18} />
-                                <span>פיצחתם את האיבר!</span>
-                            </div>
-                            <p className="text-slate-700 text-sm leading-relaxed mb-4">
-                                זוהי סדרה הנדסית! כל איבר בה (החל מ-<MathText sub="2">a</MathText>) 
-                                גדול פי <MathText>q</MathText> מהאיבר הקודם לו.
-                            </p>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">מהו <MathText>q</MathText> במקרה זה?</label>
-                            
-                            <form onSubmit={handleQSubmit} className="flex items-center gap-3" dir="ltr">
-                                <span className="math-serif text-2xl text-slate-600 italic font-bold">
-                                    q =
-                                </span>
-                                <input
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={qInput}
-                                    onChange={(e) => setQInput(e.target.value)}
-                                    className={`
-                                        w-32 bg-white border-b-2 px-2 py-1 text-2xl font-bold text-slate-800 outline-none transition-all text-center math-serif
-                                        ${errorState ? 'border-red-400 bg-red-50 text-red-600' : 'border-indigo-300 focus:border-indigo-500'}
-                                    `}
-                                    placeholder="?"
-                                    autoFocus
-                                    autoComplete="off"
-                                />
-                                <button 
-                                    type="submit"
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md transition-transform active:scale-95 ml-2"
-                                >
-                                    בדיקה
-                                </button>
-                            </form>
-                             {errorState && <p className="text-sm text-red-500 mt-2 font-medium" dir="rtl">ערך ה-q אינו נכון. נסו שוב.</p>}
-                        </div>
-                    )}
-
-                    {/* Phase 3: Success */}
-                    {phase === 'success' && (
-                        <div className="bg-green-50 border border-green-100 p-6 rounded-2xl shadow-sm animate-in fade-in slide-in-from-bottom-4">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="bg-green-100 p-2 rounded-full text-green-600">
-                                    <Icon name="Check" size={20} />
-                                </div>
-                                <h3 className="font-bold text-green-800 text-lg">מצוין!</h3>
-                            </div>
-                            <p className="text-slate-700 leading-relaxed mb-4">
-                                {riddle.explanation}
-                            </p>
-                            {riddle.bonus && (
-                                <div className="mt-2 pt-3 border-t border-green-200 text-sm text-green-800 bg-green-100/50 p-3 rounded-lg">
-                                    <strong>✨ בונוס למחשבה:</strong> {riddle.bonus}
-                                </div>
-                            )}
-                            <div className="flex gap-3 mt-4">
-                                <button onClick={onNext} className="text-green-700 font-bold hover:underline flex items-center gap-1 text-sm">
-                                    לחידה הבאה <Icon name="ChevronLeft" size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Hints */}
-                    {(phase === 'solving_term' || phase === 'solving_q') && (
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wide">עזרה ורמזים</h3>
-                                {hintsShown < riddle.hints.length && (
-                                    <button 
-                                        onClick={() => onHintReveal(riddle.id)}
-                                        className="text-xs bg-white border border-slate-200 text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-full font-medium transition-colors flex items-center gap-1 shadow-sm"
-                                    >
-                                        <Icon name="Lightbulb" size={14} />
-                                        קבל רמז
-                                    </button>
-                                )}
-                            </div>
-
-                            {hintsShown === 0 ? (
-                                <div className="text-slate-400 text-sm italic text-center py-4 bg-slate-100/50 rounded-xl border border-dashed border-slate-200">
-                                    צריכים עזרה? בקשו רמז למעלה
-                                </div>
-                            ) : (
-                                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">
-                                    {riddle.hints.slice(0, hintsShown).map((hint, i) => (
-                                        <div key={i} className="bg-yellow-50 border border-yellow-100 p-4 rounded-xl text-slate-700 text-sm shadow-sm flex gap-3">
-                                            <div className="bg-yellow-100 w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-yellow-700 text-xs font-bold">
-                                                {i + 1}
-                                            </div>
-                                            <p>{hint}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Reflection */}
-                    <ReflectionSection values={status?.reflection} onUpdate={(key, val) => onReflectionUpdate(riddle.id, key, val)} />
-
-                    {/* Navigation Buttons (Bottom) */}
-                    <div className="flex justify-between pt-6 border-t border-slate-100">
-                        <button onClick={onPrev} className="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
-                            <Icon name="ChevronRight" size={16} /> הקודם
-                        </button>
-                        <button onClick={onNext} className="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
-                            הבא <Icon name="ChevronLeft" size={16} />
-                        </button>
-                    </div>
-
-                </div>
-
-                {/* Sequence & Graph (Left on Desktop, First on Mobile) */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 order-1 lg:order-2">
-                    <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-3">
-                        <h2 className="font-bold text-slate-700">הסדרה הנתונה</h2>
-                        <span className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-500">חקירה</span>
-                    </div>
-                    
-                    {/* Table */}
-                    <div className="max-h-60 overflow-y-auto custom-scroll pr-2">
-                         <div className="flex justify-between px-3 text-xl text-slate-500 font-bold mb-2 tracking-wider math-serif" dir="ltr">
-                            <span>n</span>
-                            <span>a<sub>n</sub></span>
-                        </div>
-                        <div className="space-y-1">
-                            {riddle.sequence.map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between px-3 py-2 rounded bg-slate-50 border border-slate-100 text-sm" dir="ltr">
-                                    <div className="font-bold text-slate-500 math-serif italic">
-                                        {item.n}
-                                    </div>
-                                    <div className="text-slate-300 text-xs">➜</div>
-                                    <div className={`font-bold math-serif ${item.val === "?" ? "text-blue-600" : "text-slate-700"}`}>
-                                        {item.val === "?" && isSolved 
-                                            ? (riddle.id === 10 && item.n === 2 ? "1.5" : (riddle.id === 2 && item.n === 1 ? riddle.answer[0] : item.val))
-                                            : item.val}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {!riddle.hideGraph && (
-                        <SequenceGraph sequence={riddle.sequence} isSolved={isSolved} answer={riddle.answer} targetN={riddle.targetN} revealedPoints={riddle.revealedPoints} graphConfig={riddle.graphConfig} />
-                    )}
-                </div>
-
-            </div>
-        </div>
-    );
-}
-
-function App() {
+const App = () => {
     const [currentId, setCurrentId] = useState(1);
-    const [progress, setProgress] = useState(() => {
-        const initial = {};
-        riddlesData.forEach(r => initial[r.id] = { completed: false, hintsRevealed: 0, reflection: { q1: null, q2: null } });
-        return initial;
-    });
+    const [showWelcome, setShowWelcome] = useState(true);
+    const [progress, setProgress] = useState(() => { const initial = {}; riddlesData.forEach(r => initial[r.id] = { completed: false, hintsRevealed: 0, reflection: { q1: null, q2: null } }); return initial; });
     const [isSidebarOpen, setSidebarOpen] = useState(false);
 
-    const handleSolve = (id) => {
-        setProgress(prev => ({
-            ...prev,
-            [id]: { ...prev[id], completed: true }
-        }));
-    };
-
-    const handleHintReveal = (id) => {
-        setProgress(prev => {
-            const currentHints = prev[id].hintsRevealed;
-            const maxHints = riddlesData.find(r => r.id === id).hints.length;
-            if (currentHints < maxHints) {
-                return {
-                    ...prev,
-                    [id]: { ...prev[id], hintsRevealed: currentHints + 1 }
-                };
-            }
-            return prev;
-        });
-    };
-
-    const handleReflectionUpdate = (id, key, value) => {
-         setProgress(prev => ({
-            ...prev,
-            [id]: {
-                ...prev[id],
-                reflection: { ...prev[id].reflection, [key]: value }
-            }
-        }));
-    };
-
-    const navigate = (direction) => {
-        const currentIndex = riddlesData.findIndex(r => r.id === currentId);
-        if (direction === 'next') {
-            const nextIndex = (currentIndex + 1) % riddlesData.length;
-            setCurrentId(riddlesData[nextIndex].id);
-        } else {
-            const prevIndex = (currentIndex - 1 + riddlesData.length) % riddlesData.length;
-            setCurrentId(riddlesData[prevIndex].id);
-        }
-    };
+    const handleSolve = (id) => { setProgress(prev => ({ ...prev, [id]: { ...prev[id], completed: true } })); };
+    const handleHintReveal = (id) => { setProgress(prev => { const currentHints = prev[id].hintsRevealed; const maxHints = riddlesData.find(r => r.id === id).hints.length; if (currentHints < maxHints) { return { ...prev, [id]: { ...prev[id], hintsRevealed: currentHints + 1 } }; } return prev; }); };
+    const handleReflectionUpdate = (id, key, value) => { setProgress(prev => ({ ...prev, [id]: { ...prev[id], reflection: { ...prev[id].reflection, [key]: value } } })); };
+    const navigate = (direction) => { const currentIndex = riddlesData.findIndex(r => r.id === currentId); if (direction === 'next') { setCurrentId(riddlesData[(currentIndex + 1) % riddlesData.length].id); } else { setCurrentId(riddlesData[(currentIndex - 1 + riddlesData.length) % riddlesData.length].id); } };
 
     const currentRiddle = riddlesData.find(r => r.id === currentId);
     const currentStatus = progress[currentId];
 
+    if (showWelcome) return <WelcomeScreen onStart={() => setShowWelcome(false)} />;
+
     return (
         <div className="flex flex-col h-[100dvh] w-screen bg-slate-50 overflow-hidden" dir="rtl">
-            
             <Header onToggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
-
             <div className="flex flex-1 overflow-hidden relative">
-                <Sidebar 
-                    riddles={riddlesData} 
-                    progress={progress} 
-                    currentId={currentId} 
-                    onSelect={setCurrentId}
-                    isOpen={isSidebarOpen}
-                    toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
-                />
-
-                <MainContent 
-                    riddle={currentRiddle}
-                    status={currentStatus}
-                    onSolve={handleSolve}
-                    onHintReveal={handleHintReveal}
-                    onNext={() => navigate('next')}
-                    onPrev={() => navigate('prev')}
-                    onReflectionUpdate={handleReflectionUpdate}
-                />
+                <Sidebar riddles={riddlesData} progress={progress} currentId={currentId} onSelect={setCurrentId} isOpen={isSidebarOpen} toggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
+                <MainContent riddle={currentRiddle} status={currentStatus} onSolve={handleSolve} onHintReveal={handleHintReveal} onNext={() => navigate('next')} onPrev={() => navigate('prev')} onReflectionUpdate={handleReflectionUpdate} />
             </div>
-            
             <Footer />
         </div>
     );
-}
+};
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
