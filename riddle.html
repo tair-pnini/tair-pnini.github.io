@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיחת פתרון החידה</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #efeae2;
+            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+            background-repeat: repeat;
+            background-size: 400px;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+
+        .message-bubble {
+            position: relative;
+            max-width: 80%;
+            padding: 6px 7px 8px 9px;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+            font-size: 14.2px;
+            line-height: 19px;
+            color: #111b21;
+        }
+
+        .message-out {
+            background-color: #d9fdd3;
+            border-radius: 7.5px 0 7.5px 7.5px;
+            margin-right: auto;
+            margin-left: 0;
+        }
+        
+        .message-out::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -8px;
+            width: 8px;
+            height: 13px;
+            background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13' width='8' height='13'%3E%3Cpath opacity='.13' fill='%230000000' d='M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z'/%3E%3Cpath fill='%23d9fdd3' d='M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z'/%3E%3C/svg%3E");
+        }
+
+        .message-in {
+            background-color: #ffffff;
+            border-radius: 0 7.5px 7.5px 7.5px;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .message-in::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -8px;
+            width: 8px;
+            height: 13px;
+            background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 13' width='8' height='13'%3E%3Cpath opacity='.13' fill='%230000000' d='M1.533 3.568L8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z'/%3E%3Cpath fill='%23ffffff' d='M1.533 2.568L8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z'/%3E%3C/svg%3E");
+        }
+
+        .reply-container {
+            background-color: rgba(0,0,0,0.05);
+            border-right: 4px solid;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .reply-out { border-color: #00a884; } 
+        .reply-in { border-color: #d646bf; }
+
+        .highlight-anim {
+            animation: highlight 1.5s ease-out;
+        }
+
+        @keyframes highlight {
+            0% { background-color: rgba(255, 235, 59, 0.5); }
+            100% { background-color: transparent; }
+        }
+
+        .msg-number {
+            position: absolute;
+            top: 4px;
+            left: 6px;
+            font-size: 10px;
+            color: rgba(0,0,0,0.4);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col items-center justify-center py-0 md:py-4">
+
+    <!-- Phone Container -->
+    <div class="w-full h-full md:w-[450px] md:h-[850px] bg-[#efeae2] md:rounded-[20px] shadow-2xl overflow-hidden flex flex-col relative border-0 md:border-8 md:border-gray-800">
+        
+        <!-- Header -->
+        <div class="bg-[#008069] p-3 flex items-center justify-between text-white shadow-md z-10 shrink-0">
+            <div class="flex items-center gap-3">
+                <svg viewBox="0 0 24 24" width="24" height="24" class="fill-current cursor-pointer"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                    <svg viewBox="0 0 24 24" width="24" height="24" class="fill-gray-500"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-medium text-lg leading-tight">הפותרת</span>
+                    <span class="text-xs text-gray-200">מחובר/ת כעת</span>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <svg viewBox="0 0 24 24" width="24" height="24" class="fill-current cursor-pointer"><path d="M15.9 14.3H15l-.3-.3c1-1.1 1.6-2.7 1.6-4.3 0-3.7-3-6.7-6.7-6.7S3 6 6.7 6s6.7 3 6.7 6.7c0 1.6-.5 3.2-1.6 4.3l.3.3v.9l5.1 5.1 1.5-1.5-5.1-5.1zM6.7 11c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z"></path></svg>
+                <svg viewBox="0 0 24 24" width="24" height="24" class="fill-current cursor-pointer"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="chat-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2"></div>
+
+        <!-- Input Area -->
+        <div class="bg-[#f0f2f5] p-2 flex items-center gap-2 shrink-0">
+            <svg viewBox="0 0 24 24" width="24" height="24" class="fill-gray-500 cursor-pointer ml-1"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z"></path></svg>
+            <div class="flex-1 bg-white rounded-lg p-2 px-4 text-gray-400 text-sm border border-white">הקלד/י הודעה</div>
+            <div class="bg-[#008069] rounded-full p-2 text-white">
+                <svg viewBox="0 0 24 24" width="20" height="20" class="fill-current"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatData = [
+            {id: 1, sender: "המלווה", time: "19:40", text: "שני אנשים בחדר, רשאים להחליט על אסטרטגיה מראש. לאחר מכן, על כל אחד מהם מונח כובע עם מספר טבעי עליו. כעת כל אחד מהשניים צריך לספק רשימה סופית של אפשרויות למספר שמופיע על הכובע שלו. השניים לא רואים את הרשימות זה של זה (לא ניתן להעביר באמצעותן מידע). אם לפחות אחד מהשניים צדק באחת מהאפשרויות שכתב ברשימה - מוכרז ניצחון.", replyTo: null},
+            {id: 2, sender: "המלווה", time: "19:40", text: "מהי האסטרטגיה המנצחת?", replyTo: null},
+            {id: 3, sender: "הפותרת", time: "19:41", text: "לא, נתחיל מהשאלה הראשונה", replyTo: null},
+            {id: 4, sender: "הפותרת", time: "19:41", text: "אפילו אותה לא הצלחתי 🙈", replyTo: null},
+            {id: 5, sender: "המלווה", time: "19:41", text: "אה, היא לדעתי תהיה לך יותר קשה :)", replyTo: null},
+            {id: 6, sender: "המלווה", time: "19:42", text: "על כל אחד כובע - או שחור או לבן (יכול להיות שניהם בצבעים שונים, או באותו צבע). כל אחד כותב על פתק אם יש לו עצמו שחור או לבן. אם לפחות אחד צודק - שניהם ניצחו", replyTo: null},
+            {id: 7, sender: "המלווה", time: "19:44", text: "את יכולה לשתף אותי במחשבות... אילו שאלות תשאלי את עצמך? ואז תעני לעצמך עליהן. זה יוביל את המחשבה", replyTo: null},
+            {id: 8, sender: "הפותרת", time: "20:21", text: "לא מצליחה להבין איך נוסף לי מידע מלראות את הכובע של האחר. ה setting לא ברור לי, איך זה שהם שניים משנה משהו", replyTo: 6},
+            {id: 9, sender: "הפותרת", time: "20:22", text: "כאן אותו הדבר. אולי אפשר לנסח את זה ככה - אין לי רעיון לאסטרטגיה. אני רואה שעל הכובע של האחר כתוב 7. אוקיי, אז איזה מידע זה מוסיף לי?", replyTo: 1},
+            {id: 10, sender: "המלווה", time: "21:23", text: "קול - כלומר, אני מבינה שהרשימה שלי צריכה להתייחס למספר של השני", replyTo: null},
+            {id: 11, sender: "המלווה", time: "21:23", text: "מה עוד יודעת? אולי יכלת לנסח לעצמך טיפה אחרת", replyTo: null},
+            {id: 12, sender: "הפותרת", time: "21:30", text: "שיש לו כובע ומספר טבעי", replyTo: null},
+            {id: 13, sender: "הפותרת", time: "21:30", text: "וגם לי", replyTo: null},
+            {id: 14, sender: "המלווה", time: "21:46", text: "והרשימה שלו צריכה להתייחס למספר שלך, ולהיפך", replyTo: null},
+            {id: 15, sender: "המלווה", time: "21:46", text: "ועוד דבר אחד", replyTo: null},
+            {id: 16, sender: "הפותרת", time: "23:05", text: "הם יכולים לעשות פרצופים או סימנים מוסכמים אחד לשני? מרגיש לי מחוץ לחוקי המשחק", replyTo: null},
+            {id: 17, sender: "הפותרת", time: "23:06", text: "אני לא מצליחה לראות קשר בין המספר \"שלי\", לבין מה שאני רואה על הכובע שלה :)", replyTo: 14},
+            {id: 18, sender: "הפותרת", time: "23:21", text: "אוקיי אני אתן את כל המספרים עד למספר שעל הכובע שלך ואת תכתבי את כל המספרים עד למספר שעל הכובע שלי. אחד המספרים גדול יותר (או שהם שווים) אז משהו חייב להצליח. נניח לי יש 5 ולך 7. אז את תראי 5, תכתבי 1,2,3,4,5. אני רואה 7 אז אכתוב 1,2,3,4,5,6,7. אז יצא שכתבתי 5", replyTo: null},
+            {id: 19, sender: "הפותרת", time: "23:21", text: "זה מופרך 😂", replyTo: null},
+            {id: 20, sender: "המלווה", time: "23:52", text: "זה יפהיפה!!", replyTo: null},
+            {id: 21, sender: "המלווה", time: "23:53", text: "עכשיו מסקרן - מה איפשר לך להגיע לשם... (?) ואיך מלמדות את המיומנות הזו לאחרים", replyTo: null},
+            {id: 22, sender: "הפותרת", time: "23:56", text: "זה כנראה... ? אין לי מושג דרישת הסופיות של הרשימה וההדדיות", replyTo: 14},
+            {id: 23, sender: "הפותרת", time: "23:56", text: "אין לי מושג 😇", replyTo: null},
+            {id: 24, sender: "הפותרת", time: "23:57", text: "את זה לא ראיתי בעצמי", replyTo: 14},
+            {id: 25, sender: "המלווה", time: "23:58", text: "איך היית יכולה להגיע לזה בעצמך?", replyTo: 22},
+            {id: 26, sender: "המלווה", time: "23:59", text: "דווקא הגעת לזה - אולי בניסוח אחר? כתבת שהשאלה שלך היא \"איזה מידע נוסף לי על ידי זה שאני רואה את המספר של האחר\"", replyTo: null},
+            {type: "date", text: "18 בספטמבר 2024"},
+            {id: 27, sender: "הפותרת", time: "00:00", text: "נכון לא ראיתי איזה מידע זה מוסיף לי הבנתי שזה אמור לתת לי משהו", replyTo: null},
+            {id: 28, sender: "המלווה", time: "00:01", text: "נשארת ב\"לא יודעת\" מה זה מוסיף לי. למרות שכל מה שעשית בניסוח היה טריוויאלי...", replyTo: null},
+            {id: 29, sender: "המלווה", time: "00:01", text: "במקום \"אני לא יודעת מה זה מוסיף לי\" - נהיה \"אני יודעת שזה מוסיף לי משהו. ואני יודעת שזה קורה פעמיים\"", replyTo: null},
+            {id: 30, sender: "הפותרת", time: "00:02", text: "לא את כתבת שהרשימה שלו צריכה להתייחס למספר שלך, ולהיפך. לא את כתבת שהרשימה שלו צריכה להתייחס למספר שלך. זה תוספת מידע / קפיצה מחשבתית", replyTo: 14},
+            {id: 31, sender: "הפותרת", time: "00:02", text: "זה כאילו טריוויאלי אבל בכל זאת תוספת", replyTo: null},
+            {id: 32, sender: "המלווה", time: "00:05", text: "אבל לא קפיצה שהיא מעל ליכולותיך בשום צורה... אז מה יכול לאפשר לך אותה?", replyTo: null},
+            {id: 33, sender: "הפותרת", time: "00:12", text: "1. אין לי מושג 2. בזמן שעבר הייתי במשהו אחר (ספורט), \"החלפתי מצברים\". נראה לי שהיחס שלי לשאלה היה יותר רגוע ואגבי, ופחות מכוון מטרה. יותר סקרנית ופחות לחוצה, נראה לי.", replyTo: null},
+            {id: 34, sender: "הפותרת", time: "00:13", text: "ועדיין יש פה קפיצה מחשבתית כי אני מסתכלת על המספר השני וכותבת משהו על המספר שלי. זו באמת חידה מיוחדת, לא?", replyTo: null},
+            {id: 35, sender: "הפותרת", time: "00:13", text: "וזה עדיין לא ברור :)", replyTo: 6},
+            {id: 36, sender: "המלווה", time: "00:13", text: "מאוד מיוחדת!", replyTo: null},
+            {id: 37, sender: "המלווה", time: "00:13", text: "מעניין - 1, ואחריו 2", replyTo: 33},
+            {id: 38, sender: "המלווה", time: "00:14", text: "יאללה - אני מתחילה להתכנס לשינה 😊 לילה טוב 🌸🙏", replyTo: null},
+            {id: 39, sender: "הפותרת", time: "00:24", text: "כבר כיביתי את האור ואז הבנתי גם את השניה! 🤷‍♀️💡 זה ממש מגניב ופלאי אולי בזכות הדיאלוג איתך 🌟 לילה טוב ! 💫", replyTo: null},
+        ];
+
+        const container = document.getElementById('chat-container');
+        const getMessageById = (id) => chatData.find(m => m.id === id);
+        const checkIcon = `<span class="ml-1 inline-block align-bottom"><svg viewBox="0 0 16 11" width="16" height="11" class="fill-[#53bdeb]"><path d="M11.5 0L6.4 5.1l-2-2-1.3 1.3L6.4 7.7 12.8 1.3 11.5 0zm3.3.6l-1.3-1.3-7.1 7.1.6.7 7.8-6.5zM4.4 6.4L3.1 5.1.5 7.7l4.5 4.5 9.2-9.2-1.3-1.3-7.9 7.9-2.6-2.6z"></path></svg></span>`;
+
+        chatData.forEach(msg => {
+            if (msg.type === 'date') {
+                const dateDiv = document.createElement('div');
+                dateDiv.className = "flex justify-center my-4";
+                dateDiv.innerHTML = `<span class="bg-white/80 shadow-sm text-gray-600 text-xs px-3 py-1.5 rounded-lg border border-gray-100">${msg.text}</span>`;
+                container.appendChild(dateDiv);
+                return;
+            }
+
+            const isMe = msg.sender === "המלווה";
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex w-full mb-1 ${isMe ? 'justify-start' : 'justify-end'}`;
+            wrapper.id = `msg-${msg.id}`;
+
+            let replyHtml = '';
+            if (msg.replyTo) {
+                const originalMsg = getMessageById(msg.replyTo);
+                if (originalMsg) {
+                    const senderColor = originalMsg.sender === "המלווה" ? "text-[#00a884]" : "text-[#d646bf]";
+                    const truncatedText = originalMsg.text.length > 60 ? originalMsg.text.substring(0, 60) + '...' : originalMsg.text;
+                    replyHtml = `
+                        <div class="reply-container ${isMe ? 'reply-out' : 'reply-in'}" onclick="scrollToMessage(${msg.replyTo})">
+                            <span class="${senderColor} font-bold text-xs mb-1">${originalMsg.sender}</span>
+                            <span class="text-gray-500 text-xs line-clamp-1">${truncatedText}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            wrapper.innerHTML = `
+                <div class="message-bubble ${isMe ? 'message-out' : 'message-in'}">
+                    <span class="msg-number">#${msg.id}</span>
+                    ${replyHtml}
+                    <div class="text-sm whitespace-pre-wrap mt-2">${msg.text}</div>
+                    <div class="flex justify-end items-center mt-1 gap-1">
+                        <span class="text-[11px] text-gray-500 min-w-[45px] text-left">${msg.time}</span>
+                        ${isMe ? checkIcon : ''} 
+                    </div>
+                </div>
+            `;
+            container.appendChild(wrapper);
+        });
+
+        container.scrollTop = container.scrollHeight;
+
+        function scrollToMessage(id) {
+            const el = document.getElementById(`msg-${id}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const bubble = el.querySelector('.message-bubble');
+                bubble.classList.add('highlight-anim');
+                setTimeout(() => bubble.classList.remove('highlight-anim'), 1500);
+            }
+        }
+    </script>
+</body>
+</html>
