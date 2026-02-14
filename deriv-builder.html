@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בונה הנגזרות - כתיבה מודרכת</title>
+    <!-- גופנים -->
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&family=David+Libre:wght@400;700&display=swap" rel="stylesheet">
+    <!-- MathJax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #fdfbf7;
+            --paper-line: #e1e1e1;
+            --ink-color: #2c3e50;
+            --accent-color: #3498db;
+            --slot-bg: #f0f0f0;
+            --slot-border: #bbb;
+            --selected-glow: 0 0 10px rgba(52, 152, 219, 0.8);
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--ink-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* כותרת */
+        header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        h1 { margin: 0; font-size: 1.3rem; color: #444; }
+
+        .controls { display: flex; gap: 10px; }
+
+        select, button {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        button.check-btn { background-color: var(--accent-color); color: white; border: none; font-weight: bold; }
+        button.check-btn:hover { background-color: #2980b9; }
+        button.reset-btn { background-color: #e74c3c; color: white; border: none; }
+        
+        /* אזור עבודה ראשי */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* סרגל כלים ימני */
+        .sidebar-tools {
+            width: 220px;
+            background: #fff;
+            border-left: 1px solid #ddd;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.02);
+            z-index: 5;
+        }
+
+        .section-title { font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9rem; border-bottom: 2px solid #eee; padding-bottom: 5px;}
+
+        .template-card {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: grab;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+            direction: ltr; /* Ensure formula inside looks right */
+        }
+        .template-card:hover { transform: translateY(-2px); border-color: var(--accent-color); }
+        .template-card:active { cursor: grabbing; }
+
+        /* אזור הנייר (Workspace) */
+        .workspace {
+            flex: 1;
+            position: relative;
+            background-image: linear-gradient(var(--paper-line) 1px, transparent 1px);
+            background-size: 100% 30px;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .question-display {
+            background: white;
+            padding: 15px 30px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 1.8rem;
+            margin-bottom: 40px;
+            font-family: 'David Libre', serif;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+            direction: ltr; /* Math implies LTR */
+        }
+
+        #canvas-zone {
+            width: 100%;
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-bottom: 150px; /* Space for scrolling */
+        }
+
+        .empty-msg {
+            color: #999;
+            font-style: italic;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.8);
+            direction: rtl;
+        }
+
+        /* מחסן האיברים (למטה) */
+        .terms-bank {
+            height: 130px;
+            background: #2c3e50;
+            border-top: 4px solid #34495e;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            direction: ltr; /* Keep terms ordered nicely LTR usually looks better for math arrays */
+            position: relative;
+            z-index: 20;
+        }
+
+        .term-chip {
+            background: white;
+            color: black;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: grab;
+            box-shadow: 0 4px 0 #bdc3c7;
+            transition: all 0.2s;
+            font-family: 'Times New Roman', serif;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 40px;
+            border: 2px solid transparent;
+            user-select: none;
+        }
+
+        .term-chip:active {
+            transform: translateY(4px);
+            box-shadow: none;
+            cursor: grabbing;
+        }
+        
+        .term-chip.selected {
+            border-color: #3498db;
+            background-color: #eaf6ff;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        /* רכיבי המתמטיקה על הלוח */
+        .math-container {
+            display: inline-flex;
+            align-items: center;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.6rem;
+            background: rgba(255,255,255,0.7);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            direction: ltr; /* CRITICAL: Math logic flows Left to Right */
+        }
+        
+        .math-group {
+            display: inline-flex;
+            align-items: center;
+            flex-direction: row; /* Enforce row */
+        }
+
+        .operator { margin: 0 10px; font-weight: bold; color: #555; }
+        
+        .structure-bracket {
+            font-size: 2.5rem;
+            color: #7f8c8d;
+            font-weight: 300;
+            margin: 0 2px;
+        }
+
+        .fraction-layout {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+        }
+        
+        .fraction-line {
+            width: 100%;
+            height: 2px;
+            background: black;
+            margin: 8px 0;
+        }
+
+        /* אזורי הגרירה (החורים) */
+        .drop-slot {
+            min-width: 70px;
+            min-height: 50px;
+            background: var(--slot-bg);
+            border: 2px dashed var(--slot-border);
+            border-radius: 6px;
+            margin: 0 8px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .drop-slot:hover {
+            border-color: #999;
+        }
+
+        .drop-slot.drag-over {
+            background: #d4e6f1;
+            border-color: var(--accent-color);
+        }
+
+        .drop-slot.filled {
+            border: 2px solid transparent;
+            background: transparent;
+        }
+        
+        /* Show delete hint on hover of filled slot */
+        .drop-slot.filled:hover {
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 6px;
+        }
+        
+        .drop-slot.filled:hover::after {
+            content: '\f2ed'; /* Trash icon fontawesome */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: -25px;
+            right: -10px;
+            color: #e74c3c;
+            font-size: 1rem;
+            background: white;
+            border-radius: 50%;
+            padding: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        /* תווית קטנה מעל החור */
+        .slot-label {
+            position: absolute;
+            top: -24px;
+            font-size: 0.8rem;
+            color: #555;
+            font-family: 'Assistant', sans-serif;
+            font-weight: bold;
+            white-space: nowrap;
+            pointer-events: none;
+            background: rgba(255,255,255,0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            direction: rtl; /* Labels in Hebrew should be RTL */
+            unicode-bidi: isolate;
+        }
+
+        .dropped-content {
+            padding: 5px 10px;
+            font-size: 1.4rem;
+            pointer-events: none; /* Let clicks pass to the slot for clearing */
+        }
+
+        .math-container[data-is-nested="true"] {
+            transform: scale(0.85);
+            background: rgba(0,0,0,0.03);
+            border: 1px dotted #ccc;
+        }
+
+        #feedback-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 25px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>בונה הנגזרות - כתיבה מודרכת</h1>
+    <div class="controls">
+        <select id="exercise-select" onchange="loadExercise()">
+            <option value="" disabled selected>בחר תרגיל לתרגול...</option>
+        </select>
+        <button class="check-btn" onclick="checkAnswer()">בדיקה</button>
+        <button class="reset-btn" onclick="resetBoard()">איפוס</button>
+    </div>
+</header>
+
+<div class="main-layout">
+    <!-- צד ימין: תבניות מבנה -->
+    <div class="sidebar-tools">
+        <div class="section-title">1. בחירת מבנה:</div>
+        
+        <div class="template-card" draggable="true" ondragstart="dragTemplate(event, 'product')">
+            <strong>מכפלה</strong>
+            <div style="font-size:0.8rem; margin-top:5px;">\((u \cdot v)'\)</div>
+        </div>
+
+        <div class="template-card" draggable="true" ondragstart="dragTemplate(event, 'quotient')">
+            <strong>מנה</strong>
+            <div style="font-size:0.8rem; margin-top:5px;">\((\frac{u}{v})'\)</div>
+        </div>
+
+        <div class="template-card" draggable="true" ondragstart="dragTemplate(event, 'chain')">
+            <strong>שרשרת (חזקה)</strong>
+            <div style="font-size:0.8rem; margin-top:5px;">\((u^n)'\)</div>
+        </div>
+
+        <div style="margin-top:auto; font-size:0.8rem; color:#666; direction:rtl;">
+            <strong>הוראות חדשות:</strong>
+            <ul style="padding-right: 15px; margin: 5px 0;">
+                <li>גררי מבנה ללוח.</li>
+                <li><strong>לבחירת u/v:</strong> לחצי על איבר במחסן למטה, ואז לחצי על המשבצת המתאימה.</li>
+                <li><strong>לתיקון:</strong> לחצי על משבצת מלאה כדי לנקות אותה ("להחזיר למחסן").</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- מרכז: אזור הכתיבה -->
+    <div class="workspace">
+        <div id="question-box" class="question-display">
+            \( f(x) = \dots \)
+        </div>
+        
+        <div id="canvas-zone" ondrop="dropOnCanvas(event)" ondragover="allowDrop(event)">
+            <div class="empty-msg">גררי לכאן את מבנה הנגזרת המתאים כדי להתחיל</div>
+        </div>
+    </div>
+</div>
+
+<!-- למטה: מחסן איברים -->
+<div class="terms-bank" id="terms-bank">
+    <div style="color:white; direction:rtl; width:100%; text-align:center;">בחר תרגיל כדי לראות איברים...</div>
+</div>
+
+<div id="feedback-toast"></div>
+
+<script>
+    // --- Data ---
+    const exercises = [
+        {
+            id: 1,
+            name: "מכפלה: פולינומים",
+            latex: "f(x) = (x^2+1)(x-5)",
+            type: "product",
+            correctSlots: { "u_tag": "2x", "v": "x-5", "u": "x^2+1", "v_tag": "1" },
+            bank: [
+                { val: "2x", isDistractor: false },
+                { val: "x-5", isDistractor: false },
+                { val: "x^2+1", isDistractor: false },
+                { val: "1", isDistractor: false },
+                { val: "x^2", isDistractor: true },
+                { val: "2x+1", isDistractor: true },
+                { val: "-5", isDistractor: true },
+                { val: "5", isDistractor: true },
+                { val: "x", isDistractor: true }
+            ]
+        },
+        {
+            id: 2,
+            name: "מנה: רציונלית פשוטה",
+            latex: "f(x) = \\frac{2x+3}{x^2}",
+            type: "quotient",
+            correctSlots: { "u_tag": "2", "v": "x^2", "u": "2x+3", "v_tag": "2x", "v_squared": "x^4" },
+            bank: [
+                { val: "2", isDistractor: false },
+                { val: "x^2", isDistractor: false },
+                { val: "2x+3", isDistractor: false },
+                { val: "2x", isDistractor: false },
+                { val: "(x^2)^2", isDistractor: false },
+                { val: "x^4", isDistractor: false },
+                { val: "3", isDistractor: true },
+                { val: "x", isDistractor: true },
+                { val: "2x^2", isDistractor: true }
+            ]
+        },
+        {
+            id: 3,
+            name: "שרשרת: חזקה חיצונית",
+            latex: "f(x) = (4x-1)^6",
+            type: "chain",
+            correctSlots: { "outer": "6(4x-1)^5", "inner": "4" },
+            bank: [
+                { val: "6(4x-1)^5", isDistractor: false },
+                { val: "4", isDistractor: false },
+                { val: "6(4x-1)", isDistractor: true },
+                { val: "(4x-1)^6", isDistractor: true },
+                { val: "4x", isDistractor: true },
+                { val: "24", isDistractor: true }
+            ]
+        },
+        {
+            id: 4,
+            name: "משולב: מכפלה ושרשרת",
+            latex: "f(x) = x^3 \\cdot (x^2+2)^4",
+            type: "product",
+            correctSlots: { "u_tag": "3x^2", "v": "(x^2+2)^4", "u": "x^3", "v_tag": "chain_required" },
+            nestedChainCorrect: { "outer": "4(x^2+2)^3", "inner": "2x" },
+            bank: [
+                { val: "3x^2", isDistractor: false },
+                { val: "(x^2+2)^4", isDistractor: false },
+                { val: "x^3", isDistractor: false },
+                { val: "4(x^2+2)^3", isDistractor: false },
+                { val: "2x", isDistractor: false },
+                { val: "4(x^2+2)", isDistractor: true },
+                { val: "x^2", isDistractor: true },
+                { val: "3x", isDistractor: true }
+            ]
+        }
+    ];
+
+    let currentExercise = null;
+    let selectedTermVal = null; // For Click-to-Select interaction
+
+    // --- Init ---
+    window.onload = () => {
+        const select = document.getElementById('exercise-select');
+        exercises.forEach(ex => {
+            let opt = document.createElement('option');
+            opt.value = ex.id;
+            opt.text = ex.name;
+            select.appendChild(opt);
+        });
+    };
+
+    function loadExercise() {
+        const id = parseInt(document.getElementById('exercise-select').value);
+        currentExercise = exercises.find(e => e.id === id);
+        
+        const qBox = document.getElementById('question-box');
+        qBox.innerHTML = `\\( ${currentExercise.latex} \\)`;
+        MathJax.typesetPromise([qBox]);
+
+        resetBoard();
+        renderBank();
+    }
+
+    function renderBank() {
+        const bankEl = document.getElementById('terms-bank');
+        bankEl.innerHTML = '';
+        selectedTermVal = null; // Reset selection
+        
+        const shuffled = [...currentExercise.bank].sort(() => Math.random() - 0.5);
+
+        shuffled.forEach(item => {
+            const chip = document.createElement('div');
+            chip.className = 'term-chip';
+            chip.draggable = true;
+            chip.setAttribute('data-val', item.val);
+            chip.innerHTML = `\\(${item.val}\\)`; 
+            
+            // Drag Handler
+            chip.ondragstart = (e) => {
+                selectTerm(null); // Clear click selection if dragging
+                dragTerm(e, item.val);
+            };
+
+            // Click Handler (New interaction)
+            chip.onclick = () => selectTerm(item.val, chip);
+
+            bankEl.appendChild(chip);
+        });
+        MathJax.typesetPromise([bankEl]);
+    }
+
+    function resetBoard() {
+        document.getElementById('canvas-zone').innerHTML = '<div class="empty-msg">גררי לכאן את מבנה הנגזרת המתאים כדי להתחיל</div>';
+        selectedTermVal = null;
+    }
+
+    // --- Interaction Logic (Click-to-Select) ---
+
+    function selectTerm(val, chipEl) {
+        // Deselect all
+        document.querySelectorAll('.term-chip').forEach(el => el.classList.remove('selected'));
+        
+        if (val && chipEl) {
+            selectedTermVal = val;
+            chipEl.classList.add('selected');
+        } else {
+            selectedTermVal = null;
+        }
+    }
+
+    function handleSlotClick(event, slotElement) {
+        // 1. If slot is filled -> Clear it (Return to bank)
+        if (slotElement.classList.contains('filled')) {
+            clearSlot(slotElement);
+            return;
+        }
+
+        // 2. If slot is empty AND we have a selected term -> Fill it
+        if (selectedTermVal) {
+            fillSlot(slotElement, selectedTermVal);
+            selectTerm(null); // Clear selection after placing
+        }
+    }
+
+    function fillSlot(slot, val) {
+        slot.innerHTML = `<div class="dropped-content" data-val="${val}">\\(${val}\\)</div>`;
+        slot.classList.add('filled');
+        MathJax.typesetPromise([slot]);
+    }
+
+    function clearSlot(slot) {
+        // Restore label
+        const labelText = slot.getAttribute('data-label');
+        slot.innerHTML = `<span class="slot-label">${labelText}</span>`;
+        slot.classList.remove('filled');
+        // No need to re-render MathJax for simple text, but if label was math:
+        // MathJax.typesetPromise([slot]); 
+    }
+
+    // --- Drag and Drop ---
+
+    function dragTemplate(ev, type) {
+        ev.dataTransfer.setData("dragType", "template");
+        ev.dataTransfer.setData("templateType", type);
+    }
+
+    function dragTerm(ev, val) {
+        ev.dataTransfer.setData("dragType", "term");
+        ev.dataTransfer.setData("termVal", val);
+    }
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+        if (ev.target.closest('.drop-slot')) {
+            ev.target.closest('.drop-slot').classList.add('drag-over');
+        }
+    }
+
+    document.addEventListener('dragleave', (ev) => {
+        if (ev.target.closest('.drop-slot')) {
+            ev.target.closest('.drop-slot').classList.remove('drag-over');
+        }
+    });
+
+    function dropOnCanvas(ev) {
+        ev.preventDefault();
+        const dragType = ev.dataTransfer.getData("dragType");
+        
+        if (dragType === "template") {
+            const type = ev.dataTransfer.getData("templateType");
+            const dropTarget = ev.target.closest('.drop-slot') || ev.target.closest('#canvas-zone');
+            
+            if (dropTarget.id === 'canvas-zone' || dropTarget.querySelector('.empty-msg') || dropTarget.classList.contains('empty-msg')) {
+                const zone = document.getElementById('canvas-zone');
+                zone.innerHTML = '';
+                zone.appendChild(createStructure(type));
+                MathJax.typesetPromise([zone]);
+            } 
+            else if (dropTarget.classList.contains('drop-slot')) {
+                // Nesting
+                dropTarget.innerHTML = ''; 
+                dropTarget.classList.add('filled');
+                dropTarget.appendChild(createStructure(type, true));
+                MathJax.typesetPromise([dropTarget]);
+            }
+        }
+    }
+
+    // Direct drop handler for slots to handle Term drops
+    window.dropTermIntoSlot = function(ev) {
+        ev.stopPropagation();
+        ev.preventDefault();
+        
+        const slot = ev.target.closest('.drop-slot');
+        slot.classList.remove('drag-over');
+
+        const dragType = ev.dataTransfer.getData("dragType");
+
+        // Handle Template Nesting via Drag
+        if (dragType === "template") {
+            const type = ev.dataTransfer.getData("templateType");
+            slot.innerHTML = '';
+            slot.classList.add('filled');
+            slot.appendChild(createStructure(type, true));
+            MathJax.typesetPromise([slot]);
+            return;
+        }
+
+        // Handle Term Drag
+        if (dragType === "term") {
+            const val = ev.dataTransfer.getData("termVal");
+            fillSlot(slot, val);
+        }
+    }
+
+    // --- HTML Generation ---
+
+    function createStructure(type, isNested = false) {
+        const container = document.createElement('div');
+        container.className = 'math-container';
+        container.setAttribute('data-struct-type', type);
+        if(isNested) container.setAttribute('data-is-nested', 'true');
+
+        let html = '';
+
+        if (type === 'product') {
+            html = `
+                <div class="math-group">
+                    <span class="structure-bracket">(</span>
+                    ${createSlot("u_tag", "u גזור")}
+                    <span class="operator">&middot;</span>
+                    ${createSlot("v", "v לא")}
+                    <span class="structure-bracket">)</span>
+                </div>
+                <span class="operator">+</span>
+                <div class="math-group">
+                    <span class="structure-bracket">(</span>
+                    ${createSlot("u", "u לא")}
+                    <span class="operator">&middot;</span>
+                    ${createSlot("v_tag", "v גזור")}
+                    <span class="structure-bracket">)</span>
+                </div>
+            `;
+        } 
+        else if (type === 'quotient') {
+            html = `
+                <div class="fraction-layout">
+                    <div class="math-group">
+                        ${createSlot("u_tag", "u גזור")}
+                        <span class="operator">&middot;</span>
+                        ${createSlot("v", "v לא")}
+                        <span class="operator">-</span>
+                        ${createSlot("u", "u לא")}
+                        <span class="operator">&middot;</span>
+                        ${createSlot("v_tag", "v גזור")}
+                    </div>
+                    <div class="fraction-line"></div>
+                    <div class="math-group">
+                        ${createSlot("v_squared", "v בריבוע")}
+                    </div>
+                </div>
+            `;
+        }
+        else if (type === 'chain') {
+            html = `
+                <div class="math-group">
+                    ${createSlot("outer", "חיצונית")}
+                    <span class="operator">&middot;</span>
+                    ${createSlot("inner", "פנימית")}
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
+        return container;
+    }
+
+    function createSlot(id, label) {
+        // Added onclick handler for interaction
+        return `<div class="drop-slot" data-slot-id="${id}" data-label="${label}" 
+                     ondrop="window.dropTermIntoSlot(event)" 
+                     onclick="handleSlotClick(event, this)">
+                    <span class="slot-label">${label}</span>
+                </div>`;
+    }
+
+    // --- Validation ---
+
+    function checkAnswer() {
+        if (!currentExercise) return showToast("בחר תרגיל קודם", "error");
+        
+        const rootNode = document.querySelector('#canvas-zone > .math-container');
+        if (!rootNode) return showToast("הלוח ריק", "error");
+
+        const result = validateStructure(rootNode, currentExercise.type, currentExercise.correctSlots);
+        
+        if (result === true) {
+            showToast("מצוין! התשובה נכונה!", "success");
+        } else {
+            showToast(result, "error");
+        }
+    }
+
+    function validateStructure(node, expectedType, expectedSlots) {
+        const actualType = node.getAttribute('data-struct-type');
+        if (actualType !== expectedType) {
+            return "סוג המבנה (מכפלה/מנה/שרשרת) אינו נכון לתרגיל זה.";
+        }
+
+        for (let key in expectedSlots) {
+            const expectedVal = expectedSlots[key];
+            const slotEl = node.querySelector(`[data-slot-id="${key}"]`);
+            
+            if (!slotEl) continue;
+
+            const nestedStruct = slotEl.querySelector('.math-container');
+            const termContent = slotEl.querySelector('.dropped-content');
+
+            if (expectedVal === "chain_required") {
+                if (!nestedStruct) return `במיקום '${key}' נדרשת נגזרת פנימית מורכבת (שרשרת).`;
+                if (currentExercise.nestedChainCorrect) {
+                     const res = validateStructure(nestedStruct, 'chain', currentExercise.nestedChainCorrect);
+                     if (res !== true) return res;
+                }
+            } else {
+                if (nestedStruct) return `במיקום '${key}' לא נדרש מבנה מורכב, אלא איבר פשוט.`;
+                if (!termContent) return `המיקום '${key}' ריק.`;
+                
+                const actualVal = termContent.getAttribute('data-val');
+                if (actualVal !== expectedVal) {
+                    return `האיבר במיקום '${key}' שגוי. נסי שוב.`;
+                }
+            }
+        }
+        return true;
+    }
+
+    function showToast(msg, type) {
+        const t = document.getElementById('feedback-toast');
+        t.innerText = msg;
+        t.style.backgroundColor = type === 'success' ? '#27ae60' : '#c0392b';
+        t.style.opacity = 1;
+        setTimeout(() => t.style.opacity = 0, 3000);
+    }
+
+</script>
+
+</body>
+</html>
