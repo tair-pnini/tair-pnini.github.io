@@ -4,8 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מצטרפים לקבוצה של תאיר</title>
-    <!-- הפניה אוטומטית כגיבוי אחרי 3 שניות אם שום דבר לא קרה -->
-    <meta http-equiv="refresh" content="3; url=https://chat.whatsapp.com/HEUYyb8C8cu5Gr5R40uxd">
+    
+    <!-- ניסיון הפניה ראשון - הכי מהיר שאפשר (לפני טעינת ה-Body) -->
+    <script>
+        const whatsappUrl = "https://chat.whatsapp.com/HEUYyb8C8cu5Gr5R40uxd";
+        // ביצוע הפניה מיידית
+        window.location.replace(whatsappUrl);
+    </script>
+
+    <!-- גיבוי למקרה ש-JS חסום או לא הגיב - הפניה אחרי 2 שניות -->
+    <meta http-equiv="refresh" content="2; url=https://chat.whatsapp.com/HEUYyb8C8cu5Gr5R40uxd">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap');
@@ -43,13 +52,13 @@
             "משחקים שתאיר אוהבת במיוחד"
         </p>
 
-        <!-- כפתור לחיצה ידנית - ברור ובולט -->
+        <!-- כפתור לחיצה ידנית - מוצג כגיבוי בולט -->
         <a id="joinButton" href="https://chat.whatsapp.com/HEUYyb8C8cu5Gr5R40uxd" 
            class="inline-block w-full py-4 px-6 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-100">
             הצטרפות לקבוצה
         </a>
 
-        <!-- אלמנט טעינה ויזואלי בלבד ללא טקסט מעיק -->
+        <!-- אנימציה עדינה -->
         <div class="mt-12 flex justify-center">
             <div class="flex space-x-2 space-x-reverse opacity-40">
                 <div class="w-2 h-2 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
@@ -60,11 +69,9 @@
     </div>
 
     <script>
-        // ניסיון הפניה אוטומטית בחלוף חצי שנייה (כדי לאפשר לדף להיטען ויזואלית)
+        // ניסיון נוסף ליתר ביטחון לאחר טעינת כל האלמנטים
         window.onload = function() {
-            setTimeout(function() {
-                window.location.href = "https://chat.whatsapp.com/HEUYyb8C8cu5Gr5R40uxd";
-            }, 800);
+            window.location.replace(whatsappUrl);
         };
     </script>
 </body>
