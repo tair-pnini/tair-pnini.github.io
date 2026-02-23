@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דף עבודה: בלשי המילים</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Heebo', sans-serif; background-color: #f1f5f9; }
+        .card { border-top: 8px solid #8b5cf6; }
+        .input-line { border-bottom: 2px dashed #cbd5e1; min-height: 1.5rem; display: inline-block; width: 100%; }
+        @media print {
+            body { background-color: white; padding: 0; }
+            .no-print { display: none; }
+            .card { border: 1px solid #ddd; box-shadow: none; }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden card">
+        <!-- Header -->
+        <div class="bg-purple-600 p-8 text-white flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-black">🔍 בלשי המילים</h1>
+                <p class="text-purple-100 mt-2 text-xl italic">איך ה-AI יודע ש"שולחן" ו"כיסא" הם חברים?</p>
+            </div>
+            <div class="bg-white/20 p-4 rounded-2xl backdrop-blur-sm hidden md:block">
+                <span class="text-sm font-bold block uppercase tracking-wider">מעבדת AI</span>
+                <span class="text-xs">הבנת שפה ומרחב סמנטי</span>
+            </div>
+        </div>
+
+        <div class="p-8 space-y-10">
+            <!-- Introduction -->
+            <section class="bg-purple-50 p-6 rounded-2xl border border-purple-100">
+                <h2 class="text-2xl font-bold text-purple-900 mb-3">הסוד של הבינה המלאכותית</h2>
+                <p class="text-purple-800 leading-relaxed">
+                    בינה מלאכותית לא יודעת מה זה "כלב". עבורה, מילים הן כמו <b>נקודות על מפה ענקית</b>. מילים שקשורות אחת לשנייה (כמו "כלב" ו"עצם") נמצאות קרוב מאוד על המפה. מילים שלא קשורות (כמו "כלב" ו"מקרר") נמצאות רחוק מאוד. בשיעור היום ננסה למדוד את המרחקים האלו!
+                </p>
+            </section>
+
+            <!-- Preparation -->
+            <section class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">1</span>
+                    <h3 class="text-xl font-bold text-gray-800">הכנת ה"שופט"</h3>
+                </div>
+                <p class="text-gray-600 mr-11">
+                    פתחו חלון צ'אט (ChatGPT / Gemini) וכתבו לו את ההנחיה הבאה:
+                </p>
+                <div class="bg-gray-800 text-green-400 p-4 rounded-lg font-mono text-sm mr-11 relative">
+                    "מהיום אתה השופט הסמנטי שלי. אני אתן לך זוגות של מילים, ואתה תיתן לי ציון מ-0 עד 100 כמה הן קשורות אחת לשנייה בעולם האמיתי (סמנטית). תן רק את הציון והסבר קצר של שורה אחת."
+                </div>
+            </section>
+
+            <!-- Experiment Table -->
+            <section class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">2</span>
+                    <h3 class="text-xl font-bold text-gray-800">ניסוי המרחקים</h3>
+                </div>
+                <p class="text-gray-600 mr-11 mb-4">מלאו את הטבלה הבאה: שעררו מה הציון שיינתן, ואז בדקו מול ה-AI.</p>
+                
+                <table class="w-full border-collapse mr-11">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-700">
+                            <th class="border p-3 text-right">זוג מילים</th>
+                            <th class="border p-3 text-right">הניחוש שלכם (0-100)</th>
+                            <th class="border p-3 text-right">הציון של ה-AI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="border p-3">שמש ☀️ | ירח 🌙</td>
+                            <td class="border p-3"></td>
+                            <td class="border p-3"></td>
+                        </tr>
+                        <tr>
+                            <td class="border p-3">גלידה 🍦 | אופניים 🚲</td>
+                            <td class="border p-3"></td>
+                            <td class="border p-3"></td>
+                        </tr>
+                        <tr>
+                            <td class="border p-3">בית ספר 🏫 | למידה 📚</td>
+                            <td class="border p-3"></td>
+                            <td class="border p-3"></td>
+                        </tr>
+                        <tr>
+                            <td class="border p-3 italic">בחרו זוג שלכם:</td>
+                            <td class="border p-3"></td>
+                            <td class="border p-3"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Challenge -->
+            <section class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold">3</span>
+                    <h2 class="text-xl font-bold text-gray-800">האתגר הגדול: לשבור את המערכת!</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mr-11">
+                    <div class="p-5 border-2 border-dashed border-purple-200 rounded-xl">
+                        <h4 class="font-bold text-purple-800 mb-2">משימת הקוטב הצפוני ❄️</h4>
+                        <p class="text-sm text-gray-600 mb-3">מצאו שתי מילים שהמחשב ייתן להן ציון <b>0</b> (חוסר קשר מוחלט).</p>
+                        <span class="input-line"></span>
+                    </div>
+                    <div class="p-5 border-2 border-dashed border-purple-200 rounded-xl">
+                        <h4 class="font-bold text-purple-800 mb-2">משימת התאומים 👯</h4>
+                        <p class="text-sm text-gray-600 mb-3">מצאו שתי מילים שהמחשב ייתן להן ציון <b>100</b> (זהות מוחלטת).</p>
+                        <span class="input-line"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Conclusion -->
+            <section class="bg-gray-50 p-6 rounded-2xl border border-gray-200 italic text-gray-700">
+                <h4 class="font-bold mb-2">שאלה למחשבה:</h4>
+                <p>האם היו מילים שהפתיעו אתכם? משהו שהיה קשור בעיניכם אבל המחשב חשב שהוא רחוק? למה זה קרה?</p>
+                <div class="mt-4 border-b border-gray-300 h-12 w-full"></div>
+            </section>
+        </div>
+
+        <!-- Print Footer -->
+        <div class="p-6 bg-gray-100 text-center no-print">
+            <button onclick="window.print()" class="bg-purple-600 text-white px-10 py-3 rounded-full font-bold hover:bg-purple-700 transition transform hover:scale-105 shadow-lg">
+                🖨️ הדפס משימת בלשי מילים
+            </button>
+        </div>
+    </div>
+    <div class="text-center mt-6 text-gray-400 text-sm no-print italic">קרדיט: תאיר פניני בשיתוף Gemini 🤖</div>
+</body>
+</html>
