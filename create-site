@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מדריך להקמת אתר משחקים ב-GitHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- הגדרות בסיס --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Rubik', sans-serif;
+            direction: rtl;
+            text-align: right;
+            color: #334155;
+            line-height: 1.6;
+            background-image: radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.05), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(20, 184, 166, 0.05), transparent 25%);
+            background-attachment: fixed;
+        }
+
+        /* --- טיפוגרפיה --- */
+        h1, h2, h3, h4, summary {
+            font-family: 'Heebo', sans-serif;
+            color: #0f172a;
+        }
+
+        code {
+            background-color: #f1f5f9;
+            color: #db2777;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.9em;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        /* --- מבנה האתר --- */
+        .header {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        .header p {
+            font-size: 1.5rem;
+            color: #475569;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header-icon {
+            font-size: 5rem;
+            color: #6366f1;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px 80px;
+        }
+
+        /* --- כרטיסיות (Sections) --- */
+        .card {
+            background-color: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+            padding: 50px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #14b8a6, #6366f1);
+        }
+
+        .card-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-title i {
+            color: #14b8a6;
+        }
+
+        /* --- רכיבי תוכן --- */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .text-content p {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+        }
+
+        /* קופסת אזהרה מעוצבת */
+        .warning-box {
+            background-color: #fffbeb;
+            border-right: 6px solid #f59e0b;
+            padding: 25px;
+            border-radius: 12px 0 0 12px;
+            margin-top: 30px;
+        }
+
+        .warning-box strong {
+            color: #b45309;
+            font-size: 1.4rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .warning-box p {
+            color: #92400e;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        /* רשימות עם כדורים מצוירים */
+        .bullet-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .bullet-list li {
+            position: relative;
+            padding-right: 40px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .bullet-list i {
+            position: absolute;
+            right: 0;
+            top: 5px;
+            color: #6366f1;
+            font-size: 1.4rem;
+        }
+
+        /* אלמנט ויזואלי במקום תמונה */
+        .visual-circle {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #e0e7ff 0%, #ccfbf1 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 8rem;
+            color: #6366f1;
+            box-shadow: inset 0 0 50px rgba(255,255,255,0.5);
+        }
+
+        /* קופסת קוד בולטת */
+        .code-highlight-box {
+            background-color: #f0fdf4;
+            border-right: 6px solid #22c55e;
+            padding: 30px;
+            border-radius: 16px 0 0 16px;
+        }
+
+        .code-display {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px dashed #86efac;
+            font-family: monospace;
+            font-size: 1.3rem;
+            color: #166534;
+            direction: ltr;
+            text-align: left;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+
+        /* --- אקורדיונים --- */
+        .accordion-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        details {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        details[open] {
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
+            border-color: #818cf8;
+            background-color: #ffffff;
+        }
+
+        summary {
+            cursor: pointer;
+            padding: 20px 25px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #6366f1;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        details[open] summary {
+            color: #3730a3;
+            border-bottom: 1px solid #e0e7ff;
+            background-color: #eef2ff;
+        }
+
+        details[open] summary::after {
+            transform: rotate(180deg);
+            color: #3730a3;
+        }
+
+        .details-content {
+            padding: 20px 25px;
+            font-size: 1.15rem;
+            color: #475569;
+        }
+
+        /* --- סיום --- */
+        .footer-cta {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .footer-cta i {
+            font-size: 4rem;
+            color: #14b8a6;
+            margin-bottom: 20px;
+        }
+
+        /* --- רספונסיביות למובייל --- */
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .header h1 { font-size: 2.5rem; }
+            .card { padding: 30px 20px; }
+            .visual-circle { max-width: 300px; margin: 0 auto; font-size: 6rem; }
+            .code-display { font-size: 1.1rem; }
+            summary { font-size: 1.1rem; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Hero Section -->
+    <header class="header">
+        <div class="header-icon"><i class="fa-brands fa-github"></i></div>
+        <h1>איך להקים אתר משחקים ב-GitHub</h1>
+        <p>מדריך צעד-אחר-צעד, פשוט וברור, להעלאת יצירות ה-HTML שלכם לרשת בחינם.<br>גללו למטה כדי להתחיל!</p>
+    </header>
+
+    <main class="container">
+
+        <!-- כרטיסיה 1: מה זה גיטהאב -->
+        <section class="card">
+            <h2 class="card-title"><i class="fa-solid fa-cloud"></i> מה זה בעצם גיטהאב (GitHub)?</h2>
+            <div class="grid-2">
+                <div class="text-content">
+                    <p>
+                        גיטהאב היא פלטפורמת ענן (כמו "גוגל דרייב" למתכנתים) שנועדה לשמור ולנהל קוד. מעבר לשמירת קבצים, יש לגיטהאב כלי מדהים שמאפשר לקחת את הקוד שלנו ולהציג אותו <strong>כאתר אינטרנט אמיתי בחינם!</strong>
+                    </p>
+                    <div class="warning-box">
+                        <strong>שימו לב! כלל ברזל <i class="fa-solid fa-triangle-exclamation"></i></strong>
+                        <p>בגלל שאנחנו עובדים עם חשבונות חינמיים, כל מה שנעלה לאתר הוא <strong>פומבי לגמרי</strong>. לעולם אל תעלו תוכן אישי (כמו תמונות פרטיות או סיסמאות) שאינכם רוצים שיהיה גלוי לכולם באינטרנט.</p>
+                    </div>
+                </div>
+                <div class="visual-circle">
+                    <i class="fa-solid fa-server"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- כרטיסיה 2: שלבי הקמה חלק א -->
+        <section class="card">
+            <h2 class="card-title"><i class="fa-solid fa-user-plus"></i> חלק א': פתיחת חשבון ויצירת המאגר</h2>
+            <div class="accordion-wrapper">
+                <details>
+                    <summary>שלב 1: יצירת חשבון חדש ב-GitHub</summary>
+                    <div class="details-content">
+                        יוצרים חשבון חינמי באתר GitHub.com. אני ממליצה בחום להירשם בקלות ובמהירות דרך חשבון ה-Google שלכם (Sign up with Google).
+                    </div>
+                </details>
+                <details>
+                    <summary>שלב 2: בחירת שם משתמש</summary>
+                    <div class="details-content">
+                        בחרו לעצמכם שם משתמש קצר וקליט (למשל <code>tair-exemp</code>). <strong>שימו לב:</strong> השם שתבחרו כאן ילווה אתכם ויהפוך להיות חלק בלתי נפרד מכתובת האתר העתידי שלכם!
+                    </div>
+                </details>
+                <details>
+                    <summary>שלב 3: יצירת Repository חדש</summary>
+                    <div class="details-content">
+                        בצד המסך, חפשו ולחצו על יצירת <strong>Repository</strong> חדש (זו בעצם "תיקיית הפרויקט" שלנו).<br><br>
+                        <strong>טיפ זהב לכתובת קצרה:</strong> קראו למאגר בדיוק בשם המשתמש שלכם בתוספת הסיומת, למשל <code>tair-exemp.github.io</code>. חובה לבחור בנראות <strong>Public</strong> (פומבי) וללחוץ על הכפתור הירוק למטה ליצירה.
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- כרטיסיה 3: שלבי הקמה חלק ב -->
+        <section class="card">
+            <h2 class="card-title"><i class="fa-solid fa-file-code"></i> חלק ב': קובץ ה-HTML הראשון</h2>
+            <div class="accordion-wrapper">
+                <details>
+                    <summary>שלב 4: כניסה למאגר שלכם</summary>
+                    <div class="details-content">
+                        לאחר היצירה, גשו לרשימת ה-Repositories שלכם, ולחצו על השם של המאגר החדש שהרגע הקמתם כדי להיכנס לתוכו.
+                    </div>
+                </details>
+                <details>
+                    <summary>שלב 5: בחירה ביצירת קובץ חדש</summary>
+                    <div class="details-content">
+                        במסך הראשי של המאגר הריק, חפשו את אזור ההגדרה המהירה (Quick setup), ולחצו שם על הקישור שאומר <strong>creating a new file</strong> (יצירת קובץ חדש).
+                    </div>
+                </details>
+                <details>
+                    <summary>שלב 6: מתן שם חובה לקובץ: index.html</summary>
+                    <div class="details-content">
+                        בשדה הטקסט העליון, כתבו את שם הקובץ במדויק: <code>index.html</code>. <br><br>
+                        <strong>למה דווקא השם הזה?</strong> דפדפני אינטרנט תמיד מחפשים קובץ בשם index כדי לדעת מהו "דף הבית" הראשון שצריך להציג אוטומטית כשנכנסים לאתר שלכם.
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- כרטיסיה 4: שלבי הקמה חלק ג -->
+        <section class="card">
+            <h2 class="card-title"><i class="fa-solid fa-floppy-disk"></i> חלק ג': הוספת התוכן ושמירה</h2>
+            <div class="accordion-wrapper">
+                <details>
+                    <summary>שלב 7: הוספת התוכן והקוד שלכם</summary>
+                    <div class="details-content">
+                        בתוך תיבת הטקסט הגדולה והשחורה, פשוט הדביקו את קוד ה-HTML שקיבלתם מה-AI או כתבתם בעצמכם, שישמש כשער המבוא לאתר שלכם.
+                    </div>
+                </details>
+                <details>
+                    <summary>שלב 8: שמירת השינויים (Commit)</summary>
+                    <div class="details-content">
+                        סיימתם לערוך? כדי לשמור את העבודה בגיטהאב, עליכם ללחוץ למעלה בצד על הכפתור הירוק <strong>Commit changes</strong> (שמירת שינויים) ולאשר שוב את השמירה בחלון הקטן שיקפוץ.
+                    </div>
+                </details>
+                <details>
+                    <summary>שלב 9: כניסה למסך ההגדרות (Settings)</summary>
+                    <div class="details-content">
+                        הקובץ נשמר בהצלחה! השלב האחרון הוא "להדליק" את האתר. לשם כך, בתפריט העליון של המאגר שלכם, חפשו ולחצו על הלשונית <strong>Settings</strong> (שמסומנת באייקון של גלגל שיניים).
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- כרטיסיה 5: שלבי הקמה חלק ד -->
+        <section class="card">
+            <h2 class="card-title"><i class="fa-solid fa-globe"></i> חלק ד': האתר עולה לאוויר!</h2>
+            <div class="accordion-wrapper">
+                <details>
+                    <summary>שלב 10: מעבר להגדרות עמודים (Pages)</summary>
+                    <div class="details-content">
+                        בתוך מסך ההגדרות, הסתכלו בתפריט הצדדי השמאלי, חפשו את האפשרות שנקראת <strong>Pages</strong> ולחצו עליה. מכאן אנחנו שולטים באתר החי שלנו.
+                    </div>
+                </details>
+                <details>
+                    <summary>שלב 11: בחירת ענף תצוגה (Branch)</summary>
+                    <div class="details-content">
+                        תחת הכותרת "Build and deployment", תראו אזור שנקרא "Branch". פתחו את התפריט ושנו את ההגדרה מ-None לבחירה ב-<strong>main</strong> (או master), ולחצו על כפתור Save.
+                    </div>
+                </details>
+                <details open>
+                    <summary>שלב 12: מזל טוב! האתר באוויר 🎉</summary>
+                    <div class="details-content">
+                        זהו זה! עכשיו צריך טיפ-טיפה סבלנות (חכו 2-3 דקות לשרתים שיתעדכנו). אם תרעננו את אותו עמוד, תופיע לכם למעלה הודעה ירוקה ומשמחת יחד עם <strong>הקישור הישיר והלחיץ</strong> לאתר החדש שלכם!
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- כרטיסיה 6: העלאת משחק חדש -->
+        <section class="card">
+            <h2 class="card-title"><i class="fa-solid fa-gamepad"></i> איך מעלים משחק HTML חדש לאתר?</h2>
+            <div class="grid-2">
+                <div>
+                    <p class="text-content" style="font-weight: 500; margin-bottom: 20px;">
+                        כבר יש לכם אתר פעיל ויצרתם משחק חדש (למשל: <code>pacman.html</code>)? כך תוסיפו אותו לאתר בקלות:
+                    </p>
+                    <ul class="bullet-list">
+                        <li><i class="fa-solid fa-folder-open"></i> היכנסו חזרה ל-Repository (המאגר) שלכם ב-GitHub.</li>
+                        <li><i class="fa-solid fa-plus-circle"></i> בשורה העליונה של הקבצים, לחצו על כפתור <strong>Add file</strong>.</li>
+                        <li><i class="fa-solid fa-upload"></i> בתפריט שיפתח בחרו ב-<strong>Upload files</strong> (להעלאה מהמחשב).</li>
+                        <li><i class="fa-solid fa-hand-pointer"></i> פשוט גררו את קובץ ה-HTML של המשחק שלכם לתוך החלון.</li>
+                        <li><i class="fa-solid fa-check-circle"></i> לחצו למטה על הכפתור הירוק <strong>Commit changes</strong> כדי לפרסם!</li>
+                    </ul>
+                </div>
+                <div class="visual-circle" style="background: linear-gradient(135deg, #fce7f3 0%, #fae8ff 100%); color: #db2777;">
+                    <i class="fa-solid fa-puzzle-piece"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- כרטיסיה 7: הכתובת של המשחק -->
+        <section class="card">
+            <h2 class="card-title"><i class="fa-solid fa-link"></i> מה תהיה הכתובת של המשחק החדש?</h2>
+            <div class="code-highlight-box">
+                <h3 style="color: #166534; font-size: 1.5rem; margin-bottom: 10px;">הנוסחה לכתובת המשחק:</h3>
+                <p style="font-size: 1.2rem; color: #15803d; margin-bottom: 20px;">
+                    הכתובת תמיד תורכב מהכתובת הראשית של האתר שלכם, לוכסן (<code>/</code>), ואז השם המדויק של הקובץ שהעליתם.
+                </p>
+                
+                <div class="code-display">
+                    https://tair-exemp.github.io/<span style="color: #ea580c; font-weight: bold;">pacman.html</span>
+                </div>
+                
+                <p style="font-size: 1.1rem; color: #166534; margin-top: 20px;">
+                    <i class="fa-solid fa-circle-info"></i> <strong>טיפ חשוב:</strong> השתדלו לתת לקבצים שלכם שמות באנגלית בלבד וללא רווחים (<code>my-game.html</code> עובד הרבה יותר טוב מ-<code>המשחק שלי 2.html</code>).
+                </p>
+            </div>
+        </section>
+
+        <!-- סיום -->
+        <section class="footer-cta">
+            <i class="fa-solid fa-rocket"></i>
+            <h2 style="font-size: 2.5rem; margin-bottom: 15px; color: #0f172a;">אתם מוכנים ליצור!</h2>
+            <p style="font-size: 1.3rem; color: #475569;">
+                יש לכם עכשיו שטח אחסון פרטי, חינמי ומקצועי משלכם.<br><strong>זה הזמן להתחיל לקודד, להעלות משחקים ולשתף אותם עם העולם!</strong>
+            </p>
+        </section>
+
+    </main>
+
+</body>
+</html>
