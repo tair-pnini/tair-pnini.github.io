@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משולש החזקה</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: #f8fafc;
+            overflow: hidden; /* מניעת גלילה וחיתוכים */
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+        }
+        .slide {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            animation: fadeIn 0.4s ease-out forwards;
+            box-sizing: border-box;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2vh 2vw; /* ריווח דינמי לפי המסך */
+        }
+        .slide.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-bubble {
+            max-width: 85%;
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .chat-teacher { background-color: #e0f2fe; align-self: flex-start; border-bottom-right-radius: 0; color: #0369a1; border: 1px solid #bae6fd; }
+        .chat-student { background-color: #ffffff; align-self: flex-end; border-bottom-left-radius: 0; color: #374151; border: 1px solid #e2e8f0; }
+        
+        .timer-active {
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+        }
+        mjx-container {
+            max-width: 100% !important;
+        }
+        /* כפתור חזור גלובלי */
+        #global-back-btn {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 50;
+            display: none;
+        }
+        /* מספור שקופיות */
+        #slide-counter {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            z-index: 50;
+            font-family: monospace;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- כפתור חזור גלובלי -->
+    <button id="global-back-btn" onclick="prevSlide()" class="bg-white/90 backdrop-blur border border-slate-200 hover:bg-slate-100 text-slate-600 px-5 py-2 rounded-full font-bold shadow-md transition-all flex items-center gap-2">
+        <span class="text-xl leading-none">&rarr;</span> חזור
+    </button>
+
+    <!-- מספור שקופיות גלובלי -->
+    <div id="slide-counter" class="text-slate-400 font-bold text-lg border border-slate-200">1 / 13</div>
+
+    <!-- Slide 1: פתיחה -->
+    <div class="slide active text-center" id="slide-1">
+        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl max-w-4xl w-full border-b-[10px] border-blue-600">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-slate-800 mb-4 tracking-tight">לוגריתמים - איך מתמודדים עם ה'עונש' הזה?</h1>
+            <p class="text-xl md:text-2xl text-slate-500 mb-8 font-light italic">אפיזודה: על משבר הזהות של הלוגריתמים</p>
+            
+            <div class="flex justify-center gap-6 text-xl font-bold mb-8">
+                <span class="text-blue-700 bg-blue-50 px-5 py-2 rounded-xl">טל עובדת</span>
+                <span class="text-blue-700 bg-blue-50 px-5 py-2 rounded-xl">תאיר פניני</span>
+            </div>
+            
+            <p class="text-slate-400 text-sm mb-8">מבוסס על רעיון של <strong>Grant Sanderson</strong> (3Blue1Brown)</p>
+
+            <button onclick="nextSlide()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full text-xl font-black transition-all hover:scale-105 shadow-xl mx-auto flex items-center gap-3">
+                להצגת האפיזודה <span class="text-2xl">&larr;</span>
+            </button>
+            <p class="text-slate-400 text-xs mt-4">טיפ: ניתן לנווט במצגת באמצעות מקש ה'רווח'</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: הוראות -->
+    <div class="slide bg-slate-800 text-white" id="slide-2">
+        <div class="max-w-3xl w-full bg-slate-900/60 p-8 md:p-10 rounded-[2.5rem] border-2 border-slate-700 text-right">
+            <h2 class="text-4xl font-black mb-6 text-center text-blue-400">מוכנים לאתגר? ⏱️</h2>
+            <div class="text-xl md:text-2xl space-y-4 md:space-y-5 leading-relaxed">
+                <div class="flex items-start gap-4">
+                    <span class="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-black mt-1">1</span>
+                    <p>אנחנו נציג תרגילים מתמטיים מהירים.</p>
+                </div>
+                <div class="flex items-start gap-4">
+                    <span class="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-black mt-1">2</span>
+                    <p>ברגע שיודעים את התשובה - <strong>מרימים יד הכי מהר שאפשר!</strong></p>
+                </div>
+                <div class="flex items-start gap-4">
+                    <span class="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-black mt-1">3</span>
+                    <p>הטיימר יתחיל לרוץ אוטומטית עם הצגת השאלה.</p>
+                </div>
+                <div class="flex items-start gap-4">
+                    <span class="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-black mt-1">4</span>
+                    <p>נמדוד כמה זמן לוקח עד שרוב הכיתה פותרת.</p>
+                </div>
+            </div>
+            <div class="flex justify-center mt-10">
+                <button onclick="nextSlide()" class="bg-blue-500 hover:bg-blue-400 text-white px-10 py-3 rounded-full text-2xl font-black transition transform hover:scale-105 shadow-xl">צאו לדרך!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: אתגרי מתמטיקה (דינמית) -->
+    <div class="slide bg-slate-100" id="slide-3">
+        <div class="w-full max-w-4xl bg-white rounded-[2.5rem] shadow-xl flex flex-col items-center p-8 relative border border-slate-200">
+            <div class="absolute top-6 right-8 flex flex-col items-end">
+                <span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">שאלה</span>
+                <div class="text-2xl font-black text-slate-800" id="question-index">1 / 6</div>
+            </div>
+
+            <h2 class="text-xl text-slate-400 mb-2 font-bold uppercase" id="question-title">חימום מנועים...</h2>
+            
+            <!-- Timer Area -->
+            <div class="bg-slate-50 px-8 py-3 rounded-2xl mb-6 flex flex-col items-center shadow-inner border border-slate-100 min-w-[200px]">
+                <span class="text-xs text-slate-400 font-bold tracking-widest mb-1">טיימר</span>
+                <div class="text-5xl font-mono font-black text-slate-300 transition-colors duration-300" id="timer-display">00:00</div>
+            </div>
+
+            <!-- Exercise Area -->
+            <div class="text-6xl md:text-7xl font-black mb-6 text-slate-800 w-full text-center" id="exercise-text"></div>
+
+            <!-- Answer Area -->
+            <div class="h-20 flex items-center justify-center mb-6">
+                <div class="text-5xl md:text-6xl font-black text-green-600 opacity-0 transition-all duration-300 transform translate-y-4" id="answer-text"></div>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-3 w-full">
+                <button onclick="prevQuestion()" class="bg-slate-200 hover:bg-slate-300 text-slate-600 px-6 py-2 rounded-xl font-bold transition">&rarr; הקודם</button>
+                <button id="btn-stop" onclick="actionStopTimer()" class="bg-red-500 hover:bg-red-600 text-white px-8 py-2 rounded-xl font-black transition shadow-md">עצור טיימר</button>
+                <button id="btn-reveal" onclick="actionReveal()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-xl font-black transition shadow-md">הצג תשובה</button>
+                <button onclick="actionNextQ()" class="bg-slate-800 hover:bg-black text-white px-8 py-2 rounded-xl font-black transition shadow-md">הבא &larr;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: סיכום זמנים -->
+    <div class="slide bg-slate-900 text-white" id="slide-4">
+        <div class="max-w-4xl w-full text-center">
+            <h1 class="text-4xl md:text-5xl font-black mb-6 text-amber-400 drop-shadow-md">סיכום זמני תגובה</h1>
+            <div class="bg-slate-800 p-6 rounded-[2rem] shadow-2xl border border-slate-700 overflow-hidden">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="border-b-2 border-slate-600 text-slate-300 text-lg">
+                            <th class="p-3 font-bold">תרגיל</th>
+                            <th class="p-3 font-bold text-center">זמן תגובה (דד:שש)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summary-tbody">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-8">
+                <button onclick="nextSlide()" class="bg-white text-slate-900 px-8 py-3 rounded-full text-xl font-black hover:bg-blue-500 hover:text-white transition-all shadow-lg">המשך לניתוח</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: ניתוח דידקטי -->
+    <div class="slide" id="slide-5">
+        <div class="max-w-5xl w-full text-center">
+            <h1 class="text-4xl md:text-5xl font-black mb-8 text-slate-800">למה המוח שלנו נתקע מול לוגריתמים? 🤯</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-right mb-6">
+                <div class="bg-white p-6 rounded-3xl border-t-[8px] border-red-500 shadow-lg">
+                    <h3 class="text-2xl font-black mb-3 text-slate-800">עלות התירגום</h3>
+                    <p class="text-lg text-slate-600 leading-relaxed font-light">פעולת החזקה מעובדת באופן מיידי וטבעי. פעולות השורש והלוגריתם דורשות "תרגום" מנטלי מאומץ המייצר שיהוי והתנגדות.</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border-t-[8px] border-blue-500 shadow-lg">
+                    <h3 class="text-2xl font-black mb-3 text-slate-800">חוסר עקביות בממשק המסורתי</h3>
+                    <p class="text-lg text-slate-600 leading-relaxed font-light">המיקום של הבסיס, המעריך והתוצאה משתנה לחלוטין בין שלוש הפעולות. אין שום עקביות חזותית.</p>
+                </div>
+            </div>
+            <div class="bg-slate-800 text-white p-5 rounded-2xl shadow-lg inline-block">
+                <p class="text-xl font-bold">הקושי אינו (רק) מתמטי. הוא נובע מעומס סימבולי וקוגניטיבי.</p>
+            </div>
+            <div class="mt-8">
+                <button onclick="nextSlide()" class="bg-blue-600 text-white px-8 py-3 rounded-full text-xl font-black hover:bg-blue-700 transition shadow-md">איך מלמדים את זה בד"כ?</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: איך מלמדים את זה בד"כ (מעודכן לפי תמונות) -->
+    <div class="slide bg-slate-100" id="slide-6">
+        <h1 class="text-4xl md:text-5xl font-black mb-10 text-slate-800">איך מלמדים את זה בד"כ?</h1>
+        
+        <div class="flex flex-col items-center w-full max-w-5xl">
+            <!-- מרכז: משוואת החזקה -->
+            <div class="text-5xl font-serif font-black text-slate-800 bg-white px-8 py-4 rounded-2xl shadow-md border border-slate-200 mb-8">
+                \( a^b = c \)
+            </div>
+
+            <!-- שתי התיבות בצדדים -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full text-right">
+                <!-- צד ימין (במקור עברית) - שורש -->
+                <div class="bg-white p-6 rounded-3xl shadow-lg border-r-[8px] border-blue-500">
+                    <p class="text-xl text-blue-900 font-bold mb-4 bg-blue-50 p-3 rounded-xl">
+                        הפעולה ההפוכה לפעולת החזקה כאשר מחפשים את הבסיס היא - הוצאת שורש
+                    </p>
+                    <div class="text-3xl font-serif text-center text-slate-800" dir="ltr">
+                        \( x^3 = 64 \quad \Rightarrow \quad \sqrt[3]{64} = x \)
+                    </div>
+                </div>
+
+                <!-- צד שמאל - לוגריתם -->
+                <div class="bg-white p-6 rounded-3xl shadow-lg border-r-[8px] border-red-500">
+                    <p class="text-xl text-red-900 font-bold mb-4 bg-red-50 p-3 rounded-xl">
+                        הפעולה ההפוכה לפעולת החזקה כאשר מחפשים את המעריך היא - מציאת לוגריתם
+                    </p>
+                    <div class="text-3xl font-serif text-center text-slate-800" dir="ltr">
+                        \( 2^x = 32 \quad \Rightarrow \quad \log_2(32) = x \)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-12">
+            <button onclick="nextSlide()" class="bg-slate-800 text-white px-10 py-3 rounded-full text-xl font-black hover:bg-slate-700 transition shadow-md">נמשיך...</button>
+        </div>
+    </div>
+
+    <!-- Slide 7: דיאלוג בכיתה -->
+    <div class="slide" id="slide-7">
+        <div class="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-2xl w-full max-w-4xl flex flex-col border border-slate-100">
+            <h2 class="text-3xl font-black text-slate-800 mb-6 border-b pb-3 flex items-center justify-between">
+                <span>אפיזודה: משבר הנוטציה</span>
+                <span class="text-sm font-normal text-slate-400 bg-slate-100 px-3 py-1 rounded-full">סימולציה בכיתה י'</span>
+            </h2>
+            
+            <div class="flex flex-col mb-6 p-4 bg-slate-50 rounded-2xl overflow-y-auto max-h-[45vh]">
+                <div class="chat-bubble chat-teacher">
+                    <strong>מורה:</strong> "אוקיי כיתה, נגדיר לוגריתם: \(\log_a(c) = b\). זו הפעולה שמוצאת את המעריך שבו נצטרך להעלות את הבסיס \(a\) כדי לקבל את \(c\)."
+                </div>
+                <div class="chat-bubble chat-student">
+                    <strong>תלמיד:</strong> "רגע המורה, למה \(a\) למטה ובקטן? בפעולת החזקה הוא בכלל מופיע בגדול... ובגלל \(b\) הוא זה שמופיע בקטן בחזקה ובשורש..."
+                </div>
+                <div class="chat-bubble chat-teacher">
+                    <strong>מורה:</strong> "זו המוסכמה. פשוט תזכרו את המיקומים: \(a^b = c \iff \log_a(c) = b\). זה דורש קצת תרגול."
+                </div>
+                <div class="chat-bubble chat-student">
+                    <strong>תלמיד:</strong> "זה מרגיש כאילו אני צריך לתרגם כל פעם בראש. בבגרות אני בטוח אתבלבל עם כל הדבר הזה מה מחפשים ואיפה לשים כל דבר."
+                </div>
+                <div class="chat-bubble chat-teacher font-black text-blue-800 italic border border-blue-300 bg-blue-100 shadow-sm mt-2 text-center">
+                    💡 החלטה בזמן אמת: "אתם צודקים. המילים והסמלים לפעמים מסתירים את המתמטיקה. אבל אפשר לנסות גישה אחרת."
+                </div>
+            </div>
+            <button onclick="nextSlide()" class="self-center bg-blue-600 text-white px-8 py-3 rounded-full text-xl font-black hover:bg-blue-700 transition shadow-lg">הדיון הכיתתי</button>
+        </div>
+    </div>
+
+    <!-- Slide 8: דיון -->
+    <div class="slide bg-slate-800 text-white text-center" id="slide-8">
+        <h1 class="text-5xl md:text-6xl font-black mb-8 text-amber-400">דיון</h1>
+        <div class="max-w-3xl bg-slate-900/50 p-10 rounded-3xl border border-slate-700 shadow-2xl mb-10">
+            <p class="text-3xl leading-relaxed font-light">מה אתם הייתם עושים?<br>איך אתם מלמדים את הלוגריתם?<br><span class="font-bold text-blue-300">מקלילים? מנגישים?</span></p>
+        </div>
+        <button onclick="nextSlide()" class="bg-blue-500 hover:bg-blue-400 text-white px-8 py-3 rounded-full text-xl font-black transition shadow-lg">נציג את ההצעה שלנו</button>
+    </div>
+
+    <!-- Slide 9: הצגת משולש החזקה -->
+    <div class="slide bg-white" id="slide-9">
+        <div class="text-center w-full max-w-5xl">
+            <h1 class="text-5xl md:text-6xl font-black mb-2 text-slate-800 tracking-tight">Triangle of Power</h1>
+            <p class="text-base text-slate-500 mb-6 max-w-2xl mx-auto">מפה ויזואלית אחת לכל שלוש הפעולות. (עלה לראשונה בשרשור ב-Math Stack Exchange בשנת 2012 ופורסם ע"י ערוץ 3Blue1Brown בשנת 2016).</p>
+            
+            <div class="relative w-64 h-56 mx-auto my-8 flex justify-center scale-90 md:scale-100">
+                <svg viewBox="0 0 100 86.6" class="w-full h-full drop-shadow-xl" preserveAspectRatio="xMidYMid meet">
+                    <polygon points="50,0 100,86.6 0,86.6" fill="#1e293b"/>
+                </svg>
+                <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-14 h-14 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-2xl border-4 border-white shadow-lg z-10 font-serif">b</div>
+                <div class="absolute -bottom-5 -left-6 w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-2xl border-4 border-white shadow-lg z-10 font-serif">a</div>
+                <div class="absolute -bottom-5 -right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-2xl border-4 border-white shadow-lg z-10 font-serif">c</div>
+                
+                <div class="absolute -top-14 left-1/2 -translate-x-1/2 font-black text-red-500 text-lg whitespace-nowrap">מעריך (Log)</div>
+                <div class="absolute -bottom-14 -left-6 font-black text-blue-500 text-lg">בסיס</div>
+                <div class="absolute -bottom-14 -right-6 font-black text-green-500 text-lg">חזקה</div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-center mt-8">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <p class="text-slate-600 mb-1 font-bold">חזקה? מחפשים את הקודקוד הימני:</p>
+                    <p class="text-2xl font-bold text-slate-800" dir="ltr">\( a^b = ? \)</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <p class="text-slate-600 mb-1 font-bold">לוג? מחפשים את הקודקוד העליון:</p>
+                    <p class="text-2xl font-bold text-slate-800" dir="ltr">\( \log_a(c) = ? \)</p>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <p class="text-slate-600 mb-1 font-bold">שורש? מחפשים את הקודקוד השמאלי:</p>
+                    <p class="text-2xl font-bold text-slate-800" dir="ltr">\( \sqrt[b]{c} = ? \)</p>
+                </div>
+            </div>
+
+            <button onclick="nextSlide()" class="mt-8 bg-slate-800 text-white px-8 py-3 rounded-full font-black text-xl hover:bg-slate-700 transition-all shadow-md">בואו נתרגל!</button>
+        </div>
+    </div>
+
+    <!-- Slide 10: בואו נתרגל (חצי עליון מלא, חצי תחתון ריק) -->
+    <div class="slide justify-start pt-12 bg-white" id="slide-10">
+        <div class="w-full max-w-5xl text-center">
+            <h1 class="text-4xl md:text-5xl font-black mb-6 text-slate-800">בואו נתרגל - איפה הנעלם?</h1>
+            <p class="text-lg text-slate-500 mb-6">המירו את התרגילים הבאים לשפת "משולש החזקה":</p>
+            
+            <div class="flex flex-wrap justify-center gap-x-10 gap-y-4 text-2xl md:text-3xl font-serif font-bold text-slate-800 bg-slate-50 p-6 rounded-3xl border border-slate-200" dir="ltr">
+                <span>\( \log_5(125) = ? \)</span>
+                <span>\( 2^6 = ? \)</span>
+                <span>\( \sqrt[3]{27} = ? \)</span>
+                <span>\( \log_?(81) = 4 \)</span>
+                <span>\( ?^3 = 64 \)</span>
+            </div>
+            
+            <div class="mt-8">
+                <button onclick="nextSlide()" class="bg-blue-600 text-white px-8 py-2 rounded-full text-lg font-bold shadow-md hover:bg-blue-700">המשך</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: שאלות להמשך - תחום ההגדרה -->
+    <div class="slide bg-slate-800 text-white text-center" id="slide-11">
+        <h1 class="text-5xl font-black mb-8 text-blue-400">מה לגבי תחום ההגדרה?</h1>
+        <div class="max-w-3xl bg-slate-900/50 p-10 rounded-3xl border border-slate-700 shadow-2xl mb-10">
+            <p class="text-2xl md:text-3xl leading-relaxed font-light">איפה הקשיים שיש לנו עם חזקות ושורשים?<br>מתי מתחילים להתייחס לזה?</p>
+        </div>
+        <button onclick="nextSlide()" class="bg-blue-500 hover:bg-blue-400 text-white px-8 py-3 rounded-full text-xl font-black transition shadow-lg">המשך</button>
+    </div>
+
+    <!-- Slide 12: חוקי חזקות -->
+    <div class="slide bg-slate-100 text-center" id="slide-12">
+        <h1 class="text-5xl font-black mb-8 text-slate-800">מה לגבי חוקי חזקות ולוגריתמים?</h1>
+        <div class="max-w-4xl bg-white p-10 rounded-3xl shadow-xl mb-10 border border-slate-200">
+            <p class="text-2xl leading-relaxed text-slate-600 font-light">דיון פתוח בכיתה על חוקי החזקות והלוגריתמים וכיצד הם משתלבים במשולש.</p>
+        </div>
+        <button onclick="nextSlide()" class="bg-slate-800 text-white px-8 py-3 rounded-full text-xl font-black hover:bg-slate-700 transition shadow-lg">לדיון המסכם</button>
+    </div>
+
+    <!-- Slide 13: סיכום ודיון -->
+    <div class="slide text-center" id="slide-13">
+        <h1 class="text-5xl font-black mb-4 text-slate-800">סיכום ודיון</h1>
+        <p class="text-xl text-slate-500 mb-8 font-light">מה דעתכם? האם הייתם משתמשים במשולש? כיצד?</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
+            <div class="bg-white p-6 rounded-3xl shadow-lg border-b-[8px] border-amber-500 border-x border-t border-slate-100">
+                <h3 class="text-xl font-black mb-3 text-slate-800">קביים זמניים</h3>
+                <p class="text-slate-600 text-base md:text-lg leading-relaxed">שימוש במשולש רק כשלב מעבר למי שמתקשה, וחזרה מהירה לשפת הבחינה.</p>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-lg border-b-[8px] border-blue-500 border-x border-t border-slate-100">
+                <h3 class="text-xl font-black mb-3 text-slate-800">למידה עמוקה לקידום הבנה</h3>
+                <p class="text-slate-600 text-base md:text-lg leading-relaxed">הוראה של חודש שלם רק עם המשולש כדי להטמיע את המושג, ותרגום רשמי רק בסוף.</p>
+            </div>
+            <div class="bg-white p-6 rounded-3xl shadow-lg border-b-[8px] border-red-500 border-x border-t border-slate-100">
+                <h3 class="text-xl font-black mb-3 text-slate-800">לא לבלבל עם שיטה חדשה</h3>
+                <p class="text-slate-600 text-base md:text-lg leading-relaxed">להיצמד לספרי הלימוד. המשולש יפה, אבל בבגרות הוא לא קיים ועלול לבלבל.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const totalSlides = 13;
+        let currentSlideID = 1;
+        
+        // Data for Slide 3
+        const mathQuestions = [
+            { tex: "2^5", title: "חזקות זה קל!", ans: "32", timeRecorded: null, state: 0 },
+            { tex: "\\sqrt[3]{64}", title: "ומה עם שורשים?", ans: "4", timeRecorded: null, state: 0 },
+            { tex: "\\log_4(256)", title: "כמה זמן לוקח לוג?", ans: "4", timeRecorded: null, state: 0 },
+            { tex: "\\log_?(81) = 4", title: "מי הבסיס?", ans: "3", timeRecorded: null, state: 0 },
+            { tex: "\\log_{14}(196)", title: "מהירות שיא!", ans: "2", timeRecorded: null, state: 0 },
+            { tex: "\\log_?(125) = 2", title: "רגע... משהו חסר?", ans: "5\\sqrt{5}", timeRecorded: null, state: 0 }
+        ];
+        
+        let qIndex = 0;
+        let timerInterval;
+        let startTime;
+        let timerElement = document.getElementById('timer-display');
+
+        function updateGlobalBackBtn() {
+            const btn = document.getElementById('global-back-btn');
+            if (currentSlideID > 1) {
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        function showSlide(id) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            const slide = document.getElementById(`slide-${id}`);
+            if (slide) slide.classList.add('active');
+            
+            updateGlobalBackBtn();
+            
+            // Update slide counter
+            const slideCounter = document.getElementById('slide-counter');
+            if (slideCounter) slideCounter.innerText = `${id} / ${totalSlides}`;
+
+            if (id === 3) {
+                renderQuestion();
+            } else {
+                clearTimer();
+            }
+
+            if (id === 4) {
+                generateSummaryTable();
+            }
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlideID < totalSlides) {
+                currentSlideID++;
+                showSlide(currentSlideID);
+            }
+        }
+
+        function prevSlide() {
+            // אם אנחנו בשקופית 3 ויש תרגיל קודם - נלך אליו במקום לשקופית הקודמת
+            if (currentSlideID === 3 && qIndex > 0) {
+                qIndex--;
+                renderQuestion();
+                return;
+            }
+            if (currentSlideID > 1) {
+                currentSlideID--;
+                showSlide(currentSlideID);
+            }
+        }
+
+        // --- Slide 3 Logic ---
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function renderQuestion() {
+            const q = mathQuestions[qIndex];
+            
+            document.getElementById('question-index').innerText = `${qIndex + 1} / ${mathQuestions.length}`;
+            document.getElementById('question-title').innerText = q.title;
+            document.getElementById('exercise-text').innerHTML = `\\( ${q.tex} \\)`;
+            
+            const ansEl = document.getElementById('answer-text');
+            ansEl.innerHTML = `\\( ${q.ans} \\)`;
+            
+            if (q.state === 2) {
+                // כבר נחשף בעבר (כמו במקרה שחוזרים אחורה)
+                ansEl.classList.remove('opacity-0', 'translate-y-4');
+                timerElement.innerText = q.timeRecorded || "00:00";
+                timerElement.classList.remove('timer-active', 'text-red-500');
+                timerElement.classList.add('text-slate-800');
+                clearTimer();
+            } else if (q.state === 1) {
+                // נעצר אך טרם נחשף
+                ansEl.classList.add('opacity-0', 'translate-y-4');
+                timerElement.innerText = q.timeRecorded || "00:00";
+                timerElement.classList.remove('timer-active', 'text-red-500');
+                timerElement.classList.add('text-slate-800');
+                clearTimer();
+            } else {
+                // טרם נעצר - התחל שעון
+                ansEl.classList.add('opacity-0', 'translate-y-4');
+                startTimer();
+            }
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('exercise-text'), document.getElementById('answer-text')]);
+            }
+        }
+
+        function startTimer() {
+            clearTimer();
+            timerElement.innerText = "00:00";
+            timerElement.classList.add('timer-active', 'text-red-500');
+            timerElement.classList.remove('text-slate-800');
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+                timerElement.innerText = formatTime(totalSeconds);
+            }, 200); // מתעדכן כל רבע שנייה כדי להבטיח מעבר מדויק של שניות
+        }
+
+        function clearTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // פונקציות עבור הכפתורים הידניים:
+        function actionStopTimer() {
+            const q = mathQuestions[qIndex];
+            if (q.state === 0) {
+                clearTimer();
+                timerElement.classList.remove('timer-active', 'text-red-500');
+                timerElement.classList.add('text-slate-800');
+                q.timeRecorded = timerElement.innerText;
+                q.state = 1;
+            }
+        }
+
+        function actionReveal() {
+            const q = mathQuestions[qIndex];
+            // אם הטיימר עדיין רץ, קודם נעצור אותו
+            if (q.state === 0) {
+                actionStopTimer();
+            }
+            if (q.state === 1) {
+                const ansEl = document.getElementById('answer-text');
+                ansEl.classList.remove('opacity-0', 'translate-y-4');
+                q.state = 2;
+            }
+        }
+
+        function actionNextQ() {
+            const q = mathQuestions[qIndex];
+            // נוודא שעצרנו טיימר לפני שעוברים הלאה (למקרה שהמורה פשוט דילגה)
+            if (q.state === 0) {
+                q.timeRecorded = "--:--"; 
+                q.state = 2;
+            }
+            
+            qIndex++;
+            if (qIndex < mathQuestions.length) {
+                renderQuestion();
+            } else {
+                nextSlide();
+            }
+        }
+
+        function prevQuestion() {
+            prevSlide(); // זה כבר מטפל בחזרה לתרגיל קודם
+        }
+
+        // ניהול רצף בלחיצה על רווח בשקופית 3
+        function handleSpacebarSlide3() {
+            const q = mathQuestions[qIndex];
+            if (q.state === 0) {
+                actionStopTimer();
+            } else if (q.state === 1) {
+                actionReveal();
+            } else if (q.state === 2) {
+                actionNextQ();
+            }
+        }
+
+        // --- Slide 4 Logic ---
+        function generateSummaryTable() {
+            const tbody = document.getElementById('summary-tbody');
+            tbody.innerHTML = '';
+            mathQuestions.forEach(q => {
+                const timeStr = q.timeRecorded && q.timeRecorded !== "--:--" ? `${q.timeRecorded}` : '--:--';
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition">
+                        <td class="p-3 text-left font-serif text-xl md:text-2xl" dir="ltr">\\( ${q.tex} \\)</td>
+                        <td class="p-3 text-center text-xl md:text-2xl font-mono text-amber-300 font-bold">${timeStr}</td>
+                    </tr>
+                `;
+            });
+            if (window.MathJax) {
+                MathJax.typesetPromise([tbody]);
+            }
+        }
+
+        // --- Keyboard Navigation (Spacebar) ---
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); 
+                if (document.activeElement) document.activeElement.blur();
+
+                if (currentSlideID === 3) {
+                    handleSpacebarSlide3();
+                } else {
+                    nextSlide();
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
