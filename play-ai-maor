@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jump Tag Pro - 2-3-4 Players</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0c0a09;
+            touch-action: none;
+            user-select: none;
+        }
+        canvas {
+            display: block;
+        }
+        .ui-panel {
+            background: rgba(12, 10, 9, 0.95);
+            border: 4px solid #444;
+            image-rendering: pixelated;
+        }
+        .time-btn.active {
+            background-color: #06b6d4;
+            color: black;
+            border-color: #0891b2;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center font-mono">
+
+    <a href="https://tair-pnini.github.io/play-ai" class="absolute top-4 left-4 z-[100] bg-slate-800 text-white px-4 py-2 rounded border-b-4 border-black font-bold active:translate-y-1 hover:bg-slate-700 transition-all text-sm uppercase tracking-widest no-underline">
+        &#8592; Home
+    </a>
+
+    <div id="menu-ui" class="absolute inset-0 flex flex-col items-center justify-center z-50">
+        <div class="ui-panel p-8 rounded-xl text-center flex flex-col items-center border-b-8 border-black shadow-2xl">
+            <h1 class="text-6xl font-black text-cyan-400 mb-2 italic tracking-tighter">TAG PRO</h1>
+            <p class="text-white text-xs mb-6 tracking-[0.3em] uppercase opacity-60">Buffs & Portals Update</p>
+            
+            <div class="flex gap-2 mb-6">
+                <button onclick="setMatchTime(60)" id="t60" class="time-btn bg-slate-800 text-white px-4 py-2 rounded border-b-4 border-black font-bold active:translate-y-1">60s</button>
+                <button onclick="setMatchTime(120)" id="t120" class="time-btn bg-slate-800 text-white px-4 py-2 rounded border-b-4 border-black font-bold active:translate-y-1 active">120s</button>
+                <button onclick="setMatchTime(180)" id="t180" class="time-btn bg-slate-800 text-white px-4 py-2 rounded border-b-4 border-black font-bold active:translate-y-1">180s</button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <button onclick="startGame(2)" class="bg-blue-600 hover:bg-blue-500 text-white font-black p-6 rounded-lg border-b-8 border-blue-900 active:border-b-0 active:translate-y-2 transition-all text-3xl">2</button>
+                <button onclick="startGame(3)" class="bg-green-600 hover:bg-green-500 text-white font-black p-6 rounded-lg border-b-8 border-green-900 active:border-b-0 active:translate-y-2 transition-all text-3xl">3</button>
+                <button onclick="startGame(4)" class="bg-red-600 hover:bg-red-500 text-white font-black p-6 rounded-lg border-b-8 border-red-900 active:border-b-0 active:translate-y-2 transition-all text-3xl">4</button>
+            </div>
+
+            <div class="text-[10px] text-slate-400 uppercase space-y-1">
+                <p>WASD | ARROWS | IJKL | TFGH</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-hud" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+        <div class="bg-black/80 backdrop-blur-md border-2 border-white/20 px-8 py-2 rounded-full">
+            <span id="match-timer-display" class="text-4xl font-black text-white italic tracking-tighter">00:00</span>
+        </div>
+    </div>
+
+    <div id="game-over-ui" class="hidden absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/80">
+        <div class="ui-panel p-10 rounded-xl text-center border-b-8 border-black">
+            <h2 id="winner-text" class="text-5xl font-black mb-8 italic uppercase text-white"></h2>
+            <button onclick="showMenu()" class="bg-cyan-500 text-black font-black py-4 px-10 rounded-lg border-b-8 border-cyan-700 active:border-b-0 active:translate-y-2 transition-all text-2xl">
+                CONTINUE
+            </button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const menuUI = document.getElementById('menu-ui');
+        const hudUI = document.getElementById('game-hud');
+        const gameOverUI = document.getElementById('game-over-ui');
+        const winnerText = document.getElementById('winner-text');
+        const timerDisplay = document.getElementById('match-timer-display');
+
+        // Physics Constants (Made even slower as requested)
+        const GRAVITY = 0.38;   // Lowered gravity slightly to maintain jump height with slower horizontal speed
+        const JUMP_FORCE = -9.2; // Adjusted jump force for a smoother, slower arc
+        const WALK_SPEED = 2.0;  // Significantly slower movement speed
+        const IT_SPEED_BOOST = 1.15; // Slightly higher relative boost so catching others is balanced at slow speeds
+        const PLAYER_SIZE = 28;
+
+        let width, height;
+        let players = [];
+        let platforms = [];
+        let particles = [];
+        let interactables = []; // Trampolines, Portals, Buffs
+        let gameState = 'menu';
+        let matchTimeLimit = 120;
+        let currentMatchTime = 0;
+
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        const playerConfigs = [
+            { id: 1, name: 'BLUE', color: '#3b82f6', keys: { up: 'w', left: 'a', down: 's', right: 'd' } },
+            { id: 2, name: 'GREEN', color: '#22c55e', keys: { up: 'arrowup', left: 'arrowleft', down: 'arrowdown', right: 'arrowright' } },
+            { id: 3, name: 'RED', color: '#ef4444', keys: { up: 'i', left: 'j', down: 'k', right: 'l' } },
+            { id: 4, name: 'YELLOW', color: '#eab308', keys: { up: 't', left: 'f', down: 'g', right: 'h' } }
+        ];
+
+        function setMatchTime(seconds) {
+            matchTimeLimit = seconds;
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('t' + seconds).classList.add('active');
+        }
+
+        class Player {
+            constructor(x, y, config) {
+                this.id = config.id;
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.config = config;
+                this.isIt = false;
+                this.isDead = false;
+                this.onGround = false;
+                this.tagCooldown = 0;
+                this.speedBuffTimer = 0;
+                this.facing = 1;
+            }
+
+            update() {
+                if (this.isDead) return;
+                if (this.tagCooldown > 0) this.tagCooldown--;
+                if (this.speedBuffTimer > 0) this.speedBuffTimer--;
+
+                let currentSpeed = this.isIt ? WALK_SPEED * IT_SPEED_BOOST : WALK_SPEED;
+                if (this.speedBuffTimer > 0) currentSpeed *= 1.5;
+                
+                if (keys[this.config.keys.left]) {
+                    this.vx = -currentSpeed;
+                    this.facing = -1;
+                } else if (keys[this.config.keys.right]) {
+                    this.vx = currentSpeed;
+                    this.facing = 1;
+                } else {
+                    this.vx = 0;
+                }
+
+                if (keys[this.config.keys.up] && this.onGround) {
+                    this.vy = JUMP_FORCE;
+                    this.onGround = false;
+                }
+
+                this.vy += GRAVITY;
+
+                // Move X
+                this.x += this.vx;
+                this.checkPlatformCollision('x');
+
+                // Screen Wrap
+                if (this.x < -PLAYER_SIZE) this.x = width;
+                if (this.x > width) this.x = -PLAYER_SIZE;
+
+                // Move Y
+                this.y += this.vy;
+                this.onGround = false;
+                this.checkPlatformCollision('y');
+
+                // Interactable Checks
+                this.checkInteractables();
+
+                // Floor/Ceiling
+                if (this.y < 0) {
+                    this.y = 0;
+                    this.vy = 0;
+                }
+                if (this.y > height - PLAYER_SIZE) {
+                    this.y = height - PLAYER_SIZE;
+                    this.vy = 0;
+                    this.onGround = true;
+                }
+            }
+
+            checkPlatformCollision(axis) {
+                for (let plat of platforms) {
+                    if (this.x < plat.x + plat.w &&
+                        this.x + PLAYER_SIZE > plat.x &&
+                        this.y < plat.y + plat.h &&
+                        this.y + PLAYER_SIZE > plat.y) {
+                        
+                        if (axis === 'x') {
+                            if (this.vx > 0) this.x = plat.x - PLAYER_SIZE;
+                            else if (this.vx < 0) this.x = plat.x + plat.w;
+                            this.vx = 0;
+                        } else {
+                            if (this.vy > 0) {
+                                this.y = plat.y - PLAYER_SIZE;
+                                this.onGround = true;
+                            } else if (this.vy < 0) {
+                                this.y = plat.y + plat.h;
+                            }
+                            this.vy = 0;
+                        }
+                    }
+                }
+            }
+
+            checkInteractables() {
+                for (let i = interactables.length - 1; i >= 0; i--) {
+                    const obj = interactables[i];
+                    if (this.x < obj.x + obj.w &&
+                        this.x + PLAYER_SIZE > obj.x &&
+                        this.y < obj.y + obj.h &&
+                        this.y + PLAYER_SIZE > obj.y) {
+                        
+                        if (obj.type === 'trampoline') {
+                            this.vy = -16;
+                            createExplosion(obj.x + obj.w/2, obj.y, '#a855f7');
+                        } else if (obj.type === 'portal') {
+                            this.x = Math.random() * (width - PLAYER_SIZE);
+                            this.y = Math.random() * (height - 200);
+                            createExplosion(obj.x + obj.w/2, obj.y + obj.h/2, '#3b82f6');
+                            interactables.splice(i, 1);
+                        } else if (obj.type === 'buff') {
+                            this.speedBuffTimer = 300; // 5 seconds at 60fps
+                            createExplosion(obj.x + obj.w/2, obj.y + obj.h/2, '#eab308');
+                            interactables.splice(i, 1);
+                        }
+                    }
+                }
+            }
+
+            draw() {
+                if (this.isDead) return;
+                ctx.save();
+                ctx.fillStyle = this.config.color;
+                ctx.fillRect(this.x, this.y, PLAYER_SIZE, PLAYER_SIZE);
+                
+                if (this.speedBuffTimer > 0) {
+                    ctx.strokeStyle = '#eab308';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(this.x - 4, this.y - 4, PLAYER_SIZE + 8, PLAYER_SIZE + 8);
+                }
+
+                if (this.isIt) {
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(this.x - 2, this.y - 2, PLAYER_SIZE + 4, PLAYER_SIZE + 4);
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('IT!', this.x + PLAYER_SIZE/2, this.y - 12);
+                }
+
+                ctx.fillStyle = 'white';
+                const eyeX = this.facing === 1 ? this.x + 14 : this.x + 4;
+                ctx.fillRect(eyeX, this.y + 8, 4, 4);
+                ctx.fillRect(eyeX + 6, this.y + 8, 4, 4);
+                ctx.restore();
+            }
+        }
+
+        function generateLevel() {
+            platforms = [];
+            interactables = [];
+            const midX = width / 2;
+            
+            // Much lower platforms (vertical gaps reduced from 100 to 75)
+            // Central Ledges
+            platforms.push({ x: midX - 100, y: height - 80, w: 200, h: 20 });
+            platforms.push({ x: midX - 60, y: height - 160, w: 120, h: 20 });
+            platforms.push({ x: midX - 100, y: height - 240, w: 200, h: 20 });
+            platforms.push({ x: midX - 60, y: height - 320, w: 120, h: 20 });
+            platforms.push({ x: midX - 100, y: height - 400, w: 200, h: 20 });
+
+            // Left Side Staircase
+            platforms.push({ x: 100, y: height - 120, w: 120, h: 20 });
+            platforms.push({ x: 30, y: height - 200, w: 120, h: 20 });
+            platforms.push({ x: 100, y: height - 280, w: 120, h: 20 });
+
+            // Right Side Staircase
+            platforms.push({ x: width - 220, y: height - 120, w: 120, h: 20 });
+            platforms.push({ x: width - 150, y: height - 200, w: 120, h: 20 });
+            platforms.push({ x: width - 220, y: height - 280, w: 120, h: 20 });
+
+            // Permanent Trampolines at the bottom corners
+            interactables.push({ type: 'trampoline', x: 20, y: height - 25, w: 40, h: 10 });
+            interactables.push({ type: 'trampoline', x: width - 60, y: height - 25, w: 40, h: 10 });
+        }
+
+        function spawnRandomInteractable() {
+            const types = ['portal', 'buff'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const x = Math.random() * (width - 40);
+            const y = Math.random() * (height - 200) + 100;
+            
+            interactables.push({ type, x, y, w: 25, h: 25, spawnTime: Date.now() });
+        }
+
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1.0,
+                    color
+                });
+            }
+        }
+
+        function handleTags() {
+            const it = players.find(p => p.isIt);
+            if (!it || it.tagCooldown > 0) return;
+
+            for (let p of players) {
+                if (p === it || p.isDead) continue;
+                if (it.x < p.x + PLAYER_SIZE && it.x + PLAYER_SIZE > p.x &&
+                    it.y < p.y + PLAYER_SIZE && it.y + PLAYER_SIZE > p.y) {
+                    it.isIt = false;
+                    p.isIt = true;
+                    p.tagCooldown = 40;
+                    createExplosion(p.x + PLAYER_SIZE/2, p.y + PLAYER_SIZE/2, '#fff');
+                    break;
+                }
+            }
+        }
+
+        function startGame(num) {
+            width = Math.min(window.innerWidth, 1000);
+            height = Math.min(window.innerHeight, 700);
+            canvas.width = width;
+            canvas.height = height;
+            
+            players = [];
+            particles = [];
+            generateLevel();
+            currentMatchTime = matchTimeLimit;
+
+            for (let i = 0; i < num; i++) {
+                players.push(new Player((width / (num + 1)) * (i + 1), height - 80, playerConfigs[i]));
+            }
+
+            players[Math.floor(Math.random() * num)].isIt = true;
+            gameState = 'playing';
+            menuUI.classList.add('hidden');
+            hudUI.classList.remove('hidden');
+        }
+
+        function showMenu() {
+            gameState = 'menu';
+            menuUI.classList.remove('hidden');
+            gameOverUI.classList.add('hidden');
+            hudUI.classList.add('hidden');
+        }
+
+        let lastSpawn = 0;
+        function loop() {
+            ctx.fillStyle = '#1c1917';
+            ctx.fillRect(0, 0, width, height);
+
+            if (gameState === 'playing') {
+                players.forEach(p => p.update());
+                handleTags();
+                
+                if (Date.now() - lastSpawn > 5000) {
+                    spawnRandomInteractable();
+                    lastSpawn = Date.now();
+                }
+
+                currentMatchTime -= (1/60);
+                const mins = Math.floor(currentMatchTime / 60);
+                const secs = Math.floor(currentMatchTime % 60);
+                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (currentMatchTime <= 0) {
+                    currentMatchTime = 0;
+                    gameState = 'gameover';
+                    const it = players.find(p => p.isIt);
+                    winnerText.textContent = it ? `${it.config.name} LOSES!` : "GAME OVER";
+                    winnerText.style.color = it ? it.config.color : "white";
+                    gameOverUI.classList.remove('hidden');
+                }
+                
+                particles.forEach((p, i) => {
+                    p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+                    if (p.life <= 0) particles.splice(i, 1);
+                });
+            }
+
+            // Platforms
+            ctx.fillStyle = '#333';
+            platforms.forEach(p => {
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.fillStyle = '#444';
+                ctx.fillRect(p.x, p.y, p.w, 4);
+                ctx.fillStyle = '#333';
+            });
+
+            // Interactables
+            interactables.forEach(obj => {
+                if (obj.type === 'trampoline') {
+                    ctx.fillStyle = '#a855f7';
+                    ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                    ctx.fillStyle = '#d8b4fe';
+                    ctx.fillRect(obj.x, obj.y, obj.w, 3);
+                } else if (obj.type === 'portal') {
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.beginPath();
+                    ctx.ellipse(obj.x + obj.w/2, obj.y + obj.h/2, obj.w/2, obj.h/2, Date.now()/200, 0, Math.PI*2);
+                    ctx.fill();
+                } else if (obj.type === 'buff') {
+                    ctx.fillStyle = '#eab308';
+                    ctx.beginPath();
+                    ctx.moveTo(obj.x + obj.w/2, obj.y);
+                    ctx.lineTo(obj.x + obj.w, obj.y + obj.h/2);
+                    ctx.lineTo(obj.x + obj.w/2, obj.h + obj.y);
+                    ctx.lineTo(obj.x, obj.y + obj.h/2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            });
+
+            // Particles
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, 4, 4);
+            });
+            ctx.globalAlpha = 1;
+
+            players.forEach(p => p.draw());
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('resize', () => {
+            if (gameState !== 'playing') {
+                width = Math.min(window.innerWidth, 1000);
+                height = Math.min(window.innerHeight, 700);
+                canvas.width = width;
+                canvas.height = height;
+                generateLevel();
+            }
+        });
+
+        loop();
+    </script>
+</body>
+</html>
