@@ -1,0 +1,657 @@
+<!DOCTYPE html><html lang="he" dir="rtl"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מצגת: אחוזים כפרופורציה</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&amp;family=Heebo:wght@400;500;800&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Assistant', sans-serif;
+            overflow: hidden; 
+        }
+
+        #scale-wrapper {
+            width: 1280px;
+            height: 720px;
+            position: relative;
+            transform-origin: center center;
+        }
+
+        .top-nav {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .top-nav button {
+            background: none;
+            border: none;
+            color: #00e5ff;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s;
+            padding: 0;
+            display: flex;
+        }
+
+        .top-nav button:hover {
+            color: #ffffff;
+            text-shadow: 0 0 10px #00e5ff;
+        }
+
+        #slide-counter {
+            color: #ffffff;
+            font-family: 'Heebo', sans-serif;
+            font-size: 22px;
+            font-weight: 500;
+            min-width: 70px;
+            text-align: center;
+            direction: ltr;
+        }
+
+        .slide-container {
+            align-items: flex-start;
+            background-color: #000000;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            display: none; 
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            padding: 50px 60px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: #f5f5f5;
+        }
+
+        .slide-container::after {
+            background: rgba(255, 255, 255, 0.15);
+            bottom: 40px;
+            content: '';
+            height: 1px;
+            left: 60px;
+            position: absolute;
+            right: 60px;
+        }
+
+        .slide-container.active {
+            display: flex;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Heebo', sans-serif;
+            font-weight: 500;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .slide-title {
+            font-size: 55px;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .slide-title span { color: #00e5ff; } 
+        .slide-title.lime-highlight span { color: #4ade80; } 
+
+        p, li {
+            font-size: 26px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #daffde;
+        }
+
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .title-layout { text-align: center; width: 100%; }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+        }
+
+        .image-container {
+            height: 450px;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .two-column .image-container { height: 100%; max-height: 480px; }
+
+        .full-bg-image {
+            background-size: cover;
+            background-position: center;
+        }
+        .full-bg-image .content-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid #ff3366;
+        }
+
+        .bullet-list { list-style: none; padding-right: 20px; }
+        .bullet-list li { position: relative; margin-bottom: 20px; }
+        .bullet-list li::before {
+            content: '\f0da';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: -25px;
+            top: 2px;
+            color: #00e5ff;
+        }
+
+        .equation-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 30px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 50px;
+            font-weight: 800;
+            direction: ltr; 
+            margin: 20px auto;
+        }
+
+        .fraction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .fraction-line {
+            height: 6px;
+            background: #ffffff;
+            width: 100%;
+            border-radius: 3px;
+        }
+
+        .live-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            min-width: 120px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .live-input:focus { border-color: #ffffff; background: rgba(255,255,255,0.1); }
+        
+        .live-input[data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: rgba(255,255,255,0.3);
+            font-size: 30px;
+            pointer-events: none;
+        }
+
+        .static-val { min-width: 100px; text-align: center; }
+
+        .cyan-text { color: #00e5ff; }
+        .lime-text { color: #4ade80; }
+        .equation-box .cyan-text { border-color: #00e5ff; }
+        .equation-box .lime-text { border-color: #4ade80; }
+
+        .btn-nav {
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'Heebo', sans-serif;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .btn-nav:hover { background: rgba(255,255,255,0.2); border-color: #ffffff; }
+
+        .stand-up-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-right: 5px solid #ff3366;
+            padding: 15px 20px;
+            margin-top: 25px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="scale-wrapper">
+
+    <!-- Top Navigation Bar -->
+    <div class="top-nav">
+        <button onclick="moveSlide(-1)" title="הקודם"><i class="fa-solid fa-arrow-right"></i></button>
+        <span id="slide-counter">1 / 15</span>
+        <button onclick="moveSlide(1)" title="הבא"><i class="fa-solid fa-arrow-left"></i></button>
+    </div>
+
+    <!-- Slide 0: Introduction -->
+    <div class="slide-container active" id="slide0">
+        <div class="two-column">
+            <div>
+                <h2 class="slide-title">מתי בכלל צריכים <span>אחוזים?</span></h2>
+                <ul class="bullet-list" style="margin-top: 40px;">
+                    <li><strong>קניות וסוף עונה:</strong> 50% הנחה על הסניקרס שרציתם.</li>
+                    <li><strong>סוללה בנייד:</strong> &#34;נשאר לי רק 15%, אל תנתקו&#34;.</li>
+                    <li><strong>סטטיסטיקה:</strong> 80% מתלמידי הכיתה עברו את המבחן.</li>
+                    <li><strong>תזונה:</strong> 12% שומן בגבינה צהובה.</li>
+                </ul>
+            </div>
+            <div class="image-container">
+                <img alt="Neon sale sign 50 percent dark background" src="https://media.istockphoto.com/id/1239669418/vector/50-percent-off-set-of-neon-signs-on-a-dark-background.jpg?s=1024x1024&amp;w=is&amp;k=20&amp;c=-a7oUZrX5JEpjzP8GmxVVkUF4rV36ARMF2IHGqgsvXw=">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container" id="slide1">
+        <div class="content-area title-layout">
+            <h1 style="font-size: 90px; margin-bottom: 20px;">אבל מה זה בעצם <span>אחוז?</span></h1>
+            <p style="font-size: 40px; color: rgba(255,255,255,0.6); margin-top: 50px;">(רגע למחשבה...)</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: 50% Example Part A -->
+    <div class="slide-container" id="slide2">
+        <div class="content-area title-layout">
+            <h1 style="font-size: 70px; margin-bottom: 30px;">במקום 50% אפשר להגיד פשוט...?</h1>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 20px; display: inline-block; margin-top: 60px;">
+                <p style="font-size: 35px; margin-bottom: 20px;">אם המחיר המקורי של המוצר הוא <strong style="color: #4ade80;">400 ש&#34;ח</strong>,<br>אבל עכשיו יש עליו 50% הנחה...</p>
+                <p style="font-size: 40px; font-weight: bold; margin-top: 30px;">כמה צריך לשלם?</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: 50% Example Part B -->
+    <div class="slide-container" id="slide3">
+        <div class="content-area title-layout">
+            <h1 style="font-size: 70px; margin-bottom: 30px;">אחוז זה בסך הכל <span>יחס!</span></h1>
+            <p style="font-size: 35px; margin-bottom: 50px;">באחוזים, המכנה שלנו הוא <strong>תמיד 100</strong>.</p>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 50px; border-radius: 20px; display: inline-block;">
+                <p style="font-size: 30px; margin-bottom: 40px;">שלושת הביטויים הבאים שווים לחלוטין:</p>
+                <math display="block" style="font-size: 80px; color: #4ade80;">
+                    <mfrac>
+                        <mn>50</mn>
+                        <mn>100</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mfrac>
+                        <mn>1</mn>
+                        <mn>2</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mfrac>
+                        <mn>200</mn>
+                        <mn>400</mn>
+                    </mfrac>
+                </math>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container" id="slide4">
+        <div class="two-column">
+            <div>
+                <h2 class="slide-title lime-highlight">מבצע! <span>איפה משתלם יותר?</span></h2>
+                <p style="margin-bottom: 30px;">בואו נראה למה אחוזים עושים לנו חיים קלים.</p>
+                
+                <div style="background: rgba(0, 229, 255, 0.1); border-right: 5px solid #00e5ff; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="font-size: 30px;">כרטיס אשראי א&#39;</h3>
+                    <p>על כל קנייה ב-250 ש&#34;ח, מקבלים החזר של 15 ש&#34;ח.</p>
+                </div>
+                
+                <div style="background: rgba(74, 222, 128, 0.1); border-right: 5px solid #4ade80; padding: 20px;">
+                    <h3 style="font-size: 30px;">כרטיס אשראי ב&#39;</h3>
+                    <p>על כל קנייה ב-300 ש&#34;ח, מקבלים החזר של 27 ש&#34;ח.</p>
+                </div>
+                <p style="margin-top: 30px; font-weight: bold; color: #ff3366; font-size: 30px;">חישוב קשה בראש, נכון?</p>
+            </div>
+            <div class="image-container">
+                <img alt="Credit cards cashback concept neon dark background" src="https://media.istockphoto.com/id/1510755993/vector/cash-back-money-saving-vector-concept-with-dollar-coins-wallet-arrows-credit-card.jpg?s=612x612&amp;w=0&amp;k=20&amp;c=ag0vizRtNfKSaGn-m7Zx5Ok_WbUy8fUlG3i8EleGCMI=">
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: The percentage answer -->
+    <div class="slide-container" id="slide5">
+        <div class="content-area title-layout">
+            <h1 style="font-size: 70px; margin-bottom: 30px;">בשפת ה<span>אחוזים</span> זה פשוט!</h1>
+            <p style="font-size: 35px; margin-bottom: 40px;">כשמתרגמים את ההחזר למכנה של 100:</p>
+            
+            <ul class="bullet-list" style="display: inline-block; text-align: right; margin-bottom: 50px;">
+                <li><strong style="color: #00e5ff;">כרטיס א&#39;:</strong> מחזיר לנו <strong>6%</strong> מכל קנייה.</li>
+                <li><strong style="color: #4ade80;">כרטיס ב&#39;:</strong> מחזיר לנו <strong>9%</strong> מכל קנייה.</li>
+            </ul>
+            <h3 style="font-size: 40px; color: #deff9a;">עכשיו ברור שכרטיס ב&#39; הרבה יותר משתלם!</h3>
+        </div>
+    </div>
+
+    <div class="slide-container" id="slide6">
+        <div class="content-area title-layout">
+            <h1 style="font-size: 65px; margin-bottom: 20px;">התבנית האחת <span>והיחידה</span></h1>
+            <p style="font-size: 28px; margin-bottom: 40px;">כשאנחנו עובדים עם אחוזים, אנחנו תמיד כותבים שוויון כזה:</p>
+            
+            <div class="equation-box" style="width: 80%;">
+                <div class="fraction">
+                    <div class="static-val cyan-text" style="font-size: 50px;">אחוז</div>
+                    <div class="fraction-line"></div>
+                    <div class="static-val cyan-text" style="font-size: 50px;">100</div>
+                </div>
+                <div style="font-size: 70px; margin: 0 20px;">=</div>
+                <div class="fraction">
+                    <div class="static-val lime-text" style="font-size: 50px;">חלק</div>
+                    <div class="fraction-line"></div>
+                    <div class="static-val lime-text" style="font-size: 50px;">שלם</div>
+                </div>
+            </div>
+            
+            <p style="font-size: 26px; margin-top: 30px;">שמים כל מספר במקום שלו, ובמקום מה שחסר שמים x (או נעלם אחר).<br>
+            <span style="color: #ff3366; font-weight: bold;">חשוב!</span> לשים לב לקרוא טוב את השאלה ולזהות נכון את האחוז!</p>
+        </div>
+    </div>
+
+    <!-- Slide 7: Live Practice 1 -->
+    <div class="slide-container" id="slide7">
+        <div class="two-column">
+            <div>
+                <h2 class="slide-title">שאלה 1: <span>המכוניות</span></h2>
+                <p style="margin-bottom: 30px;">בדקו את הצבעים של 90 מכוניות בחניון. התברר ש-60% מהמכוניות היו בצבע לבן. כמה מכוניות היו בצבע לבן?</p>
+                
+                <div class="equation-box">
+                    <div class="fraction">
+                        <div class="live-input cyan-text" contenteditable="true" data-placeholder="אחוז"></div>
+                        <div class="fraction-line"></div>
+                        <div class="static-val cyan-text">100</div>
+                    </div>
+                    <div>=</div>
+                    <div class="fraction">
+                        <div class="live-input lime-text" contenteditable="true" data-placeholder="חלק"></div>
+                        <div class="fraction-line"></div>
+                        <div class="live-input lime-text" contenteditable="true" data-placeholder="שלם"></div>
+                    </div>
+                </div>
+                
+                <div class="stand-up-box">
+                    <h4 style="font-size: 24px; color: #ff3366; margin-bottom: 10px;"><i class="fa-solid fa-person-arrow-up-from-line"></i> למעלה או למטה?</h4>
+                    <p style="font-size: 20px;">מזהים איפה ה-x (החסר) ממוקם בנוסחה? אם הוא למעלה - <strong>קמים!</strong> אם הוא למטה - <strong>מתכווצים בכיסא!</strong></p>
+                </div>
+            </div>
+            <div class="image-container">
+                <img alt="White cars in parking lot dark mood" src="https://www.genesis.com/content/dam/genesis-p2/worldwide/assets/models/gv70/26my/kv/genesis-ww-gv70-26my-key-visual-hero-small.jpg">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container" id="slide8">
+        <div class="two-column">
+            <div class="image-container">
+                <img alt="Soccer ball in goal net dark stadium lights" src="https://image.slidesdocs.com/responsive-images/background/spotlight-on-soccer-3d-rendering-of-soccer-ball-in-net-with-stadium-light-and-green-turf-powerpoint-background_7edcbe4cb0__960_540.jpg">
+            </div>
+            <div>
+                <h2 class="slide-title">שאלה 2: <span>קבוצת הכדורגל</span></h2>
+                <p style="margin-bottom: 30px;">קבוצת כדורגל ניצחה ב-24 משחקים מתוך 32 משחקים סך הכל ששיחקה בעונה. באיזה אחוז מהמשחקים הקבוצה ניצחה?</p>
+                
+                <div class="equation-box">
+                    <div class="fraction">
+                        <div class="live-input cyan-text" contenteditable="true" data-placeholder="אחוז"></div>
+                        <div class="fraction-line"></div>
+                        <div class="static-val cyan-text">100</div>
+                    </div>
+                    <div>=</div>
+                    <div class="fraction">
+                        <div class="live-input lime-text" contenteditable="true" data-placeholder="חלק"></div>
+                        <div class="fraction-line"></div>
+                        <div class="live-input lime-text" contenteditable="true" data-placeholder="שלם"></div>
+                    </div>
+                </div>
+                
+                <div class="stand-up-box">
+                    <h4 style="font-size: 24px; color: #ff3366; margin-bottom: 10px;"><i class="fa-solid fa-person-arrow-up-from-line"></i> למעלה או למטה?</h4>
+                    <p style="font-size: 20px;">ראיתם איפה ה-x ממוקם הפעם? קמים או מתכווצים?</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Live Practice 3 (Tweak 1 applied here) -->
+    <div class="slide-container" id="slide9">
+        <div class="two-column">
+            <div>
+                <h2 class="slide-title" style="font-size: 45px; margin-bottom: 15px;">שאלה 3: <span>תנועת הנוער</span></h2>
+                <p style="margin-bottom: 20px;">בכיתה יש 28 תלמידים שהם חברים בתנועות נוער. הם מהווים 80% מתלמידי כל הכיתה. כמה תלמידים יש בכיתה סך הכל?</p>
+                
+                <div class="equation-box">
+                    <div class="fraction">
+                        <div class="live-input cyan-text" contenteditable="true" data-placeholder="אחוז"></div>
+                        <div class="fraction-line"></div>
+                        <div class="static-val cyan-text">100</div>
+                    </div>
+                    <div>=</div>
+                    <div class="fraction">
+                        <div class="live-input lime-text" contenteditable="true" data-placeholder="חלק"></div>
+                        <div class="fraction-line"></div>
+                        <div class="live-input lime-text" contenteditable="true" data-placeholder="שלם"></div>
+                    </div>
+                </div>
+                
+                <div class="stand-up-box">
+                    <h4 style="font-size: 24px; color: #ff3366; margin-bottom: 10px;"><i class="fa-solid fa-person-arrow-up-from-line"></i> למעלה או למטה?</h4>
+                    <p style="font-size: 20px;">איפה ה-x? קמים או יושבים?</p>
+                </div>
+            </div>
+            <div class="image-container">
+                <img alt="High school students classroom dark mood" src="https://kappanonline.org/wp-content/uploads/2024/03/FB_K1612_8_Wahlstrom-1.png">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container full-bg-image" id="slide10" style="background-image: url('https://media.istockphoto.com/id/2193868401/vector/futuristic-glowing-exclamation-mark-in-a-triangle-shape-a-danger-symbol-with-a-neon-light.jpg?s=612x612&amp;w=0&amp;k=20&amp;c=s6gl_-22AD4Ws4y30X8O400NDQC3MEgj9Tjgg2-4J7g='); justify-content: center; align-items: center;">
+        <div class="content-overlay">
+            <h1 style="font-size: 80px; color: #ff3366; margin-bottom: 20px;">שימו לב!</h1>
+            <h2 style="font-size: 50px;">שאלה טריקית לפניכם...</h2>
+            <p style="margin-top: 20px; font-size: 30px;">האם האחוז שכתוב בשאלה הוא באמת האחוז שאנחנו צריכים להציב בנוסחה?</p>
+        </div>
+    </div>
+
+    <!-- Slide 11: Live Practice 4 (Tricky) -->
+    <div class="slide-container" id="slide11">
+        <div class="two-column">
+            <div class="image-container">
+                <img alt="Wrestler athlete standing on a scale dark background" src="https://img.olympics.com/images/image/private/t_s_16_9_g_auto/t_s_w440/f_auto/primary/pnb8zsvs3rybs6gnb394">
+            </div>
+            <div>
+                <h2 class="slide-title">שאלה 4: <span>המתאבק</span></h2>
+                <p style="margin-bottom: 30px;">משקלו של מתאבק היה 80 ק&#34;ג. אחרי חודש משקלו <strong>ירד</strong> ב-6.25%. מה היה משקלו של המתאבק <strong>אחרי</strong> חודש?</p>
+                
+                <div class="equation-box">
+                    <div class="fraction">
+                        <div class="live-input cyan-text" contenteditable="true" data-placeholder="אחוז"></div>
+                        <div class="fraction-line"></div>
+                        <div class="static-val cyan-text">100</div>
+                    </div>
+                    <div>=</div>
+                    <div class="fraction">
+                        <div class="live-input lime-text" contenteditable="true" data-placeholder="חלק"></div>
+                        <div class="fraction-line"></div>
+                        <div class="live-input lime-text" contenteditable="true" data-placeholder="שלם"></div>
+                    </div>
+                </div>
+                
+                <div class="stand-up-box">
+                    <h4 style="font-size: 24px; color: #ff3366; margin-bottom: 10px;"><i class="fa-solid fa-brain"></i> לחשוב לפני שקמים!</h4>
+                    <p style="font-size: 20px;">אם אנחנו רוצים לדעת את המשקל החדש שלו, כמה אחוזים ממשקלו המקורי נשארו לו?</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container" id="slide12">
+        <div class="content-area title-layout">
+            <h1 style="font-size: 70px; margin-bottom: 40px;">אז איך <span>פותרים</span> את זה תמיד?</h1>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 50px; border-radius: 20px; display: inline-block; border: 2px solid #00e5ff;">
+                <i class="fa-solid fa-xmark" style="font-size: 80px; color: #ff3366; margin-bottom: 20px;"></i>
+                <h3 style="font-size: 50px; color: #ffffff;">חוק האלכסון</h3>
+                <ul class="bullet-list" style="text-align: right; margin-top: 30px; font-size: 30px; display: inline-block;">
+                    <li style="margin-bottom: 20px;"><strong>כופלים</strong> את שני המספרים שנמצאים באלכסון זה לזה.</li>
+                    <li><strong>מחלקים</strong> במספר השלישי שנשאר בודד (זה שעל האלכסון של ה-x).</li>
+                </ul>
+            </div>
+            
+            <p style="font-size: 32px; margin-top: 40px; color: #4ade80; font-weight: bold;">זה עובד תמיד. בכל מצב. בכל תרגיל של פרופורציה!</p>
+        </div>
+    </div>
+
+    <!-- Slide 13: The Calculator Check -->
+    <div class="slide-container" id="slide13">
+        <div class="two-column">
+            <div>
+                <h2 class="slide-title">אל תאבדו <span>נקודות סתם!</span></h2>
+                <p style="margin-bottom: 30px;">מצאתם את ה-x? מעולה. איך נוודא במבחן שלא טעינו?</p>
+                
+                <div style="background: rgba(74, 222, 128, 0.1); border-right: 5px solid #4ade80; padding: 30px; border-radius: 10px;">
+                    <h3 style="font-size: 35px; margin-bottom: 20px;">הבדיקה המהירה במחשבון:</h3>
+                    <ol style="padding-right: 30px; font-size: 26px; line-height: 1.6; color: #ffffff;">
+                        <li>לוקחים את המשוואה המלאה (אחרי שמצאנו את ה-x).</li>
+                        <li>עושים את פעולת החילוק של השבר <strong>הימני</strong>.</li>
+                        <li>עושים את פעולת החילוק של השבר <strong>השמאלי</strong>.</li>
+                        <li style="color: #4ade80; font-weight: bold;">אם יצא אותו מספר עשרוני בדיוק - התשובה נכונה 100%!</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="image-container">
+                <img alt="Pocket scientific calculator dark background" src="https://img.drz.lazcdn.com/static/np/p/2341b7181e03e6a48dd1fca593b59dc7.png_720x720q80.png">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container" id="slide14">
+        <div class="content-area title-layout">
+            <h1 style="font-size: 80px; margin-bottom: 30px; color: #4ade80;">זמן לחשב!</h1>
+            <p style="font-size: 40px; margin-bottom: 60px;">חוזרים לשאלות שמיקמנו, ופותרים במחשבון.</p>
+            
+            <button class="btn-nav" onclick="window.showSlide(7)" style="font-size: 35px; padding: 25px 50px; background: #00e5ff; color: #000; border: none; font-weight: bold; cursor: pointer; border-radius: 30px;">
+                חזרה לשאלה 1 (המכוניות) <i class="fa-solid fa-backward"></i>
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide-container');
+    const counterDisplay = document.getElementById('slide-counter');
+
+    // Make showSlide globally available for the onclick button
+    window.showSlide = function(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.remove('active');
+            if (i === index) {
+                slide.classList.add('active');
+            }
+        });
+        
+        currentSlide = index;
+        
+        // Update the counter
+        counterDisplay.innerText = (index + 1) + ' / ' + slides.length;
+    };
+
+    function moveSlide(direction) {
+        let newIndex = currentSlide + direction;
+        if (newIndex < 0) newIndex = 0;
+        if (newIndex >= slides.length) newIndex = slides.length - 1;
+        window.showSlide(newIndex);
+    }
+
+    // Keyboard navigation (RTL adjustment: Left arrow goes forward, Right goes backward)
+    document.addEventListener('keydown', (e) => {
+        // Prevent arrows from changing slides if user is typing in an input box
+        if (document.activeElement && document.activeElement.classList.contains('live-input')) {
+            return;
+        }
+        
+        if (e.key === 'ArrowLeft') moveSlide(1); 
+        if (e.key === 'ArrowRight') moveSlide(-1);
+    });
+
+    // Responsiveness Scale Function
+    function resizePresentation() {
+        const wrapper = document.getElementById('scale-wrapper');
+        const scaleWidth = window.innerWidth / 1280;
+        const scaleHeight = window.innerHeight / 720;
+        
+        // Use the smaller scale factor to ensure the whole 1280x720 area fits
+        const scale = Math.min(scaleWidth, scaleHeight);
+        
+        wrapper.style.transform = `scale(${scale})`;
+    }
+
+    // Listen to resize events
+    window.addEventListener('resize', resizePresentation);
+    
+    // Initial calls
+    resizePresentation();
+    window.showSlide(currentSlide);
+</script>
+</body>
+</html>
