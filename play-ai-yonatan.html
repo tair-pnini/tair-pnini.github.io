@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Donut World Defense - Animal Revolution</title>
+    <!-- Retro Pixel Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Press Start 2P', cursive;
+            color: #fff;
+            user-select: none;
+            touch-action: none;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* MAIN 3D GAME UI */
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 5;
+        }
+
+        .stat-box {
+            background: rgba(34, 34, 34, 0.9);
+            padding: 15px;
+            border: 4px solid #fff;
+            box-shadow: 6px 6px 0px #000;
+        }
+
+        #score-display { font-size: 14px; color: #00ffcc; margin-bottom: 8px; }
+        #level-display { font-size: 12px; color: #ff00ff; margin-bottom: 8px; }
+        #coin-display { font-size: 14px; color: #ffff00; margin-bottom: 8px; }
+        #high-score { font-size: 10px; color: #ffaa00; }
+
+        .active-powerups {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 5;
+        }
+
+        .powerup-tag {
+            background: #222;
+            border: 2px solid #fff;
+            padding: 8px 12px;
+            font-size: 10px;
+            display: none;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
+        }
+
+        #toast-container {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            z-index: 20;
+            width: 80%;
+        }
+
+        .toast-msg {
+            font-size: 20px;
+            text-shadow: 4px 4px #000;
+            display: none;
+            margin-bottom: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border: 2px solid #fff;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10;
+        }
+
+        .menu-card {
+            background: #222;
+            padding: 30px;
+            border: 6px solid #00ffcc;
+            text-align: center;
+            max-width: 550px;
+            box-shadow: 10px 10px 0px #000;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h1 { margin-top: 0; color: #ff00ff; font-size: 18px; line-height: 1.4; text-shadow: 4px 4px #000; }
+        
+        .shop-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .shop-item {
+            background: #333;
+            border: 3px solid #fff;
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .shop-item.arcade {
+            grid-column: span 2;
+            background: #111;
+            border-color: #ff00ff;
+        }
+        .shop-item.arcade:hover { background: #222; }
+        .shop-item.arcade h3 { color: #ff00ff; font-size: 12px; }
+
+        .shop-item:hover { background: #444; }
+        .shop-item h3 { font-size: 10px; margin: 5px 0; color: #00ffcc; }
+        .shop-item p { font-size: 8px; margin: 5px 0; color: #bbb; line-height: 1.4;}
+        .shop-item .price { font-size: 10px; color: #ffff00; }
+
+        .level-picker {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select {
+            background: #000;
+            color: #fff;
+            border: 2px solid #fff;
+            font-family: 'Press Start 2P', cursive;
+            padding: 5px;
+            font-size: 10px;
+            outline: none;
+        }
+
+        button {
+            background: #fff;
+            color: #000;
+            border: 4px solid #000;
+            padding: 15px 30px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #00ffcc;
+            margin-top: 10px;
+        }
+
+        button:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #00ffcc; }
+
+        #game-over-msg { color: #ff4444; font-size: 18px; display: none; margin-bottom: 10px; }
+
+        /* -------------------------- */
+        /* 2D MINI GAME STYLES        */
+        /* -------------------------- */
+        #minigame-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #2e8b57; /* SeaGreen base */
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #mg-gameCanvas {
+            display: block;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #mg-ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .mg-hud-top {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            color: white;
+            text-shadow: 2px 2px 0 #000;
+            font-weight: bold;
+            font-size: 24px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .mg-bar-container {
+            width: 200px;
+            height: 20px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        #mg-hunger-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff4e50, #f9d423);
+            transform-origin: left;
+            transition: width 0.1s linear;
+        }
+
+        #mg-start-screen, #mg-game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            pointer-events: auto;
+            z-index: 110;
+        }
+
+        .mg-title { font-size: 48px; margin: 0 0 20px 0; color: #f9d423; text-shadow: 3px 3px 0 #000; text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .mg-desc { font-size: 18px; max-width: 600px; text-align: center; line-height: 1.5; margin-bottom: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        .mg-btn {
+            background: #f9d423;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 50px;
+            box-shadow: 0 6px 0 #c0a010;
+            transition: transform 0.1s, box-shadow 0.1s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-top: 10px;
+        }
+        .mg-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c0a010; }
+
+        /* Mobile Controls */
+        #mg-mobile-controls {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            height: 150px;
+            pointer-events: none;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .mg-control-zone {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            backdrop-filter: blur(2px);
+        }
+
+        #mg-joystick-area {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        #mg-joystick-knob {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #mg-dash-btn {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 69, 0, 0.5);
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+            user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #mg-dash-btn:active { background: rgba(255, 69, 0, 0.8); }
+
+        /* -------------------------- */
+        /* FLAPPY BREAD STYLES        */
+        /* -------------------------- */
+        #fb-minigame-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #110524;
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #fb-gameCanvas {
+            display: block;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        #fb-ui-layer, #fb-start-screen, #fb-game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #fb-start-screen, #fb-game-over-screen {
+            pointer-events: auto;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 110;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- MAIN 3D UI LAYER -->
+    <div id="ui-layer">
+        <div class="stat-box">
+            <div id="dimension-display" style="font-size: 16px; color: #00ffcc; margin-bottom: 12px; text-align: center; text-shadow: 2px 2px 0px #000;">EARTH</div>
+            <div id="level-display">Level: 1</div>
+            <div id="score-display">Score: 0</div>
+            <div id="coin-display">Coins: 0</div>
+            <div id="high-score">Best: 0</div>
+        </div>
+    </div>
+
+    <div class="active-powerups">
+        <div id="shield-tag" class="powerup-tag" style="color: #00ffff; border-color: #00ffff;">SHIELD ACTIVE</div>
+        <div id="slow-tag" class="powerup-tag" style="color: #ffff00; border-color: #ffff00;">SLOW-MO ACTIVE</div>
+        <div id="cat-tag" class="powerup-tag" style="color: #ff66ff; border-color: #ff66ff;">CAT EFFECT ACTIVE</div>
+        <div id="buffalo-tag" class="powerup-tag" style="color: #ffd700; border-color: #ffd700;">BUFFALO CHAOS!</div>
+        <div id="saturn-tag" class="powerup-tag" style="color: #ff00ff; border-color: #ff00ff;">SATURN DIMENSION!</div>
+        <div id="mars-tag" class="powerup-tag" style="color: #ff4400; border-color: #ff4400;">MARS DIMENSION!</div>
+    </div>
+
+    <div id="boss-ui" style="display:none; position:absolute; top:20%; left:50%; transform:translateX(-50%); width:300px; text-align:center; z-index:15; pointer-events:none;">
+        <h2 id="boss-ui-title" style="color:#ff0000; text-shadow:2px 2px 0px #000;">TARGET BASE</h2>
+        <div style="width:100%; height:20px; border:2px solid #fff; background:#000;">
+            <div id="boss-hp-bar" style="width:100%; height:100%; background:#ff0000; transition:width 0.2s;"></div>
+        </div>
+        <p style="color:#fff; font-size:10px; margin-top:10px; animation: pulse 1s infinite alternate;">TAP/CLICK TO SHOOT!</p>
+    </div>
+
+    <div id="toast-container">
+        <div id="level-up-toast" class="toast-msg" style="color: #ff00ff;">LEVEL UP!</div>
+        <div id="cat-toast" class="toast-msg">MEOW!</div>
+    </div>
+
+<div id="overlay"> <!-- כפתור חזרה לדף הבית --> <a id="back-to-home-btn" href="https://tair-pnini.github.io/play-ai" class="absolute top-4 right-4 z-[200] bg-slate-800 text-white px-4 py-2 rounded border-b-4 border-black font-bold active:translate-y-1 hover:bg-slate-700 transition-all text-sm tracking-widest no-underline flex items-center gap-2" style="font-family: Arial, sans-serif;"> <span>משחקים של תלמידים נוספים</span> <span dir="ltr">&#8594;</span> </a>
+        <div class="menu-card">
+            <h1 id="menu-title">EARTH<br>DEFENSE</h1>
+            <div id="game-over-msg">WORLD HIT</div>
+            
+            <div id="earth-shop" class="shop-container">
+                <div class="shop-item" onclick="buyPowerup('shield')">
+                    <h3>SHIELD</h3>
+                    <p>Immune for 8s</p>
+                    <div class="price">100 COINS</div>
+                </div>
+                <div class="shop-item" onclick="buyPowerup('slow')">
+                    <h3>SLOW-MO</h3>
+                    <p>50% Speed 10s</p>
+                    <div class="price">150 COINS</div>
+                </div>
+                <div class="shop-item" onclick="buyPowerup('double')">
+                    <h3>2X COINS</h3>
+                    <p>Permanent for run</p>
+                    <div class="price">300 COINS</div>
+                </div>
+                <div class="shop-item" onclick="buyPowerup('clear')">
+                    <h3>EMP BLAST</h3>
+                    <p>Clear all objects</p>
+                    <div class="price">200 COINS</div>
+                </div>
+            </div>
+
+            <div id="saturn-shop" class="shop-container" style="display: none;">
+                <div class="shop-item" onclick="buyPowerup('mega_shield')" style="border-color:#ff00ff;">
+                    <h3 style="color:#ff00ff;">MEGA SHIELD</h3>
+                    <p>Immune for 15s</p>
+                    <div class="price">250 COINS</div>
+                </div>
+                <div class="shop-item" onclick="buyPowerup('ultra_slow')" style="border-color:#ff00ff;">
+                    <h3 style="color:#ff00ff;">ULTRA SLOW</h3>
+                    <p>30% Speed 15s</p>
+                    <div class="price">400 COINS</div>
+                </div>
+                <div class="shop-item" onclick="buyPowerup('triple')" style="border-color:#ff00ff;">
+                    <h3 style="color:#ff00ff;">3X COINS</h3>
+                    <p>Permanent for run</p>
+                    <div class="price">800 COINS</div>
+                </div>
+                <div class="shop-item" onclick="buyPowerup('super_emp')" style="border-color:#ff00ff;">
+                    <h3 style="color:#ff00ff;">SUPER EMP</h3>
+                    <p>Clear all + 3s Shield</p>
+                    <div class="price">500 COINS</div>
+                </div>
+            </div>
+
+            <div class="shop-container" id="earth-arcade-container" style="margin-top: 0;">
+                <div class="shop-item arcade" id="shop-arcade" onclick="buyArcade()">
+                    <h3 id="arcade-title">ARCADE: HUNGRY BUFFALO</h3>
+                    <p>Eat block-zombies! Don't fall in the hole! +10 Coins per zombie.</p>
+                    <div class="price" id="arcade-price">1000 COINS</div>
+                </div>
+            </div>
+
+            <div class="shop-container" id="saturn-arcade-container" style="margin-top: 0; display: none;">
+                <div class="shop-item arcade" id="shop-fb-arcade" onclick="buyFbArcade()" style="border-color:#00ffff; background:#1a0033;">
+                    <h3 id="fb-arcade-title" style="color:#00ffff;">ARCADE: FLAPPY BREAD</h3>
+                    <p>Fly a winged loaf! Tap to flap. +1 Coin per pipe.</p>
+                    <div class="price" id="fb-arcade-price" style="color:#ffff00;">1500 COINS</div>
+                </div>
+            </div>
+
+            <div class="level-picker" id="earth-level-picker">
+                <label style="font-size: 8px;">START LVL:</label>
+                <select id="start-level-earth">
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+
+            <div class="level-picker" id="saturn-level-picker" style="display: none;">
+                <label style="font-size: 8px;">START LVL:</label>
+                <select id="start-level-saturn" style="border-color:#ff00ff;">
+                    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                    <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                    <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+                </select>
+            </div>
+
+            <button id="start-btn">START MISSION</button>
+            <button id="how-to-play-btn" style="background: #00ffcc; color: #000; box-shadow: 4px 4px 0px #00aaaa; border-color: #fff; width: 100%; box-sizing: border-box; margin-top: 10px;" onclick="showHowToPlay()">HOW TO PLAY?</button>
+            <button id="menu-dim-shift-btn" style="background: #4a0080; color: #00ffff; box-shadow: 4px 4px 0px #ff00ff; border-color: #fff; width: 100%; box-sizing: border-box; margin-top: 10px; display: none;" onclick="handleDimShiftClick()">DIMENSION: NORMAL</button>
+        </div>
+    </div>
+
+    <!-- HOW TO PLAY SCREEN -->
+    <div id="how-to-play-screen" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 50; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box;">
+        <div class="menu-card" style="max-width: 600px;">
+            <h1 style="color: #00ffcc;">HOW TO PLAY</h1>
+            <p style="color: #fff; font-size: 10px; line-height: 1.8; text-align: left; margin-bottom: 20px;">
+                <span style="color:#ff00ff">EARTH:</span> Drag to rotate the planet. Catch objects in the hole! Hitting the solid donut is GAME OVER.<br><br>
+                <span style="color:#ffff00">COINS & SHOPS:</span> Earn coins to buy power-ups and unlock secret Arcades! The arcade machines hide oth
