@@ -15,7 +15,7 @@
             background-color: #000;
             font-family: 'Press Start 2P', cursive;
             color: #fff;
-            user-select: none;
+    f        user-select: none;
             touch-action: none;
         }
 
@@ -527,4 +527,2202 @@
             <h1 style="color: #00ffcc;">HOW TO PLAY</h1>
             <p style="color: #fff; font-size: 10px; line-height: 1.8; text-align: left; margin-bottom: 20px;">
                 <span style="color:#ff00ff">EARTH:</span> Drag to rotate the planet. Catch objects in the hole! Hitting the solid donut is GAME OVER.<br><br>
-                <span style="color:#ffff00">COINS & SHOPS:</span> Earn coins to buy power-ups and unlock secret Arcades! The arcade machines hide oth
+                <span style="color:#ffff00">COINS & SHOPS:</span> Earn coins to buy power-ups and unlock secret Arcades! The arcade machines hide other dimensions.<br><br>
+                <span style="color:#ff4444">BOSS FIGHTS:</span> Survive long enough to trigger epic space boss battles!<br><br>
+                <span style="color:#00ffff">CONTROLS:</span> Drag mouse/finger to rotate the world. In minigames, tap/click/space to play.
+            </p>
+            <button onclick="hideHowToPlay()" style="background: #ff4444; color: #fff; box-shadow: 4px 4px 0px #aa0000; border-color: #fff;">GOT IT!</button>
+        </div>
+    </div>
+
+    <!-- 2D MINI GAME OVERLAY -->
+    <div id="minigame-overlay">
+        <canvas id="mg-gameCanvas"></canvas>
+
+        <div id="mg-ui-layer">
+            <div class="mg-hud-top">
+                <div>
+                    <div style="font-size: 14px;">HUNGER</div>
+                    <div class="mg-bar-container">
+                        <div id="mg-hunger-bar"></div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 14px; color: #ffff00;">COINS EARNED</div>
+                    <div id="mg-score-display" style="color: #ffff00;">0</div>
+                </div>
+            </div>
+
+            <div id="mg-mobile-controls">
+                <div id="mg-joystick-area" class="mg-control-zone">
+                    <div id="mg-joystick-knob"></div>
+                </div>
+                <div id="mg-dash-btn" class="mg-control-zone">DASH</div>
+            </div>
+        </div>
+
+        <div id="mg-start-screen">
+            <h1 class="mg-title">BUFFALO VS ZOMBIES</h1>
+            <p class="mg-desc">You are a hangry Buffalo. Zombies are on the menu.<br>
+                Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move.<br>
+                Press <strong>SPACE</strong> to Charge.<br>
+                <span style="color: #00ffcc;">Watch out for the Donut Hole in the center!</span><br>
+                On Mobile: Use the on-screen Joystick.</p>
+            <p class="mg-desc" style="color: #ff4e50; font-weight:bold;">Warning: If Hunger hits zero or you fall, you die!</p>
+            <button class="mg-btn" onclick="mgStartGame()">PLAY</button>
+        </div>
+
+        <div id="mg-game-over-screen" style="display: none;">
+            <h1 class="mg-title" id="mg-fail-title" style="color: #ff4e50;">STARVED!</h1>
+            <p class="mg-desc">Your run has ended.</p>
+            <h2 id="mg-final-score" style="color: #f9d423; font-family: 'Segoe UI', sans-serif;">Coins Earned: 0</h2>
+            <button class="mg-btn" onclick="mgExitToMain()">CLAIM & EXIT</button>
+        </div>
+    </div>
+
+    <!-- FLAPPY BREAD OVERLAY -->
+    <div id="fb-minigame-overlay">
+        <canvas id="fb-gameCanvas"></canvas>
+
+        <div id="fb-ui-layer">
+            <div class="mg-hud-top">
+                <div></div>
+                <div style="text-align: right;">
+                    <div style="font-size: 14px; color: #ffff00;">COINS EARNED</div>
+                    <div id="fb-score-display" style="color: #ffff00;">0</div>
+                </div>
+            </div>
+            <div style="position: absolute; bottom: 10%; width: 100%; text-align: center; color: rgba(255,255,255,0.5); pointer-events: none; font-size: 12px; font-weight: bold;">TAP OR SPACE TO FLAP</div>
+        </div>
+
+        <div id="fb-start-screen">
+            <h1 class="mg-title" style="color:#00ffff;">FLAPPY BREAD</h1>
+            <p class="mg-desc">A Minecraft bread with angel wings.<br>
+                Tap, Click, or press <strong>SPACE</strong> to fly.<br>
+                Dodge the Saturn pipes!</p>
+            <button class="mg-btn" style="background:#00ffff; box-shadow: 0 6px 0 #00aaaa;" onclick="doFbStartGame()">PLAY</button>
+        </div>
+
+        <div id="fb-game-over-screen" style="display: none;">
+            <h1 class="mg-title" style="color: #ff4e50;">CRUMBLED!</h1>
+            <p class="mg-desc">You hit a pipe.</p>
+            <h2 id="fb-final-score" style="color: #f9d423; font-family: 'Segoe UI', sans-serif;">Coins Earned: 0</h2>
+            <button class="mg-btn" onclick="fbExitToSaturn()">CLAIM & EXIT</button>
+        </div>
+    </div>
+
+    <!-- PLANTS VS 67s OVERLAY (MARS) -->
+    <div id="pv-minigame-overlay" style="display:none; position:absolute; top:0; left:0; width:100vw; height:100vh; background:#6b2414; z-index:100; font-family:'Press Start 2P', cursive;">
+        <canvas id="pv-gameCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%;"></canvas>
+        <div id="pv-ui-layer" style="position:absolute; top:20px; left:20px; color:#fff; pointer-events:none;">
+            <div style="font-size:16px; color:#ffff00; margin-bottom:10px;">SUN: <span id="pv-sun-display">200</span></div>
+            <div style="font-size:16px; color:#00ffcc; margin-bottom:10px;">SCORE: <span id="pv-score-display">0</span></div>
+            <div style="font-size:16px; color:#ff00ff;">LVL: <span id="pv-level-display">1</span>/20 (<span id="pv-progress-display">0/25</span>)</div>
+            <div id="pv-toolbar" style="margin-top:15px; display:flex; gap:10px; pointer-events:auto;"></div>
+            <div style="font-size:10px; margin-top:10px; color:#aaa; line-height:1.5;">Tap/Click Mars dirt to plant</div>
+        </div>
+        
+        <div id="pv-start-screen" style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <h1 style="color:#ff4444; font-size:30px; text-align:center;">PLANTS VS 67s</h1>
+            <p style="color:#fff; font-size:12px; max-width:400px; text-align:center; line-height:1.5;">Protect your base on Mars!<br><br>Defeat waves of 67s to progress through 20 levels. New plants unlock at levels 3 and 5!</p>
+            <button onclick="pvStartGame(false)" style="background:#ff4444; border-color:#fff; color:#fff; padding:15px 30px; font-size:16px; margin-top:20px; font-family:'Press Start 2P', cursive; cursor:pointer;">PLANT!</button>
+            <button onclick="pvExitToMain()" style="background:#4caf50; border-color:#fff; color:#fff; padding:10px 20px; font-size:12px; margin-top:10px; font-family:'Press Start 2P', cursive; cursor:pointer;">BACK TO MENU</button>
+        </div>
+        
+        <div id="pv-level-win-screen" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); flex-direction:column; justify-content:center; align-items:center;">
+            <h1 id="pv-win-title" style="color:#00ffcc; font-size:24px; text-align:center; line-height:1.5;">LEVEL 1 CLEARED!</h1>
+            <h2 style="color:#ffff00; font-size:16px; margin:20px 0;">Reward: <span id="pv-level-reward">50</span> Coins</h2>
+            <button id="pv-next-btn" onclick="pvNextLevel()" style="background:#ff4444; border-color:#fff; color:#fff; padding:15px 30px; font-size:16px; font-family:'Press Start 2P', cursive; cursor:pointer; margin-bottom:10px;">NEXT LEVEL</button>
+            <button onclick="pvExitToMain()" style="background:#4caf50; border-color:#fff; color:#fff; padding:10px 20px; font-size:12px; font-family:'Press Start 2P', cursive; cursor:pointer;">EXIT</button>
+        </div>
+
+        <div id="pv-game-over-screen" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); flex-direction:column; justify-content:center; align-items:center;">
+            <h1 style="color:#ff4444; font-size:24px; text-align:center; line-height:1.5;">THE 67s ATE<br>YOUR LAWN!</h1>
+            <h2 id="pv-final-score" style="color:#ffff00; font-size:16px; margin:20px 0;">Score: 0</h2>
+            <button onclick="pvExitToMain()" style="background:#ff4444; border-color:#fff; color:#fff; padding:15px 30px; font-size:16px; font-family:'Press Start 2P', cursive; cursor:pointer;">CLAIM COINS & EXIT</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // MAIN 3D GAME VARIABLES & LOGIC
+        // ==========================================
+        let scene, camera, renderer, donut, starfield, shieldMesh, saturnRingMesh;
+        let objects = []; 
+        let score = 0;
+        
+        let savedCoins = parseInt(localStorage.getItem('pixelDonutCoins'));
+        let coins = isNaN(savedCoins) ? 0 : savedCoins;
+        
+        let currentLevel = 1;
+        let startingLevel = 1;
+        let highScore = localStorage.getItem('pixelDonutBest') || 0;
+        let isGameActive = false;
+        let spawnRate = 2000; 
+        let lastSpawnTime = 0;
+        let lastBuffaloTime = 0;
+        let lastCatTime = 0;
+        let lastGoldenTime = 0;
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let speedMultiplier = 1;
+
+        // Arcade Shop States
+        let hasBoughtMinigame = localStorage.getItem('pixelDonutMgBought') === 'true';
+        let lastFreeUse = parseInt(localStorage.getItem('pixelDonutMgFreeUse')) || 0;
+
+        let hasUnlockedFb = localStorage.getItem('pixelDonutFbUnlocked') === 'true';
+        let hasBoughtFb = localStorage.getItem('pixelDonutFbBought') === 'true';
+        let lastFbFreeUse = parseInt(localStorage.getItem('pixelDonutFbFreeUse')) || 0;
+
+        // Powerup/Effect States
+        let isImmune = false;
+        let slowTimeActive = false;
+        let ultraSlowTimeActive = false;
+        let doubleCoinsActive = false;
+        let tripleCoinsActive = false;
+        let catSpeedBuff = 1.0;
+        let pixelResolutionMod = 1.5;
+        let isGoldenBuffaloActive = false;
+        let catSpawnBoostActive = false;
+        let isSaturnDimension = false;
+        let isMarsDimension = false;
+        let currentDim = 'earth';
+        let hasUnlockedSaturn = localStorage.getItem('pixelDonutSaturnUnlocked') === 'true';
+        let hasUnlockedMars = localStorage.getItem('pixelDonutMarsUnlocked') === 'true';
+
+        const PIXEL_SCALE_BASE = 1.5; 
+        const DONUT_RADIUS = 3.5;
+        const DONUT_TUBE = 1.3;
+        const HOLE_RADIUS = DONUT_RADIUS - DONUT_TUBE; 
+        const BASE_SPEED = 0.5;
+        const POINTS_PER_LEVEL = 10; 
+
+        // Check if minigames are active to block 3D interactions
+        let isMgActive = false;
+        let isFbActive = false;
+        let isPvActive = false;
+
+        let saturnRocketCount = 0;
+        let isBossEventActive = false;
+        let bossHits = 0;
+        let bossMesh = null;
+        let launchStation; // New global variable to hold the station
+        let playerRockets = [];
+        let bossEventTimeout;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 12;
+
+            renderer = new THREE.WebGLRenderer({ antialias: false });
+            setPixelResolution(PIXEL_SCALE_BASE);
+            document.body.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const light = new THREE.DirectionalLight(0xffffff, 1.2);
+            light.position.set(10, 10, 15);
+            scene.add(light);
+
+            const geometry = new THREE.TorusGeometry(DONUT_RADIUS, DONUT_TUBE, 32, 96);
+            const material = new THREE.MeshToonMaterial({ color: 0x3366ff });
+            donut = new THREE.Mesh(geometry, material);
+            scene.add(donut);
+
+            const shieldGeo = new THREE.TorusGeometry(DONUT_RADIUS + 0.3, DONUT_TUBE + 0.3, 16, 64);
+            const shieldMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.3, wireframe: true });
+            shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+            shieldMesh.visible = false;
+            donut.add(shieldMesh);
+
+            // Saturn Planetary Ring (Hidden by default)
+            const ringGeo = new THREE.RingGeometry(6.5, 9.5, 64);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+            saturnRingMesh = new THREE.Mesh(ringGeo, ringMat);
+            saturnRingMesh.visible = false;
+            donut.add(saturnRingMesh);
+
+            for(let i=0; i < 45; i++) {
+                const landGeom = new THREE.BoxGeometry(0.7, 0.7, 0.7); 
+                const landMat = new THREE.MeshToonMaterial({ color: 0x22bb22 });
+                const land = new THREE.Mesh(landGeom, landMat);
+                const u = Math.random() * Math.PI * 2;
+                const v = Math.random() * Math.PI * 2;
+                land.position.x = (DONUT_RADIUS + DONUT_TUBE * Math.cos(v)) * Math.cos(u);
+                land.position.y = (DONUT_RADIUS + DONUT_TUBE * Math.cos(v)) * Math.sin(u);
+                land.position.z = DONUT_TUBE * Math.sin(v);
+                land.scale.set(Math.random() + 0.6, Math.random() + 0.6, 0.4);
+                land.rotation.set(Math.random(), Math.random(), Math.random());
+                donut.add(land);
+            }
+
+            createLaunchStation();
+            createStars();
+            updateCoinUI();
+            updateShopUI();
+            document.getElementById('high-score').innerText = `Best: ${highScore}`;
+            
+            if (hasUnlockedSaturn || hasUnlockedMars) {
+                document.getElementById('menu-dim-shift-btn').style.display = 'block';
+            }
+            
+            // Start a timer to live-update the shop UI countdown every second
+            setInterval(updateShopUI, 1000);
+            
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onMouseMove);
+            document.getElementById('start-btn').onclick = startGame;
+        }
+
+        function setPixelResolution(scale) {
+            pixelResolutionMod = scale;
+            const width = window.innerWidth / scale;
+            const height = window.innerHeight / scale;
+            renderer.setSize(width, height, false);
+        }
+
+        function createLaunchStation() {
+            launchStation = new THREE.Group();
+            launchStation.position.z = -200;
+            const base = new THREE.Mesh(new THREE.BoxGeometry(50, 6, 50), new THREE.MeshToonMaterial({ color: 0x1a1a1a }));
+            launchStation.add(base);
+            const colors = [0x239b56, 0xffffff, 0xc0392b]; // Green, White, Red stripes
+            colors.forEach((c, idx) => {
+                const s = new THREE.Mesh(new THREE.BoxGeometry(52, 1.2, 8), new THREE.MeshBasicMaterial({ color: c }));
+                s.position.set(0, 4 + idx * 1.2, 20);
+                launchStation.add(s);
+            });
+            scene.add(launchStation);
+        }
+
+        function createStars() {
+            if (starfield) scene.remove(starfield);
+            const geo = new THREE.BufferGeometry();
+            const pos = [];
+            for (let i = 0; i < 3000; i++) {
+                pos.push((Math.random()-0.5)*1200, (Math.random()-0.5)*1200, (Math.random()-0.5)*1200);
+            }
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+            starfield = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.6 }));
+            scene.add(starfield);
+        }
+
+        function getRocketMesh(isGolden = false) {
+            const group = new THREE.Group();
+            const bodyWidth = 1.1;
+            const bodyLength = 3.8;
+            const bodyColor = isGolden ? 0xffd700 : 0xeeeeee;
+            const body = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth, bodyWidth, bodyLength), new THREE.MeshToonMaterial({ color: bodyColor }));
+            group.add(body);
+            const noseColor = isGolden ? 0xffffff : 0xff2200;
+            const nose = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth, bodyWidth, 1.2), new THREE.MeshToonMaterial({ color: noseColor }));
+            nose.position.z = bodyLength/2 + 0.6;
+            group.add(nose);
+            const flame = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth * 0.8, bodyWidth * 0.8, 1.8), new THREE.MeshBasicMaterial({ color: 0xffcc00 }));
+            flame.position.z = -(bodyLength/2 + 0.9);
+            group.add(flame);
+            return { group, flame };
+        }
+
+        function getBuffaloMesh(isGolden = false) {
+            const buffalo = new THREE.Group();
+            const matMain = isGolden ? new THREE.MeshPhongMaterial({ color: 0xffd700, specular: 0xffffff, shininess: 100 }) : new THREE.MeshToonMaterial({ color: 0x5D2906 });
+            const matDark = isGolden ? new THREE.MeshPhongMaterial({ color: 0xdaa520, specular: 0xffffff, shininess: 100 }) : new THREE.MeshToonMaterial({ color: 0x3d1a04 });
+            const matHorn = isGolden ? new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0xffffff, shininess: 100 }) : new THREE.MeshToonMaterial({ color: 0xdddddd });
+            const matMuzzle = isGolden ? new THREE.MeshPhongMaterial({ color: 0xb8860b, specular: 0xffffff, shininess: 100 }) : new THREE.MeshToonMaterial({ color: 0x221108 });
+
+            const bodyMain = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.4, 2.5), matMain); buffalo.add(bodyMain);
+            const hump = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.8, 1.5), matDark); hump.position.set(0, 0.2, 0.5); buffalo.add(hump);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.3, 1.2), matDark); head.position.set(0, 0.1, 1.5); buffalo.add(head);
+            const muzzle = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.7, 0.6), matMuzzle); muzzle.position.set(0, -0.2, 2.1); buffalo.add(muzzle);
+
+            const createHorn = (side) => {
+                const hGroup = new THREE.Group();
+                const part1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.3), matHorn); part1.position.set(0.4 * side, 0, 0); hGroup.add(part1);
+                const part2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.6, 0.3), matHorn); part2.position.set(0.6 * side, 0.4, 0); hGroup.add(part2);
+                return hGroup;
+            };
+            buffalo.add(createHorn(1).translateX(0.5).translateY(0.6).translateZ(1.5));
+            buffalo.add(createHorn(-1).translateX(-0.5).translateY(0.6).translateZ(1.5));
+
+            for(let i=0; i<4; i++) {
+                const leg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.8), matDark);
+                leg.position.set((i % 2 === 0) ? 0.6 : -0.6, -0.7, (i < 2) ? 0.8 : -0.8);
+                buffalo.add(leg);
+            }
+            const tail = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 1), matDark); tail.position.set(0, 0, -1.6); buffalo.add(tail);
+            const glow = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.2, 4.5), new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: isGolden ? 0.4 : 0.15 })); buffalo.add(glow);
+
+            return buffalo;
+        }
+
+        function getCatMesh(isGolden = false) {
+            const cat = new THREE.Group();
+            const catColor = isGolden ? 0xffd700 : 0xffffff; 
+            const dark = isGolden ? 0xccaa00 : 0xdddddd;
+
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.1, 2.2), new THREE.MeshToonMaterial({ color: catColor })); cat.add(body);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 0.9), new THREE.MeshToonMaterial({ color: catColor })); head.position.set(0, 0.2, 1.4); cat.add(head);
+            const muzzle = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 0.3), new THREE.MeshToonMaterial({ color: 0xffffff })); muzzle.position.set(0, -0.1, 1.9); cat.add(muzzle);
+            const nose = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.1), new THREE.MeshToonMaterial({ color: 0xff66aa })); nose.position.set(0, 0, 2.05); cat.add(nose);
+            const eyeGeo = new THREE.BoxGeometry(0.15, 0.25, 0.1); const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const eyeL = new THREE.Mesh(eyeGeo, eyeMat); eyeL.position.set(0.3, 0.25, 1.85); cat.add(eyeL);
+            const eyeR = new THREE.Mesh(eyeGeo, eyeMat); eyeR.position.set(-0.3, 0.25, 1.85); cat.add(eyeR);
+            const earL = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.45, 0.2), new THREE.MeshToonMaterial({ color: dark })); earL.position.set(0.4, 0.8, 1.3); cat.add(earL);
+            const earR = earL.clone(); earR.position.set(-0.4, 0.8, 1.3); cat.add(earR);
+            const tailPart = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 1.2), new THREE.MeshToonMaterial({ color: dark })); tailPart.position.set(0, 0.4, -1.6); tailPart.rotation.x = 0.8; cat.add(tailPart);
+            const glow = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 3), new THREE.MeshBasicMaterial({ color: isGolden ? 0xffff00 : 0xff00ff, transparent: true, opacity: isGolden ? 0.4 : 0.15 })); cat.add(glow);
+            return cat;
+        }
+
+        function spawnRocket(isGoldenRocket = false) {
+            const { group, flame } = getRocketMesh(isGoldenRocket);
+            const buffaloVisual = getBuffaloMesh(false);
+            const wrapper = new THREE.Group();
+            wrapper.add(isGoldenBuffaloActive ? buffaloVisual : group);
+            wrapper.position.set((Math.random()-0.5)*26, (Math.random()-0.5)*26, -200);
+            scene.add(wrapper);
+            objects.push({ 
+                mesh: wrapper, 
+                rocketVisual: group, 
+                buffaloVisual: buffaloVisual, 
+                flame: flame, 
+                type: isGoldenRocket ? 'golden_rocket' : 'rocket', 
+                currentVisual: isGoldenBuffaloActive ? 'buffalo' : (isGoldenRocket ? 'golden_rocket' : 'rocket') 
+            });
+        }
+
+        function spawnBuffalo(isGolden = false) {
+            const type = isGolden ? 'golden_buffalo' : 'buffalo';
+            const { group, flame } = getRocketMesh();
+            const buffaloVisual = getBuffaloMesh(isGolden);
+            const wrapper = new THREE.Group();
+            wrapper.add(isGoldenBuffaloActive ? group : buffaloVisual);
+            wrapper.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, -200);
+            scene.add(wrapper);
+            objects.push({ mesh: wrapper, rocketVisual: group, buffaloVisual: buffaloVisual, flame: flame, type: type, currentVisual: isGoldenBuffaloActive ? 'rocket' : type });
+        }
+
+        function spawnCat(isGolden = false) {
+            const catMesh = getCatMesh(isGolden);
+            catMesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, -200);
+            scene.add(catMesh);
+            objects.push({ mesh: catMesh, type: isGolden ? 'golden_cat' : 'cat' });
+        }
+
+        function toggleGoldenBuffalo(active) {
+            isGoldenBuffaloActive = active;
+            document.getElementById('buffalo-tag').style.display = active ? 'block' : 'none';
+            
+            if (active) { 
+                scene.background = new THREE.Color(0xffffff); 
+                if (starfield) starfield.material.color.setHex(0x000000); 
+            } else {
+                if (currentDim === 'saturn') { 
+                    scene.background = new THREE.Color(0x110524); 
+                    if (starfield) starfield.material.color.setHex(0xffaaff); 
+                } else if (currentDim === 'mars') {
+                    scene.background = new THREE.Color(0x220500); 
+                    if (starfield) starfield.material.color.setHex(0xffaa88);
+                } else { 
+                    scene.background = new THREE.Color(0x000000); 
+                    if (starfield) starfield.material.color.setHex(0xffffff); 
+                }
+            }
+
+            objects.forEach(obj => {
+                if (obj.type === 'rocket' || obj.type === 'buffalo' || obj.type === 'golden_buffalo') {
+                    obj.mesh.clear();
+                    if (active) {
+                        if (obj.type === 'rocket' || obj.type === 'golden_rocket') { obj.mesh.add(obj.buffaloVisual); obj.currentVisual = 'buffalo'; }
+                        else { obj.mesh.add(obj.rocketVisual); obj.currentVisual = 'rocket'; }
+                    } else {
+                        if (obj.type === 'rocket' || obj.type === 'golden_rocket') { obj.mesh.add(obj.rocketVisual); obj.currentVisual = obj.type; }
+                        else { obj.mesh.add(obj.buffaloVisual); obj.currentVisual = obj.type; }
+                    }
+                }
+            });
+        }
+
+        function setDimension(dim) {
+            currentDim = dim;
+            isSaturnDimension = (dim === 'saturn');
+            isMarsDimension = (dim === 'mars');
+            
+            document.getElementById('saturn-tag').style.display = isSaturnDimension ? 'block' : 'none';
+            document.getElementById('mars-tag').style.display = isMarsDimension ? 'block' : 'none';
+            
+            const shiftBtn = document.getElementById('menu-dim-shift-btn');
+            if (shiftBtn) {
+                shiftBtn.innerText = "SHIFT DIMENSION: " + dim.toUpperCase();
+            }
+            
+            const dimDisplay = document.getElementById('dimension-display');
+            if (dimDisplay) {
+                dimDisplay.innerText = dim.toUpperCase();
+                if (dim === 'earth') dimDisplay.style.color = "#00ffcc";
+                if (dim === 'saturn') dimDisplay.style.color = "#ff00ff";
+                if (dim === 'mars') dimDisplay.style.color = "#ff4400";
+            }
+            
+            // Menu switching logic
+            document.getElementById('earth-shop').style.display = (dim === 'earth') ? 'grid' : 'none';
+            document.getElementById('saturn-shop').style.display = (dim !== 'earth') ? 'grid' : 'none';
+            document.getElementById('earth-level-picker').style.display = (dim === 'earth') ? 'flex' : 'none';
+            document.getElementById('saturn-level-picker').style.display = (dim !== 'earth') ? 'flex' : 'none';
+            document.getElementById('earth-arcade-container').style.display = (dim === 'earth') ? 'block' : 'none';
+            document.getElementById('saturn-arcade-container').style.display = (dim !== 'earth') ? 'block' : 'none';
+            document.getElementById('menu-title').innerHTML = dim.toUpperCase() + "<br>DEFENSE";
+            
+            if (dim === 'saturn') {
+                saturnRingMesh.visible = true;
+                donut.material.color.setHex(0xe6ccb8); // Gas giant color
+                if (!isGoldenBuffaloActive) {
+                    scene.background = new THREE.Color(0x110524); // Deep space purple
+                    if (starfield) starfield.material.color.setHex(0xffaaff); // Pinkish stars
+                }
+            } else if (dim === 'mars') {
+                saturnRingMesh.visible = false;
+                donut.material.color.setHex(0xcc4400); // Mars red
+                if (!isGoldenBuffaloActive) {
+                    scene.background = new THREE.Color(0x220500); // Deep red space
+                    if (starfield) starfield.material.color.setHex(0xffaa88); // Orange stars
+                }
+            } else {
+                saturnRingMesh.visible = false;
+                donut.material.color.setHex(0x3366ff); // Back to blue
+                if (!isGoldenBuffaloActive) {
+                    scene.background = new THREE.Color(0x000000);
+                    if (starfield) starfield.material.color.setHex(0xffffff);
+                }
+            }
+        }
+
+        function handleDimShiftClick() {
+            if (!hasUnlockedSaturn && !hasUnlockedMars) {
+                const toast = document.getElementById('cat-toast');
+                toast.innerText = "FIND ARCADE PORTAL TO UNLOCK!";
+                toast.style.color = "#ff4444";
+                toast.style.border = "4px solid red";
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            } else {
+                if (currentDim === 'earth') {
+                    if (hasUnlockedSaturn) setDimension('saturn');
+                    else if (hasUnlockedMars) setDimension('mars');
+                } else if (currentDim === 'saturn') {
+                    if (hasUnlockedMars) setDimension('mars');
+                    else setDimension('earth');
+                } else if (currentDim === 'mars') {
+                    setDimension('earth');
+                }
+            }
+        }
+
+        function applyDifficulty(lvl) {
+            speedMultiplier = 1 + (lvl - 1) * 0.22;
+            spawnRate = Math.max(180, 2100 - (lvl - 1) * 200);
+            if (currentDim === 'saturn') {
+                speedMultiplier *= 1.15; // 15% faster moving in Saturn
+                spawnRate *= 0.85; // 15% faster spawn rates in Saturn
+            } else if (currentDim === 'mars') {
+                speedMultiplier *= 1.30; // 30% faster moving in Mars
+                spawnRate *= 0.70; // 30% faster spawn rates in Mars
+            }
+        }
+
+        function updateCoinUI() {
+            document.getElementById('coin-display').innerText = `Coins: ${coins}`;
+            localStorage.setItem('pixelDonutCoins', coins);
+        }
+
+        function onMouseMove(e) { if(!isMgActive && !isFbActive) { mouseX = e.clientX; mouseY = e.clientY; } }
+        
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('.shop-item')) return;
+            if (isBossEventActive) firePlayerRocket(e.clientX, e.clientY);
+        });
+        
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('.shop-item')) return;
+            if (isBossEventActive && e.touches.length > 0) {
+                firePlayerRocket(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        });
+
+        function onWindowResize() { 
+            camera.aspect = window.innerWidth / window.innerHeight; 
+            camera.updateProjectionMatrix(); 
+            setPixelResolution(pixelResolutionMod); 
+            mgResize();
+            fbResize();
+        }
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+
+            if (isBossEventActive) {
+                if (bossMesh) {
+                    bossMesh.position.x = Math.sin(time * 0.002) * 25; // Move the huge station side to side
+                }
+                
+                for (let i = playerRockets.length - 1; i >= 0; i--) {
+                    let r = playerRockets[i];
+                    
+                    // Update position based on 3D velocity pointing to click
+                    if (r.userData && r.userData.velocity) {
+                        r.position.add(r.userData.velocity);
+                    } else {
+                        r.position.z -= 4; // Backup safety
+                    }
+                    
+                    // Collision with the large launch station
+                    if (bossMesh && Math.abs(r.position.x - bossMesh.position.x) < 26 && Math.abs(r.position.y - bossMesh.position.y) < 15 && Math.abs(r.position.z - bossMesh.position.z) < 30) {
+                        bossHits++;
+                        document.getElementById('boss-hp-bar').style.width = ((10 - bossHits) * 10) + '%';
+                        scene.remove(r);
+                        playerRockets.splice(i, 1);
+                        
+                        // Flash the whole station white on hit
+                        bossMesh.children.forEach(c => {
+                            if (c.material) c.material.color.setHex(0xffffff);
+                        });
+                        
+                        // Restore colors a split second later
+                        setTimeout(() => { 
+                            if(bossMesh && bossMesh.children.length >= 4) {
+                                bossMesh.children[0].material.color.setHex(0x1a1a1a); // base
+                                bossMesh.children[1].material.color.setHex(0x239b56); // green stripe
+                                bossMesh.children[2].material.color.setHex(0xffffff); // white stripe
+                                bossMesh.children[3].material.color.setHex(0xc0392b); // red stripe
+                            }
+                        }, 100);
+
+                        if (bossHits >= 10) endBossEvent(true);
+                    } else if (r.position.z < -260 || Math.abs(r.position.x) > 150 || Math.abs(r.position.y) > 150) {
+                        // Despawn if it flies way past the boss or too far off-screen! (Range increased to -260)
+                        scene.remove(r);
+                        playerRockets.splice(i, 1);
+                    }
+                }
+                renderer.render(scene, camera);
+                return; // Pause normal wave logic
+            }
+
+            if (isGameActive && !isMgActive && !isFbActive) { 
+                const currentSpawnRate = catSpawnBoostActive ? spawnRate * 0.83 : spawnRate; 
+                if (time - lastSpawnTime > currentSpawnRate) { 
+                    let spawnGoldRocket = false;
+                    if (currentDim === 'saturn') {
+                        saturnRocketCount++;
+                        if (saturnRocketCount >= (50 * currentLevel)) {
+                            spawnGoldRocket = true;
+                            saturnRocketCount = 0;
+                        }
+                    }
+                    spawnRocket(spawnGoldRocket); 
+                    lastSpawnTime = time; 
+                }
+                if (time - lastBuffaloTime > 18000 + Math.random() * 10000) { spawnBuffalo(false); lastBuffaloTime = time; }
+                const catInterval = catSpawnBoostActive ? 6000 : 10000;
+                if (time - lastCatTime > catInterval + Math.random() * 8000) { spawnCat(false); lastCatTime = time; }
+                if (time - lastGoldenTime > 12000 + Math.random() * 8000) {
+                    if (Math.random() < 0.5) spawnBuffalo(true);
+                    else spawnCat(true);
+                    lastGoldenTime = time;
+                }
+
+                const targetX = (mouseX / window.innerWidth) * 26 - 13;
+                const targetY = -(mouseY / window.innerHeight) * 26 + 13;
+                donut.position.x += (targetX - donut.position.x) * 0.15;
+                donut.position.y += (targetY - donut.position.y) * 0.15;
+                donut.rotation.y = (donut.position.x - targetX) * 0.25;
+                donut.rotation.x = -(donut.position.y - targetY) * 0.25;
+
+                const currentSpeedMod = ultraSlowTimeActive ? 0.3 : (slowTimeActive ? 0.5 : 1.0);
+
+                for (let i = objects.length - 1; i >= 0; i--) {
+                    const obj = objects[i];
+                    let behaviorType = obj.type.includes('cat') ? obj.type : obj.currentVisual;
+                    let speed = (behaviorType.includes('buffalo') ? BASE_SPEED * 0.6 : (behaviorType.includes('cat') ? BASE_SPEED * 0.8 : BASE_SPEED)) * speedMultiplier * currentSpeedMod;
+                    
+                    if (behaviorType === 'rocket' || behaviorType === 'golden_rocket') speed *= catSpeedBuff;
+
+                    obj.mesh.position.z += speed;
+                    if (obj.flame) obj.flame.scale.set(1, 1, 1 + Math.random() * 0.8);
+                    
+                    if (behaviorType.includes('buffalo') || behaviorType.includes('cat')) {
+                        obj.mesh.rotation.z = Math.sin(time * 0.005) * 0.1;
+                        obj.mesh.position.y += Math.sin(time * 0.01) * 0.02;
+                    }
+
+                    if (Math.abs(obj.mesh.position.z - donut.position.z) < 1.6) {
+                        const dist = Math.sqrt(Math.pow(obj.mesh.position.x - donut.position.x, 2) + Math.pow(obj.mesh.position.y - donut.position.y, 2));
+                        
+                        let hitPlanet = dist < DONUT_RADIUS + DONUT_TUBE && dist > HOLE_RADIUS - 0.5;
+                        let hitRing = isSaturnDimension ? (dist > 6.2 && dist < 9.5) : false; // Ring boundaries
+
+                        if (!isImmune && (hitPlanet || hitRing)) {
+                            if (behaviorType === 'rocket' || behaviorType === 'golden_rocket') endGame();
+                        }
+                    }
+
+                    if (obj.mesh.position.z > 25) {
+                        const dist = Math.sqrt(Math.pow(obj.mesh.position.x - donut.position.x, 2) + Math.pow(obj.mesh.position.y - donut.position.y, 2));
+                        
+                        let passedCenter = dist <= HOLE_RADIUS;
+                        let passedGap = isSaturnDimension ? (dist >= DONUT_RADIUS + DONUT_TUBE && dist <= 6.2) : false;
+
+                        if (passedCenter || passedGap) {
+                            if (behaviorType === 'golden_rocket') {
+                                startBossEvent();
+                            } else {
+                                updateScore(1, behaviorType);
+                            }
+                        }
+                        scene.remove(obj.mesh);
+                        objects.splice(i, 1);
+                    }
+                }
+                
+                if (isImmune) shieldMesh.rotation.z += 0.1;
+            }
+            renderer.render(scene, camera);
+        }
+
+        function applyCatEffect(isGolden = false) {
+            const goodEffects = ['lucky', 'nimble', 'lives', 'boost'];
+            const badEffects = ['cursed', 'zoomies', 'hairball'];
+            let chosen = isGolden ? goodEffects[Math.floor(Math.random() * goodEffects.length)] : 
+                         (Math.random() < 0.5 ? goodEffects[Math.floor(Math.random() * goodEffects.length)] : badEffects[Math.floor(Math.random() * badEffects.length)]);
+            
+            const toast = document.getElementById('cat-toast');
+            toast.style.display = 'block';
+            toast.style.border = isGolden ? "4px solid gold" : "2px solid #fff";
+
+            switch(chosen) {
+                case 'lucky': toast.innerText = "LUCKY MEOW! +250 COINS"; toast.style.color = "#ffff00"; coins += 250; updateCoinUI(); break;
+                case 'cursed': toast.innerText = "CURSED HISS! -100 COINS"; toast.style.color = "#ff4444"; coins = Math.max(0, coins - 100); updateCoinUI(); break;
+                case 'nimble': toast.innerText = "NIMBLE PAWS! ROCKETS SLOWED (15s)"; toast.style.color = "#00ffff"; catSpeedBuff = 0.5; document.getElementById('cat-tag').style.display = 'block'; setTimeout(() => { catSpeedBuff = 1.0; document.getElementById('cat-tag').style.display = 'none'; }, 15000); break;
+                case 'zoomies': toast.innerText = "THE ZOOMIES! SPEED UP (10s)"; toast.style.color = "#ff6600"; catSpeedBuff = 1.6; document.getElementById('cat-tag').style.display = 'block'; setTimeout(() => { catSpeedBuff = 1.0; document.getElementById('cat-tag').style.display = 'none'; }, 10000); break;
+                case 'lives': toast.innerText = "NINE LIVES! LONG SHIELD (15s)"; toast.style.color = "#ffffff"; activatePowerup('shield', true); break;
+                case 'hairball': toast.innerText = "HAIRBALL! VISION GLITCH (10s)"; toast.style.color = "#aaaaaa"; setPixelResolution(5.0); setTimeout(() => setPixelResolution(PIXEL_SCALE_BASE), 10000); break;
+                case 'boost': toast.innerText = "CAT REVOLUTION! MORE CATS (25s)"; toast.style.color = "#ffd700"; catSpawnBoostActive = true; setTimeout(() => { catSpawnBoostActive = false; }, 25000); break;
+            }
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function updateShopUI() {
+            // Only update if the element exists and overlay is visible to save performance
+            if (document.getElementById('overlay').style.display === 'none') return;
+            
+            const NOW = Date.now();
+            const ONE_DAY = 24 * 60 * 60 * 1000;
+            
+            // Earth Arcade
+            const arcadeTitle = document.getElementById('arcade-title');
+            const arcadePrice = document.getElementById('arcade-price');
+            if (arcadeTitle) {
+                let canUseFree = (NOW - lastFreeUse) >= ONE_DAY;
+
+                if (hasBoughtMinigame) {
+                    arcadeTitle.innerText = "ARCADE (OWNED)";
+                    arcadePrice.innerText = "PLAY (FREE)";
+                    arcadePrice.style.color = "#00ffcc";
+                } else if (canUseFree) {
+                    arcadeTitle.innerText = "ARCADE (DAILY FREE)";
+                    arcadePrice.innerText = "PLAY (FREE)";
+                    arcadePrice.style.color = "#00ffcc";
+                } else {
+                    arcadeTitle.innerText = "BUY ARCADE";
+                    const timeLeft = ONE_DAY - (NOW - lastFreeUse);
+                    const h = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    const timerStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                    
+                    arcadePrice.innerHTML = `1000 COINS<br><br><span style="font-size: 8px; color: #ffaaaa;">FREE IN: ${timerStr}</span>`;
+                    arcadePrice.style.color = "#ffff00";
+                }
+            }
+            
+            // Saturn Arcade (Flappy Bread)
+            const fbTitle = document.getElementById('fb-arcade-title');
+            const fbPrice = document.getElementById('fb-arcade-price');
+            if (fbTitle) {
+                let fbCanUseFree = (NOW - lastFbFreeUse) >= ONE_DAY;
+
+                if (hasBoughtFb || hasUnlockedFb) {
+                    fbTitle.innerText = "ARCADE (OWNED)";
+                    fbPrice.innerText = "PLAY (FREE)";
+                    fbPrice.style.color = "#00ffff";
+                } else if (fbCanUseFree) {
+                    fbTitle.innerText = "ARCADE (DAILY FREE)";
+                    fbPrice.innerText = "PLAY (FREE)";
+                    fbPrice.style.color = "#00ffff";
+                } else {
+                    fbTitle.innerText = "BUY ARCADE";
+                    const timeLeft = ONE_DAY - (NOW - lastFbFreeUse);
+                    const h = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    const timerStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                    
+                    fbPrice.innerHTML = `1500 COINS<br><br><span style="font-size: 8px; color: #ffaaaa;">FREE IN: ${timerStr}</span>`;
+                    fbPrice.style.color = "#ffff00";
+                }
+            }
+            
+            const shiftBtn = document.getElementById('menu-dim-shift-btn');
+            if (shiftBtn) {
+                if (!hasUnlockedSaturn && !hasUnlockedMars) {
+                    shiftBtn.innerText = "DIMENSION: LOCKED (FIND PORTAL)";
+                    shiftBtn.style.background = "#222";
+                    shiftBtn.style.color = "#555";
+                    shiftBtn.style.borderColor = "#555";
+                    shiftBtn.style.boxShadow = "4px 4px 0px #000";
+                } else {
+                    shiftBtn.innerText = "SHIFT DIMENSION: " + currentDim.toUpperCase();
+                    if (currentDim === 'saturn') {
+                        shiftBtn.style.background = "#4a0080";
+                        shiftBtn.style.color = "#00ffff";
+                        shiftBtn.style.borderColor = "#fff";
+                        shiftBtn.style.boxShadow = "4px 4px 0px #ff00ff";
+                    } else if (currentDim === 'mars') {
+                        shiftBtn.style.background = "#4d1a00";
+                        shiftBtn.style.color = "#ffff00";
+                        shiftBtn.style.borderColor = "#fff";
+                        shiftBtn.style.boxShadow = "4px 4px 0px #ff4400";
+                    } else {
+                        shiftBtn.style.background = "#4a0080";
+                        shiftBtn.style.color = "#00ffff";
+                        shiftBtn.style.borderColor = "#fff";
+                        shiftBtn.style.boxShadow = "4px 4px 0px #ff00ff";
+                    }
+                }
+            }
+        }
+
+        function buyArcade() {
+            const NOW = Date.now();
+            const ONE_DAY = 24 * 60 * 60 * 1000;
+            let canUseFree = (NOW - lastFreeUse) >= ONE_DAY;
+
+            if (hasBoughtMinigame) {
+                startMiniGame();
+            } else if (canUseFree) {
+                lastFreeUse = NOW;
+                localStorage.setItem('pixelDonutMgFreeUse', lastFreeUse.toString());
+                updateShopUI();
+                startMiniGame();
+            } else if (coins >= 1000) {
+                coins -= 1000;
+                hasBoughtMinigame = true;
+                localStorage.setItem('pixelDonutMgBought', 'true');
+                updateCoinUI();
+                updateShopUI();
+                startMiniGame();
+            } else {
+                const toast = document.getElementById('cat-toast');
+                toast.innerText = "NEED 1000 COINS!";
+                toast.style.color = "#ff4444";
+                toast.style.border = "2px solid #ff4444";
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2000);
+            }
+        }
+
+        function buyFbArcade() {
+            const NOW = Date.now();
+            const ONE_DAY = 24 * 60 * 60 * 1000;
+            let canUseFree = (NOW - lastFbFreeUse) >= ONE_DAY;
+
+            if (hasBoughtFb || hasUnlockedFb) {
+                fbStartMiniGame();
+            } else if (canUseFree) {
+                lastFbFreeUse = NOW;
+                localStorage.setItem('pixelDonutFbFreeUse', lastFbFreeUse.toString());
+                updateShopUI();
+                fbStartMiniGame();
+            } else if (coins >= 1500) {
+                coins -= 1500;
+                hasBoughtFb = true;
+                localStorage.setItem('pixelDonutFbBought', 'true');
+                updateCoinUI();
+                updateShopUI();
+                fbStartMiniGame();
+            } else {
+                const toast = document.getElementById('cat-toast');
+                toast.innerText = "NEED 1500 COINS!";
+                toast.style.color = "#ff4444";
+                toast.style.border = "2px solid #ff4444";
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2000);
+            }
+        }
+
+        function buyPowerup(type) {
+            let price = 0;
+            switch(type) {
+                case 'shield': price = 100; break;
+                case 'slow': price = 150; break;
+                case 'double': price = 300; break;
+                case 'clear': price = 200; break;
+                case 'mega_shield': price = 250; break;
+                case 'ultra_slow': price = 400; break;
+                case 'triple': price = 800; break;
+                case 'super_emp': price = 500; break;
+            }
+            if (coins >= price) {
+                coins -= price;
+                updateCoinUI();
+                activatePowerup(type);
+            }
+        }
+
+        function activatePowerup(type) {
+            if (type === 'shield') {
+                isImmune = true; shieldMesh.visible = true; document.getElementById('shield-tag').style.display = 'block';
+                setTimeout(() => { isImmune = false; shieldMesh.visible = false; document.getElementById('shield-tag').style.display = 'none'; }, 8000);
+            } 
+            else if (type === 'mega_shield') {
+                isImmune = true; shieldMesh.visible = true; document.getElementById('shield-tag').style.display = 'block';
+                setTimeout(() => { isImmune = false; shieldMesh.visible = false; document.getElementById('shield-tag').style.display = 'none'; }, 15000);
+            }
+            else if (type === 'slow') {
+                slowTimeActive = true; document.getElementById('slow-tag').style.display = 'block';
+                setTimeout(() => { slowTimeActive = false; document.getElementById('slow-tag').style.display = 'none'; }, 10000);
+            }
+            else if (type === 'ultra_slow') {
+                ultraSlowTimeActive = true; document.getElementById('slow-tag').style.display = 'block';
+                setTimeout(() => { ultraSlowTimeActive = false; document.getElementById('slow-tag').style.display = 'none'; }, 15000);
+            }
+            else if (type === 'double') doubleCoinsActive = true;
+            else if (type === 'triple') tripleCoinsActive = true;
+            else if (type === 'clear') { objects.forEach(o => scene.remove(o.mesh)); objects = []; }
+            else if (type === 'super_emp') { 
+                objects.forEach(o => scene.remove(o.mesh)); objects = []; 
+                isImmune = true; shieldMesh.visible = true; document.getElementById('shield-tag').style.display = 'block';
+                setTimeout(() => { isImmune = false; shieldMesh.visible = false; document.getElementById('shield-tag').style.display = 'none'; }, 3000);
+            }
+        }
+
+        function updateScore(pts, type) {
+            score += pts; document.getElementById('score-display').innerText = `Score: ${score}`;
+            
+            let multi = tripleCoinsActive ? 3 : (doubleCoinsActive ? 2 : 1);
+            
+            if (type === 'cat' || type === 'golden_cat') applyCatEffect(type === 'golden_cat');
+            else if (type === 'golden_buffalo') {
+                toggleGoldenBuffalo(true); setTimeout(() => toggleGoldenBuffalo(false), 15000);
+                coins += (15 * currentLevel) * multi; updateCoinUI();
+            }
+            else {
+                coins += ((type === 'buffalo' ? 15 : 5) * currentLevel) * multi;
+                updateCoinUI();
+            }
+
+            const maxLevel = currentDim === 'saturn' ? 15 : 10;
+            const calculatedLevel = Math.min(startingLevel + Math.floor(score / POINTS_PER_LEVEL), maxLevel);
+            
+            if (calculatedLevel > currentLevel) {
+                currentLevel = calculatedLevel; document.getElementById('level-display').innerText = `Level: ${currentLevel}`;
+                applyDifficulty(currentLevel);
+                showLevelUp();
+            }
+            if (score > highScore) { highScore = score; localStorage.setItem('pixelDonutBest', highScore); document.getElementById('high-score').innerText = `Best: ${highScore}`; }
+        }
+
+        function showLevelUp() {
+            const toast = document.getElementById('level-up-toast'); toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 1000);
+        }
+
+        function startBossEvent() {
+            isBossEventActive = true;
+            bossHits = 0;
+            
+            // Clear screen
+            objects.forEach(o => scene.remove(o.mesh)); objects = [];
+            playerRockets.forEach(r => scene.remove(r)); playerRockets = [];
+            
+            // The boss is the actual launch station from the background!
+            bossMesh = launchStation;
+            
+            document.getElementById('boss-ui-title').innerText = "TARGET BASE";
+            document.getElementById('boss-ui').style.display = 'block';
+            document.getElementById('boss-hp-bar').style.width = '100%';
+            
+            bossEventTimeout = setTimeout(() => {
+                endBossEvent(false);
+            }, 20000);
+        }
+
+        function endBossEvent(won) {
+            isBossEventActive = false;
+            clearTimeout(bossEventTimeout);
+            
+            if (bossMesh) { 
+                bossMesh.position.x = 0; // Return station to center
+                bossMesh = null; // Don't delete it from scene!
+            }
+            
+            playerRockets.forEach(r => scene.remove(r)); playerRockets = [];
+            document.getElementById('boss-ui').style.display = 'none';
+
+            if (won) {
+                hasUnlockedFb = true;
+                localStorage.setItem('pixelDonutFbUnlocked', 'true');
+                updateShopUI();
+                
+                const toast = document.getElementById('cat-toast');
+                toast.innerText = "FLAPPY BREAD UNLOCKED!";
+                toast.style.color = "#00ffff";
+                toast.style.border = "4px solid #00ffff";
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 4000);
+            }
+            
+            endGame(); 
+        }
+
+        function firePlayerRocket(clientX, clientY) {
+            const r = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 2.5), new THREE.MeshBasicMaterial({color: 0x00ffff}));
+            r.position.copy(donut.position); // Start at the donut
+
+            // Calculate 3D direction from screen click
+            const vec = new THREE.Vector3(
+                (clientX / window.innerWidth) * 2 - 1,
+                - (clientY / window.innerHeight) * 2 + 1,
+                0.5
+            );
+            vec.unproject(camera);
+            const dir = vec.sub(camera.position).normalize();
+            
+            // Give rocket a velocity vector (Speed: 6)
+            r.userData = { velocity: dir.multiplyScalar(6) };
+            
+            // Point the rocket in the direction it's flying
+            r.lookAt(r.position.clone().add(dir));
+
+            scene.add(r);
+            playerRockets.push(r);
+        }
+
+        function startGame() {
+            if(isMgActive || isFbActive || isBossEventActive || isPvActive) return;
+
+            if (currentDim === 'mars') {
+                pvStartMiniGame();
+                return;
+            }
+
+            isGameActive = true; score = 0; saturnRocketCount = 0;
+            doubleCoinsActive = false; tripleCoinsActive = false; 
+            catSpeedBuff = 1.0;
+            toggleGoldenBuffalo(false); catSpawnBoostActive = false;
+            
+            let startSelect = (currentDim !== 'earth') ? document.getElementById('start-level-saturn') : document.getElementById('start-level-earth');
+            currentLevel = startingLevel = parseInt(startSelect.value);
+            applyDifficulty(currentLevel);
+            
+            document.getElementById('score-display').innerText = `Score: 0`; document.getElementById('level-display').innerText = `Level: ${currentLevel}`;
+            document.getElementById('overlay').style.display = 'none'; document.getElementById('game-over-msg').style.display = 'none';
+            objects.forEach(o => scene.remove(o.mesh)); objects = [];
+            lastSpawnTime = lastBuffaloTime = lastCatTime = lastGoldenTime = performance.now();
+        }
+
+        function showHowToPlay() {
+            document.getElementById('how-to-play-screen').style.display = 'flex';
+        }
+
+        function hideHowToPlay() {
+            document.getElementById('how-to-play-screen').style.display = 'none';
+        }
+
+        function endGame() {
+            isGameActive = false;
+            document.getElementById('overlay').style.display = 'flex'; document.getElementById('game-over-msg').style.display = 'block';
+            document.getElementById('start-btn').innerText = "RESTART";
+            updateShopUI(); // Update UI when returning to menu
+            isImmune = false; shieldMesh.visible = false; slowTimeActive = false; ultraSlowTimeActive = false; catSpeedBuff = 1.0; 
+            toggleGoldenBuffalo(false); catSpawnBoostActive = false;
+            if (currentDim === 'saturn' && !hasUnlockedSaturn) setDimension('earth');
+            if (currentDim === 'mars' && !hasUnlockedMars) setDimension('earth');
+            document.getElementById('shield-tag').style.display = 'none'; document.getElementById('slow-tag').style.display = 'none'; document.getElementById('cat-tag').style.display = 'none';
+            setPixelResolution(PIXEL_SCALE_BASE);
+        }
+
+        // ==========================================
+        // 2D MINI GAME ENGINE (Hungry Buffalo)
+        // ==========================================
+        const mgCanvas = document.getElementById('mg-gameCanvas');
+        const mgCtx = mgCanvas.getContext('2d');
+        const mgHungerBar = document.getElementById('mg-hunger-bar');
+        const mgScoreDisplay = document.getElementById('mg-score-display');
+        const mgStartScreen = document.getElementById('mg-start-screen');
+        const mgGameOverScreen = document.getElementById('mg-game-over-screen');
+        const mgFinalScoreDisplay = document.getElementById('mg-final-score');
+        const mgMobileControls = document.getElementById('mg-mobile-controls');
+        const mgJoystickArea = document.getElementById('mg-joystick-area');
+        const mgJoystickKnob = document.getElementById('mg-joystick-knob');
+        const mgDashBtn = document.getElementById('mg-dash-btn');
+
+        let mgGameRunning = false;
+        let mgScore = 0; // 10 per zombie
+        let mgLastTime = 0;
+        let mgLastPortalCheck = 0;
+        let mgParticles = [];
+        let mgBloodSplats = [];
+        let mgAnimId;
+        
+        const MG_BUFFALO_SIZE = 40;
+        const MG_ZOMBIE_SIZE = 30;
+        const MG_MAX_HUNGER = 100;
+        
+        const mgPlayer = { x: 0, y: 0, vx: 0, vy: 0, speed: 5, dashSpeed: 12, isDashing: false, dashCooldown: 0, hunger: MG_MAX_HUNGER, angle: 0, frame: 0 };
+        let mgZombies = [];
+        
+        const mgKeys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, w: false, s: false, a: false, d: false, " ": false };
+        const mgJoystick = { active: false, dx: 0, dy: 0, originX: 0, originY: 0 };
+        
+        let mgPortal = { active: false, x: 0, y: 0, timeLeft: 0 };
+
+        function mgResize() {
+            if (mgCanvas) {
+                mgCanvas.width = window.innerWidth;
+                mgCanvas.height = window.innerHeight;
+                if (!mgGameRunning) {
+                    const holeRadius = Math.min(mgCanvas.width, mgCanvas.height) * 0.2;
+                    mgPlayer.x = mgCanvas.width / 2;
+                    mgPlayer.y = (mgCanvas.height / 2) - holeRadius - 50;
+                }
+            }
+        }
+        mgResize(); // initial
+
+        window.addEventListener('keydown', (e) => {
+            if(!isMgActive) return;
+            if (mgKeys.hasOwnProperty(e.key)) mgKeys[e.key] = true;
+            if (e.key === " " && mgGameRunning) mgTryDash();
+        });
+        window.addEventListener('keyup', (e) => {
+            if(!isMgActive) return;
+            if (mgKeys.hasOwnProperty(e.key)) mgKeys[e.key] = false;
+        });
+
+        if ('ontouchstart' in window) mgMobileControls.style.display = 'flex';
+
+        mgJoystickArea.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            mgJoystick.active = true;
+            mgJoystick.originX = touch.clientX;
+            mgJoystick.originY = touch.clientY;
+            mgUpdateJoystickVisual(0, 0);
+        });
+
+        mgJoystickArea.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!mgJoystick.active) return;
+            const touch = e.changedTouches[0];
+            const dx = touch.clientX - mgJoystick.originX;
+            const dy = touch.clientY - mgJoystick.originY;
+            const distance = Math.min(Math.sqrt(dx*dx + dy*dy), 50); 
+            const angle = Math.atan2(dy, dx);
+            mgJoystick.dx = Math.cos(angle) * (distance / 50);
+            mgJoystick.dy = Math.sin(angle) * (distance / 50);
+            mgUpdateJoystickVisual(Math.cos(angle) * distance, Math.sin(angle) * distance);
+        });
+
+        const mgResetJoystick = () => {
+            mgJoystick.active = false; mgJoystick.dx = 0; mgJoystick.dy = 0;
+            mgUpdateJoystickVisual(0, 0);
+        };
+        mgJoystickArea.addEventListener('touchend', mgResetJoystick);
+        mgJoystickArea.addEventListener('touchcancel', mgResetJoystick);
+
+        function mgUpdateJoystickVisual(x, y) { mgJoystickKnob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`; }
+        mgDashBtn.addEventListener('touchstart', (e) => { e.preventDefault(); mgTryDash(); });
+
+        function mgTryDash() {
+            if (mgPlayer.dashCooldown <= 0) {
+                mgPlayer.isDashing = true; mgPlayer.dashCooldown = 60; 
+                for(let i=0; i<10; i++) mgParticles.push(mgCreateParticle(mgPlayer.x, mgPlayer.y + MG_BUFFALO_SIZE/2, '#deb887', 2));
+            }
+        }
+
+        function mgExitToSaturn() {
+            coins += mgScore;
+            updateCoinUI();
+            updateShopUI();
+            isMgActive = false;
+            document.getElementById('minigame-overlay').style.display = 'none';
+            
+            // Permanently unlock Saturn toggle!
+            hasUnlockedSaturn = true;
+            localStorage.setItem('pixelDonutSaturnUnlocked', 'true');
+            document.getElementById('menu-dim-shift-btn').style.display = 'block';
+            
+            // Start the regular 3D game and activate the Saturn Dimension
+            startGame();
+            setDimension('saturn');
+        }
+
+        function startMiniGame() {
+            isMgActive = true;
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('minigame-overlay').style.display = 'flex';
+            mgStartScreen.style.display = 'flex';
+            mgGameOverScreen.style.display = 'none';
+            mgResize();
+        }
+
+        function mgStartGame() {
+            mgGameRunning = true;
+            mgScore = 0;
+            mgPlayer.hunger = MG_MAX_HUNGER;
+            
+            const holeRadius = Math.min(mgCanvas.width, mgCanvas.height) * 0.2;
+            mgPlayer.x = mgCanvas.width / 2;
+            mgPlayer.y = (mgCanvas.height / 2) - holeRadius - 50;
+            
+            mgPlayer.dashCooldown = 0;
+            mgPlayer.isDashing = false;
+            mgZombies = [];
+            mgBloodSplats = [];
+            mgParticles = [];
+            
+            mgStartScreen.style.display = 'none';
+            mgGameOverScreen.style.display = 'none';
+            
+            mgPortal.active = false;
+            
+            mgScoreDisplay.innerText = "0";
+            mgHungerBar.style.width = "100%";
+
+            mgLastTime = performance.now();
+            mgLastPortalCheck = performance.now();
+            requestAnimationFrame(mgGameLoop);
+        }
+
+        function mgGameOver(reason) {
+            mgGameRunning = false;
+            mgGameOverScreen.style.display = 'flex';
+            document.getElementById('mg-fail-title').innerText = reason;
+            mgFinalScoreDisplay.innerText = "Coins Earned: " + mgScore;
+        }
+
+        function mgExitToMain() {
+            coins += mgScore;
+            updateCoinUI();
+            updateShopUI();
+            isMgActive = false;
+            document.getElementById('minigame-overlay').style.display = 'none';
+            document.getElementById('overlay').style.display = 'flex';
+        }
+
+        function mgSpawnZombie() {
+            let x, y;
+            if (Math.random() < 0.5) { x = Math.random() < 0.5 ? -50 : mgCanvas.width + 50; y = Math.random() * mgCanvas.height; } 
+            else { x = Math.random() * mgCanvas.width; y = Math.random() < 0.5 ? -50 : mgCanvas.height + 50; }
+            mgZombies.push({ x: x, y: y, speed: 1.5 + Math.random() * 1.5, state: 'wander', wanderAngle: Math.random() * Math.PI * 2, type: Math.random() > 0.8 ? 'fast' : 'normal', frame: Math.floor(Math.random() * 10) });
+        }
+
+        function mgCreateParticle(x, y, color, speed) { return { x: x, y: y, vx: (Math.random() - 0.5) * speed * 4, vy: (Math.random() - 0.5) * speed * 4, life: 1.0, color: color, size: Math.random() * 5 + 2 }; }
+
+        function mgGameLoop(timestamp) {
+            if (!mgGameRunning) return;
+            const dt = (timestamp - mgLastTime) / 16.666; 
+            mgLastTime = timestamp;
+            mgUpdate(dt, timestamp);
+            mgDraw();
+            requestAnimationFrame(mgGameLoop);
+        }
+
+        function mgUpdate(dt, timestamp) {
+            let dx = 0; let dy = 0;
+            if (mgKeys.ArrowUp || mgKeys.w) dy = -1;
+            if (mgKeys.ArrowDown || mgKeys.s) dy = 1;
+            if (mgKeys.ArrowLeft || mgKeys.a) dx = -1;
+            if (mgKeys.ArrowRight || mgKeys.d) dx = 1;
+
+            if (mgJoystick.active) { dx = mgJoystick.dx; dy = mgJoystick.dy; }
+            const len = Math.sqrt(dx*dx + dy*dy);
+            if (len > 0 && !mgJoystick.active) { dx /= len; dy /= len; }
+
+            let currentSpeed = mgPlayer.isDashing ? mgPlayer.dashSpeed : mgPlayer.speed;
+            
+            if (mgPlayer.isDashing) {
+                mgPlayer.dashCooldown--;
+                if (mgPlayer.dashCooldown < 50) mgPlayer.isDashing = false; 
+            } else if (mgPlayer.dashCooldown > 0) {
+                mgPlayer.dashCooldown -= dt;
+            }
+
+            mgPlayer.x += dx * currentSpeed * dt;
+            mgPlayer.y += dy * currentSpeed * dt;
+
+            mgPlayer.x = Math.max(MG_BUFFALO_SIZE/2, Math.min(mgCanvas.width - MG_BUFFALO_SIZE/2, mgPlayer.x));
+            mgPlayer.y = Math.max(MG_BUFFALO_SIZE/2, Math.min(mgCanvas.height - MG_BUFFALO_SIZE/2, mgPlayer.y));
+            if (dx !== 0) mgPlayer.angle = dx > 0 ? 0 : Math.PI;
+
+            mgPlayer.hunger -= 0.1 * dt; 
+            if (mgPlayer.isDashing) mgPlayer.hunger -= 0.2 * dt; 
+            
+            mgHungerBar.style.width = Math.max(0, mgPlayer.hunger) + "%";
+
+            if (mgPlayer.hunger <= 0) { mgGameOver("STARVED!"); return; }
+
+            // RANDOM PORTAL SPAWNING (10% Chance every 5s)
+            if (timestamp - mgLastPortalCheck > 5000) {
+                mgLastPortalCheck = timestamp;
+                if (Math.random() < 0.10 && !mgPortal.active) {
+                    mgPortal.active = true;
+                    mgPortal.timeLeft = 5000; // Appears for 5 seconds
+                    
+                    const holeX = mgCanvas.width / 2;
+                    const holeY = mgCanvas.height / 2;
+                    const holeRadius = Math.min(mgCanvas.width, mgCanvas.height) * 0.2;
+                    
+                    // Make sure it doesn't spawn inside the hole
+                    do {
+                        mgPortal.x = 50 + Math.random() * (mgCanvas.width - 100);
+                        mgPortal.y = 50 + Math.random() * (mgCanvas.height - 100);
+                    } while (Math.sqrt(Math.pow(mgPortal.x - holeX, 2) + Math.pow(mgPortal.y - holeY, 2)) < holeRadius + 80);
+                }
+            }
+
+            // Portal Despawn Logic
+            if (mgPortal.active && mgPortal.timeLeft !== Infinity) {
+                mgPortal.timeLeft -= dt * 16.666;
+                if (mgPortal.timeLeft <= 0) {
+                    mgPortal.active = false;
+                }
+            }
+
+            // PORTAL COLLISION
+            if (mgPortal.active) {
+                const distToPortal = Math.sqrt(Math.pow(mgPlayer.x - mgPortal.x, 2) + Math.pow(mgPlayer.y - mgPortal.y, 2));
+                // Zombie sized portal collision (Radius 15)
+                if (distToPortal < (MG_BUFFALO_SIZE / 2) + 15) {
+                    mgPortal.active = false;
+                    mgExitToSaturn();
+                    return;
+                }
+            }
+
+            // DONUT HOLE COLLISION
+            const holeX = mgCanvas.width / 2;
+            const holeY = mgCanvas.height / 2;
+            const holeRadius = Math.min(mgCanvas.width, mgCanvas.height) * 0.2;
+
+            const distToHole = Math.sqrt(Math.pow(mgPlayer.x - holeX, 2) + Math.pow(mgPlayer.y - holeY, 2));
+            if (distToHole < holeRadius - 10) { 
+                mgGameOver("FELL IN THE HOLE!");
+                return;
+            }
+
+            // Spawn zombies based on score scaling
+            if (mgZombies.length < 5 + (mgScore / 20)) { if (Math.random() < 0.05) mgSpawnZombie(); }
+
+            for (let i = mgZombies.length - 1; i >= 0; i--) {
+                let z = mgZombies[i];
+
+                // Check zombie hole fall
+                const zDistHole = Math.sqrt(Math.pow(z.x - holeX, 2) + Math.pow(z.y - holeY, 2));
+                if (zDistHole < holeRadius - 10) {
+                    mgZombies.splice(i, 1);
+                    continue;
+                }
+
+                const distX = mgPlayer.x - z.x;
+                const distY = mgPlayer.y - z.y;
+                const dist = Math.sqrt(distX*distX + distY*distY);
+                let moveX = 0; let moveY = 0;
+
+                if (dist < 250) {
+                    moveX = -(distX / dist); moveY = -(distY / dist);
+                    z.state = 'flee';
+                } else {
+                    z.wanderAngle += (Math.random() - 0.5) * 0.2;
+                    moveX = Math.cos(z.wanderAngle); moveY = Math.sin(z.wanderAngle);
+                    z.state = 'wander';
+                }
+
+                z.x += moveX * z.speed * dt;
+                z.y += moveY * z.speed * dt;
+
+                if (z.x < -100) z.x = mgCanvas.width + 100;
+                if (z.x > mgCanvas.width + 100) z.x = -100;
+                if (z.y < -100) z.y = mgCanvas.height + 100;
+                if (z.y > mgCanvas.height + 100) z.y = -100;
+
+                if (dist < (MG_BUFFALO_SIZE + MG_ZOMBIE_SIZE) / 2) {
+                    mgZombies.splice(i, 1);
+                    mgScore += 10; // 10 Coins per zombie
+                    mgScoreDisplay.innerText = mgScore;
+                    mgPlayer.hunger = Math.min(MG_MAX_HUNGER, mgPlayer.hunger + 15);
+                    
+                    mgBloodSplats.push({ x: z.x, y: z.y, size: 20 + Math.random() * 30, type: Math.floor(Math.random() * 3), alpha: 1 });
+                    for(let k=0; k<8; k++) {
+                        mgParticles.push(mgCreateParticle(z.x, z.y, '#32cd32', 3)); 
+                        mgParticles.push(mgCreateParticle(z.x, z.y, '#8b0000', 3)); 
+                    }
+                }
+            }
+
+            for (let i = mgParticles.length - 1; i >= 0; i--) {
+                let p = mgParticles[i];
+                p.x += p.vx * dt; p.y += p.vy * dt;
+                p.life -= 0.05 * dt;
+                if (p.life <= 0) mgParticles.splice(i, 1);
+            }
+        }
+
+        function mgDraw() {
+            mgCtx.clearRect(0, 0, mgCanvas.width, mgCanvas.height);
+            
+            mgCtx.fillStyle = '#2e8b57'; // SeaGreen
+            mgCtx.fillRect(0, 0, mgCanvas.width, mgCanvas.height);
+            mgCtx.strokeStyle = "rgba(0,0,0,0.05)";
+            
+            mgCtx.lineWidth = 2;
+            const gridSize = 100;
+            mgCtx.beginPath();
+            for (let x = 0; x <= mgCanvas.width; x += gridSize) { mgCtx.moveTo(x, 0); mgCtx.lineTo(x, mgCanvas.height); }
+            for (let y = 0; y <= mgCanvas.height; y += gridSize) { mgCtx.moveTo(0, y); mgCtx.lineTo(mgCanvas.width, y); }
+            mgCtx.stroke();
+
+            // Draw Donut Hole
+            const holeX = mgCanvas.width / 2;
+            const holeY = mgCanvas.height / 2;
+            const holeRadius = Math.min(mgCanvas.width, mgCanvas.height) * 0.2;
+
+            mgCtx.beginPath();
+            mgCtx.arc(holeX, holeY, holeRadius, 0, Math.PI * 2);
+            
+            const skyGradient = mgCtx.createRadialGradient(holeX, holeY, 0, holeX, holeY, holeRadius);
+            skyGradient.addColorStop(0, '#e0f6ff'); // Lighter center
+            skyGradient.addColorStop(1, '#87ceeb'); // Sky blue edges
+            mgCtx.fillStyle = skyGradient; 
+            
+            mgCtx.fill();
+            mgCtx.lineWidth = 6;
+            mgCtx.strokeStyle = '#1b3b24'; // Rim border
+            mgCtx.stroke();
+
+            // Draw Portal
+            if (mgPortal.active) {
+                mgCtx.save();
+                mgCtx.translate(mgPortal.x, mgPortal.y);
+                mgCtx.rotate(Date.now() / 200); // Swirl animation (but stays in place)
+                
+                // Zombie-sized portal (Radius 15)
+                const portalGradient = mgCtx.createRadialGradient(0, 0, 0, 0, 0, 15);
+                portalGradient.addColorStop(0, '#ffffff');
+                portalGradient.addColorStop(0.5, '#ff00ff');
+                portalGradient.addColorStop(1, '#4400aa');
+                
+                mgCtx.beginPath();
+                mgCtx.arc(0, 0, 15, 0, Math.PI * 2);
+                mgCtx.fillStyle = portalGradient;
+                mgCtx.fill();
+                
+                // Portal energy ring
+                mgCtx.lineWidth = 2;
+                mgCtx.strokeStyle = '#00ffff';
+                mgCtx.beginPath();
+                mgCtx.ellipse(0, 0, 20, 6, 0, 0, Math.PI * 2);
+                mgCtx.stroke();
+                
+                mgCtx.restore();
+            }
+
+            for (let b of mgBloodSplats) {
+                mgCtx.globalAlpha = b.alpha;
+                mgCtx.fillStyle = "#204a20"; 
+                mgCtx.beginPath(); mgCtx.arc(b.x, b.y, b.size, 0, Math.PI*2); mgCtx.fill();
+                mgCtx.globalAlpha = 1;
+            }
+
+            mgCtx.save();
+            mgCtx.translate(mgPlayer.x, mgPlayer.y);
+            if (mgPlayer.isDashing) {
+                mgCtx.fillStyle = "rgba(255, 255, 255, 0.3)";
+                mgCtx.beginPath(); mgCtx.arc(-10, 0, MG_BUFFALO_SIZE, 0, Math.PI*2); mgCtx.fill();
+            }
+            if (mgPlayer.angle === Math.PI) mgCtx.scale(-1, 1);
+
+            mgCtx.font = `${MG_BUFFALO_SIZE}px serif`;
+            mgCtx.textAlign = 'center'; mgCtx.textBaseline = 'middle';
+            mgCtx.fillText("🐃", 0, 5); 
+
+            if (mgPlayer.isDashing) { mgCtx.shadowColor = 'white'; mgCtx.shadowBlur = 10; }
+            mgCtx.restore();
+
+            for (let z of mgZombies) {
+                mgCtx.save();
+                mgCtx.translate(z.x, z.y);
+                const wobble = Math.sin(Date.now() / 100 + z.frame) * 5;
+                mgCtx.rotate(wobble * Math.PI / 180);
+
+                if (z.state === 'flee') {
+                    if (z.x < mgPlayer.x) mgCtx.scale(-1, 1);
+                }
+
+                mgCtx.font = `${MG_ZOMBIE_SIZE}px serif`;
+                mgCtx.textAlign = 'center'; mgCtx.textBaseline = 'middle';
+                const emoji = z.type === 'fast' ? "🧟‍♂️" : "🧟";
+                mgCtx.fillText(emoji, 0, 0);
+
+                if (z.state === 'flee') {
+                    mgCtx.font = "bold 16px Arial";
+                    mgCtx.fillStyle = "#ff4e50";
+                    mgCtx.fillText("!", 0, -20);
+                }
+                mgCtx.restore();
+            }
+
+            for (let p of mgParticles) {
+                mgCtx.globalAlpha = p.life;
+                mgCtx.fillStyle = p.color;
+                mgCtx.fillRect(p.x, p.y, p.size, p.size);
+                mgCtx.globalAlpha = 1;
+            }
+        }
+
+        // ==========================================
+        // 2D MINI GAME ENGINE (Flappy Bread)
+        // ==========================================
+        const fbCanvas = document.getElementById('fb-gameCanvas');
+        const fbCtx = fbCanvas.getContext('2d');
+        
+        let fbGameRunning = false;
+        let fbScore = 0; 
+        let fbLastTime = 0;
+        let fbParticles = [];
+        let fbPipes = [];
+        let fbFrame = 0;
+        const fbPlayer = { x: 100, y: 300, vy: 0, gravity: 0.4, flap: -8, width: 40, height: 30 };
+        let fbPortal = { active: false, x: 0, y: 0 };
+
+        function fbResize() {
+            if (fbCanvas) {
+                fbCanvas.width = window.innerWidth;
+                fbCanvas.height = window.innerHeight;
+                if (!fbGameRunning) {
+                    fbPlayer.y = fbCanvas.height / 2;
+                }
+            }
+        }
+        fbResize();
+
+        // Listeners for Flappy Bread
+        window.addEventListener('keydown', (e) => {
+            if (isFbActive && e.key === " " && fbGameRunning) {
+                fbTryFlap();
+            }
+        });
+        fbCanvas.addEventListener('mousedown', () => { if(isFbActive && fbGameRunning) fbTryFlap(); });
+        fbCanvas.addEventListener('touchstart', (e) => { 
+            if(isFbActive && fbGameRunning) {
+                e.preventDefault(); 
+                fbTryFlap(); 
+            }
+        });
+
+        function fbTryFlap() {
+            fbPlayer.vy = fbPlayer.flap;
+            for(let i=0; i<5; i++) {
+                fbParticles.push({
+                    x: fbPlayer.x + fbPlayer.width/2, 
+                    y: fbPlayer.y + fbPlayer.height/2, 
+                    vx: (Math.random()-0.5)*5 - 2,
+                    vy: (Math.random()-0.5)*5, 
+                    life: 1.0, 
+                    size: Math.random()*4+2,
+                    color: '#e8c784' // Crumb color
+                });
+            }
+        }
+
+        function fbStartMiniGame() {
+            isFbActive = true;
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('fb-minigame-overlay').style.display = 'flex';
+            document.getElementById('fb-start-screen').style.display = 'flex';
+            document.getElementById('fb-game-over-screen').style.display = 'none';
+            fbResize();
+        }
+
+        function doFbStartGame() {
+            fbGameRunning = true;
+            fbScore = 0;
+            fbPlayer.y = fbCanvas.height / 2;
+            fbPlayer.vy = 0;
+            fbPipes = [];
+            fbParticles = [];
+            fbFrame = 0;
+            fbPortal.active = false;
+            
+            document.getElementById('fb-start-screen').style.display = 'none';
+            document.getElementById('fb-game-over-screen').style.display = 'none';
+            document.getElementById('fb-score-display').innerText = "0";
+
+            fbLastTime = performance.now();
+            requestAnimationFrame(fbGameLoop);
+        }
+
+        function fbGameOver() {
+            fbGameRunning = false;
+            document.getElementById('fb-game-over-screen').style.display = 'flex';
+            document.getElementById('fb-final-score').innerText = "Coins Earned: " + fbScore;
+        }
+
+        function fbExitToSaturn() {
+            coins += fbScore;
+            updateCoinUI();
+            updateShopUI();
+            isFbActive = false;
+            document.getElementById('fb-minigame-overlay').style.display = 'none';
+            document.getElementById('overlay').style.display = 'flex';
+        }
+
+        function fbExitToMars() {
+            coins += fbScore;
+            updateCoinUI();
+            isFbActive = false;
+            document.getElementById('fb-minigame-overlay').style.display = 'none';
+            
+            hasUnlockedMars = true;
+            localStorage.setItem('pixelDonutMarsUnlocked', 'true');
+            document.getElementById('menu-dim-shift-btn').style.display = 'block';
+            updateShopUI();
+            
+            setDimension('mars');
+            startGame();
+        }
+
+        function fbGameLoop(timestamp) {
+            if (!fbGameRunning) return;
+            const dt = (timestamp - fbLastTime) / 16.666; 
+            fbLastTime = timestamp;
+            fbUpdate(dt);
+            fbDraw();
+            requestAnimationFrame(fbGameLoop);
+        }
+
+        function fbUpdate(dt) {
+            fbFrame += dt;
+            if (fbFrame >= 100) { // Spawn roughly every ~1.5s
+                fbFrame = 0;
+                const gap = 135; // Tighter gap for more challenge!
+                const minHeight = 50;
+                const maxHeight = fbCanvas.height - gap - minHeight;
+                const topHeight = minHeight + Math.random() * (maxHeight - minHeight);
+                
+                fbPipes.push({
+                    x: fbCanvas.width,
+                    topHeight: topHeight,
+                    bottomY: topHeight + gap,
+                    width: 70,
+                    passed: false
+                });
+            }
+
+            fbPlayer.vy += fbPlayer.gravity * dt;
+            fbPlayer.y += fbPlayer.vy * dt;
+
+            // ceiling and floor collision
+            if (fbPlayer.y < 0) { fbPlayer.y = 0; fbPlayer.vy = 0; } 
+            if (fbPlayer.y + fbPlayer.height > fbCanvas.height) { fbGameOver(); return; } 
+
+            for (let i = fbPipes.length - 1; i >= 0; i--) {
+                let p = fbPipes[i];
+                p.x -= 4 * dt; // Pipe speed
+
+                // AABB Collision
+                let hitTop = fbPlayer.x + fbPlayer.width > p.x && fbPlayer.x < p.x + p.width && fbPlayer.y < p.topHeight;
+                let hitBottom = fbPlayer.x + fbPlayer.width > p.x && fbPlayer.x < p.x + p.width && fbPlayer.y + fbPlayer.height > p.bottomY;
+                
+                if (hitTop || hitBottom) {
+                    fbGameOver();
+                    return;
+                }
+
+                // Scoring
+                if (!p.passed && fbPlayer.x > p.x + p.width) {
+                    p.passed = true;
+                    fbScore += 1;
+                    document.getElementById('fb-score-display').innerText = fbScore;
+                    
+                    // 2% chance to spawn Mars portal!
+                    if (!fbPortal.active && Math.random() < 0.02) {
+                        fbPortal.active = true;
+                        fbPortal.x = fbCanvas.width + 100;
+                        fbPortal.y = fbPlayer.y; 
+                    }
+                }
+
+                // Cleanup
+                if (p.x + p.width < 0) fbPipes.splice(i, 1);
+            }
+            
+            // FB Portal Logic
+            if (fbPortal.active) {
+                fbPortal.x -= 4 * dt;
+                
+                // Portal Collision
+                let hitPortal = fbPlayer.x + fbPlayer.width > fbPortal.x - 20 &&
+                                fbPlayer.x < fbPortal.x + 20 &&
+                                fbPlayer.y + fbPlayer.height > fbPortal.y - 20 &&
+                                fbPlayer.y < fbPortal.y + 20;
+
+                if (hitPortal) {
+                    fbPortal.active = false;
+                    fbExitToMars();
+                    return;
+                }
+                
+                // Despawn if off screen
+                if (fbPortal.x < -50) fbPortal.active = false;
+            }
+
+            // Particles
+            for (let i = fbParticles.length - 1; i >= 0; i--) {
+                let pt = fbParticles[i];
+                pt.x += pt.vx * dt; pt.y += pt.vy * dt;
+                pt.life -= 0.05 * dt;
+                if (pt.life <= 0) fbParticles.splice(i, 1);
+            }
+        }
+
+        function fbDraw() {
+            fbCtx.clearRect(0, 0, fbCanvas.width, fbCanvas.height);
+            
+            // Saturn Space Background
+            fbCtx.fillStyle = '#110524';
+            fbCtx.fillRect(0, 0, fbCanvas.width, fbCanvas.height);
+            
+            // Moving stars
+            fbCtx.fillStyle = '#ffffff';
+            for(let i=0; i<30; i++) {
+                let sx = (Date.now() / 20 + i*150) % fbCanvas.width;
+                fbCtx.globalAlpha = 0.5 + Math.sin(Date.now()/500 + i)*0.5;
+                fbCtx.fillRect(fbCanvas.width - sx, (i * 91) % fbCanvas.height, 2, 2);
+            }
+            fbCtx.globalAlpha = 1;
+
+            // Neon Saturn Pipes
+            fbCtx.fillStyle = '#9900ff';
+            fbCtx.strokeStyle = '#00ffff';
+            fbCtx.lineWidth = 4;
+            for (let p of fbPipes) {
+                // Top Pipe
+                fbCtx.fillRect(p.x, 0, p.width, p.topHeight);
+                fbCtx.strokeRect(p.x, 0, p.width, p.topHeight);
+                // Bottom Pipe
+                fbCtx.fillRect(p.x, p.bottomY, p.width, fbCanvas.height - p.bottomY);
+                fbCtx.strokeRect(p.x, p.bottomY, p.width, fbCanvas.height - p.bottomY);
+            }
+            
+            // Draw Mars Portal
+            if (fbPortal.active) {
+                fbCtx.save();
+                fbCtx.translate(fbPortal.x, fbPortal.y);
+                fbCtx.rotate(Date.now() / 200);
+
+                const portalGradient = fbCtx.createRadialGradient(0, 0, 0, 0, 0, 20);
+                portalGradient.addColorStop(0, '#ffffff');
+                portalGradient.addColorStop(0.5, '#ff4400'); // Mars Red/Orange
+                portalGradient.addColorStop(1, '#660000');
+
+                fbCtx.beginPath();
+                fbCtx.arc(0, 0, 20, 0, Math.PI * 2);
+                fbCtx.fillStyle = portalGradient;
+                fbCtx.fill();
+
+                fbCtx.lineWidth = 2;
+                fbCtx.strokeStyle = '#ffff00';
+                fbCtx.beginPath();
+                fbCtx.ellipse(0, 0, 25, 8, 0, 0, Math.PI * 2);
+                fbCtx.stroke();
+
+                fbCtx.restore();
+            }
+
+            // Crumb Particles
+            for (let pt of fbParticles) {
+                fbCtx.globalAlpha = pt.life;
+                fbCtx.fillStyle = pt.color;
+                fbCtx.fillRect(pt.x, pt.y, pt.size, pt.size);
+            }
+            fbCtx.globalAlpha = 1;
+
+            // Player (Minecraft Bread w/ Wings)
+            fbCtx.save();
+            fbCtx.translate(fbPlayer.x + fbPlayer.width/2, fbPlayer.y + fbPlayer.height/2);
+            fbCtx.rotate(Math.min(Math.PI / 4, Math.max(-Math.PI / 4, (fbPlayer.vy * 0.08)))); // Tilt based on velocity
+
+            // Wings (Pixelated flapping animation)
+            const wingY = Math.sin(Date.now() / 80) * 5;
+            const wingAngle = Math.sin(Date.now() / 80) * 0.4;
+            
+            const fbWingColors = {
+                'W': '#ffffff', // Feathers
+                'G': '#dcdcdc', // Light shadow
+                'D': '#a9a9a9', // Deep shadow
+                'O': '#333333'  // Outline
+            };
+            
+            const fbWingPixels = [
+                "  OOOO  ",
+                " OWWWWO ",
+                "OWWWWWWO",
+                "OWWWWWWO",
+                "OGGGWWWO",
+                " ODGGWWO",
+                "  ODGGWO",
+                "   ODGWO",
+                "    OOO "
+            ];
+            const wPxSize = 3;
+
+            // Draw Left Wing
+            fbCtx.save();
+            fbCtx.translate(-15, -10 + wingY);
+            fbCtx.scale(-1, 1); // Flip horizontally for the left side
+            fbCtx.rotate(wingAngle);
+            for (let row = 0; row < fbWingPixels.length; row++) {
+                for (let col = 0; col < fbWingPixels[row].length; col++) {
+                    const char = fbWingPixels[row][col];
+                    if (char !== ' ') {
+                        fbCtx.fillStyle = fbWingColors[char];
+                        fbCtx.fillRect(col * wPxSize, row * wPxSize, wPxSize, wPxSize);
+                    }
+                }
+            }
+            fbCtx.restore();
+
+            // Draw Right Wing
+            fbCtx.save();
+            fbCtx.translate(15, -10 + wingY);
+            fbCtx.rotate(wingAngle);
+            for (let row = 0; row < fbWingPixels.length; row++) {
+                for (let col = 0; col < fbWingPixels[row].length; col++) {
+                    const char = fbWingPixels[row][col];
+                    if (char !== ' ') {
+                        fbCtx.fillStyle = fbWingColors[char];
+                        fbCtx.fillRect(col * wPxSize, row * wPxSize, wPxSize, wPxSize);
+                    }
+                }
+            }
+            fbCtx.restore();
+
+            // Pixelated Minecraft Bread Texture (EXACT MATCH)
+            const fbBreadColors = {
+                'O': '#3a2512', // Dark brown outline
+                'D': '#66431c', // Dark crust
+                'M': '#895a28', // Mid crust
+                'L': '#b57c32', // Bread inside
+                'H': '#d9a24d'  // Highlight
+            };
+            
+            const fbBreadPixels = [
+                "                ",
+                "         OOO    ",
+                "       OOMHHO   ",
+                "      OMHHHLDO  ",
+                "     OLLHMLDDO  ",
+                "    OMHHLMDDDO  ",
+                "   OMHHMLDDDDO  ",
+                "   OLLHMLDDDO   ",
+                "  OMHHLMDDDO    ",
+                "  OMHHLMDDO     ",
+                " OLLHMDDDO      ",
+                " OMLLMDDO       ",
+                "  ODDDDO        ",
+                "   OOO          ",
+                "                ",
+                "                "
+            ];
+            
+            const pxSize = 3; // 3x3 size for each virtual pixel
+            const offsetX = -24; // center X (16 pixels * 3 = 48 width)
+            const offsetY = -24; // center Y (16 pixels * 3 = 48 height)
+
+            for (let row = 0; row < fbBreadPixels.length; row++) {
+                for (let col = 0; col < fbBreadPixels[row].length; col++) {
+                    const char = fbBreadPixels[row][col];
+                    if (char !== ' ') {
+                        fbCtx.fillStyle = fbBreadColors[char];
+                        fbCtx.fillRect(offsetX + col * pxSize, offsetY + row * pxSize, pxSize, pxSize);
+                    }
+                }
+            }
+
+            fbCtx.restore();
+        }
+
+        // ==========================================
+        // 2D MINI GAME ENGINE (Plants vs 67s)
+        // ==========================================
+        const pvCanvas = document.getElementById('pv-gameCanvas');
+        const pvCtx = pvCanvas.getContext('2d');
+        
+        let pvGameRunning = false;
+        let pvScore = 0;
+        let pvSun = 50;
+        let pvLastTime = 0;
+        let pvLastSunTime = 0;
+        let pvLastSpawnTime = 0;
+        let pvSpawnRate = 4000;
+        let pvPlants = [];
+        let pvEnemies = [];
+        let pvProjectiles = [];
+        let PV_CELL_SIZE = 60;
+        let PV_OFFSET_X = 0;
+        let PV_OFFSET_Y = 0;
+
+        // NEW LEVEL VARIABLES
+        let pvLevel = 1;
+        let pvZombiesToKill = 25;
+        let pvZombiesKilled = 0;
+        let pvZombiesSpawned = 0;
+        let pvSelectedPlant = 0;
+
+        const PV_PLANT_DEFS = [
+            { emoji: "🌻", cost: 50, hp: 100, cd: 1500, unlock: 1, type: "shooter" },
+            { emoji: "🥔", cost: 50, hp: 400, cd: Infinity, unlock: 3, type: "wall" },
+            { emoji: "🌶️", cost: 150, hp: 100, cd: 750, unlock: 5, type: "fast_shooter" }
+        ];
+
+        function pvResize() {
+            if (pvCanvas) {
+                pvCanvas.width = window.innerWidth;
+                pvCanvas.height = window.innerHeight;
+                PV_CELL_SIZE = Math.min(window.innerWidth / 9, window.innerHeight / 6);
+                if (PV_CELL_SIZE > 80) PV_CELL_SIZE = 80;
+                if (PV_CELL_SIZE < 30) PV_CELL_SIZE = 30;
+                PV_OFFSET_X = (window.innerWidth - (9 * PV_CELL_SIZE)) / 2;
+                PV_OFFSET_Y = (window.innerHeight - (5 * PV_CELL_SIZE)) / 2;
+            }
+        }
+        pvResize();
+        window.addEventListener('resize', pvResize);
+
+        function pvUpdateToolbar() {
+            const tb = document.getElementById('pv-toolbar');
+            tb.innerHTML = '';
+            PV_PLANT_DEFS.forEach((def, index) => {
+                const btn = document.createElement('div');
+                const isUnlocked = pvLevel >= def.unlock;
+                const canAfford = pvSun >= def.cost;
+                
+                btn.style.width = '40px';
+                btn.style.height = '40px';
+                btn.style.border = (pvSelectedPlant === index) ? '3px solid #00ffff' : '2px solid #fff';
+                btn.style.background = isUnlocked ? (canAfford ? '#4caf50' : '#888') : '#444';
+                btn.style.opacity = isUnlocked ? '1' : '0.5';
+                btn.style.cursor = isUnlocked ? 'pointer' : 'not-allowed';
+                btn.style.display = 'flex';
+                btn.style.flexDirection = 'column';
+                btn.style.justifyContent = 'center';
+                btn.style.alignItems = 'center';
+                btn.style.fontSize = '20px';
+                
+                btn.innerHTML = `<div>${isUnlocked ? def.emoji : '🔒'}</div><div style="font-size:8px;">${def.cost}</div>`;
+                
+                if (isUnlocked) {
+                    btn.onclick = () => { pvSelectedPlant = index; pvUpdateToolbar(); };
+                }
+                tb.appendChild(btn);
+            });
+        }
+
+        function handlePvClick(clientX, clientY) {
+            if (!pvGameRunning) return;
+            const x = clientX - PV_OFFSET_X;
+            const y = clientY - PV_OFFSET_Y;
+            if (x >= 0 && x < 9 * PV_CELL_SIZE && y >= 0 && y < 5 * PV_CELL_SIZE) {
+                const col = Math.floor(x / PV_CELL_SIZE);
+                const row = Math.floor(y / PV_CELL_SIZE);
+                
+                if (!pvPlants.find(p => p.row === row && p.col === col)) {
+                    const plantDef = PV_PLANT_DEFS[pvSelectedPlant];
+                    if (pvLevel >= plantDef.unlock && pvSun >= plantDef.cost) {
+                        pvSun -= plantDef.cost;
+                        document.getElementById('pv-sun-display').innerText = pvSun;
+                        pvUpdateToolbar();
+                        pvPlants.push({ row, col, hp: plantDef.hp, maxHp: plantDef.hp, lastShot: 0, frame: 0, def: plantDef });
+                    }
+                }
+            }
+        }
+        
+        pvCanvas.addEventListener('mousedown', (e) => handlePvClick(e.clientX, e.clientY));
+        pvCanvas.addEventListener('touchstart', (e) => { 
+            if(isPvActive) {
+                if (e.target.closest('#pv-toolbar')) return; // Allow toolbar clicks naturally
+                e.preventDefault(); 
+                handlePvClick(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, {passive: false});
+
+        function pvStartMiniGame() {
+            isPvActive = true;
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('pv-minigame-overlay').style.display = 'block';
+            document.getElementById('pv-start-screen').style.display = 'flex';
+            document.getElementById('pv-game-over-screen').style.display = 'none';
+            document.getElementById('pv-level-win-screen').style.display = 'none';
+            pvResize();
+        }
+
+        function pvStartGame(isNextLevel = false) {
+            if (!isNextLevel) {
+                pvLevel = 1;
+                pvScore = 0;
+            }
+            pvGameRunning = true;
+            pvSun = 200; // Every level starts with 200 Sun
+            pvPlants = [];
+            pvEnemies = [];
+            pvProjectiles = [];
+            pvZombiesToKill = 25 * pvLevel;
+            pvZombiesKilled = 0;
+            pvZombiesSpawned = 0;
+            pvSpawnRate = 4000 - (pvLevel * 100);
+            if (pvSpawnRate < 800) pvSpawnRate = 800;
+            
+            document.getElementById('pv-start-screen').style.display = 'none';
+            document.getElementById('pv-game-over-screen').style.display = 'none';
+            document.getElementById('pv-level-win-screen').style.display = 'none';
+            
+            document.getElementById('pv-score-display').innerText = pvScore;
+            document.getElementById('pv-sun-display').innerText = pvSun;
+            document.getElementById('pv-level-display').innerText = pvLevel;
+            document.getElementById('pv-progress-display').innerText = `0/${pvZombiesToKill}`;
+            
+            pvUpdateToolbar();
+
+            pvLastTime = performance.now();
+            pvLastSunTime = performance.now();
+            pvLastSpawnTime = performance.now() + 2000;
+            requestAnimationFrame(pvGameLoop);
+        }
+
+        function pvLevelComplete() {
+            pvGameRunning = false;
+            const reward = 50 * pvLevel;
+            coins += reward;
+            updateCoinUI();
+            updateShopUI();
+            
+            document.getElementById('pv-level-reward').innerText = reward;
+            
+            const winTitle = document.getElementById('pv-win-title');
+            const nextBtn = document.getElementById('pv-next-btn');
+            
+            if (pvLevel >= 20) {
+                winTitle.innerText = "MARS SECURED!\nYOU BEAT ALL 20 LEVELS!";
+                nextBtn.innerText = "PLAY ENDLESS";
+            } else {
+                winTitle.innerText = "LEVEL " + pvLevel + " CLEARED!";
+                nextBtn.innerText = "NEXT LEVEL";
+            }
+            
+            document.getElementById('pv-level-win-screen').style.display = 'flex';
+        }
+
+        function pvNextLevel() {
+            pvLevel++;
+            if(pvLevel > 20) pvLevel = 20; // Max level 20
+            pvStartGame(true);
+        }
+
+        function pvGameOver() {
+            pvGameRunning = false;
+            document.getElementById('pv-game-over-screen').style.display = 'flex';
+            document.getElementById('pv-final-score').innerText = "Coins Earned: " + pvScore + " | Reached Lvl: " + pvLevel;
+        }
+
+        function pvExitToMain() {
+            coins += pvScore;
+            updateCoinUI();
+            updateShopUI();
+            isPvActive = false;
+            document.getElementById('pv-minigame-overlay').style.display = 'none';
+            document.getElementById('overlay').style.display = 'flex';
+        }
+
+        function pvGameLoop(timestamp) {
+            if (!pvGameRunning) return;
+            const dt = timestamp - pvLastTime;
+            pvLastTime = timestamp;
+            pvUpdate(dt, timestamp);
+            pvDraw();
+            requestAnimationFrame(pvGameLoop);
+        }
+
+        function pvUpdate(dt, time) {
+            // Sun generation
+            if (time - pvLastSunTime > 2000) { 
+                pvSun += 10; 
+                document.getElementById('pv-sun-display').innerText = pvSun;
+                pvUpdateToolbar(); 
+                pvLastSunTime = time; 
+            }
+            
+            // Enemy spawn
+            if (time - pvLastSpawnTime > pvSpawnRate && pvZombiesSpawned < pvZombiesToKill) {
+                const row = Math.floor(Math.random() * 5);
+                const enemyHP = 100 + (pvLevel * 20);
+                const enemySpeed = 30 + (pvLevel * 5);
+                pvEnemies.push({ row: row, x: 9 * PV_CELL_SIZE, hp: enemyHP, maxHp: enemyHP, speed: enemySpeed, flash: 0, frame: 0 });
+                pvZombiesSpawned++;
+                pvLastSpawnTime = time;
+                pvSpawnRate = Math.max(800, pvSpawnRate - 50); 
+            }
+
+            // Plants logic
+            for (let p of pvPlants) {
+                p.frame += dt;
+                if (p.def.type === 'wall') continue; // Walls don't shoot
+                
+                let enemyInLane = pvEnemies.some(e => e.row === p.row && e.x > p.col * PV_CELL_SIZE);
+                if (enemyInLane && time - p.lastShot > p.def.cd) {
+                    pvProjectiles.push({ row: p.row, x: p.col * PV_CELL_SIZE + PV_CELL_SIZE/2 });
+                    p.lastShot = time;
+                }
+            }
+
+            // Projectiles logic
+            for (let i = pvProjectiles.length - 1; i >= 0; i--) {
+                let proj = pvProjectiles[i];
+                proj.x += 200 * (dt / 1000); 
+                if (proj.x > 9 * PV_CELL_SIZE + 50) { pvProjectiles.splice(i, 1); continue; }
+                
+                // Hit enemy
+                for (let e of pvEnemies) {
+                    if (e.row === proj.row && Math.abs(e.x - proj.x) < PV_CELL_SIZE/2) {
+                        e.hp -= 25;
+                        e.flash = 100;
+                        pvProjectiles.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+
+            // Enemies logic
+            for (let i = pvEnemies.length - 1; i >= 0; i--) {
+                let e = pvEnemies[i];
+                e.frame += dt;
+                if (e.flash > 0) e.flash -= dt;
+                
+                if (e.hp <= 0) { 
+                    pvEnemies.splice(i, 1); 
+                    pvScore += 10; 
+                    pvSun += 9 * pvLevel; // 9 * level sun
+                    coins += 1 * pvLevel; // 1 * level coins
+                    updateCoinUI();
+                    pvZombiesKilled++;
+                    document.getElementById('pv-score-display').innerText = pvScore;
+                    document.getElementById('pv-sun-display').innerText = pvSun;
+                    document.getElementById('pv-progress-display').innerText = `${pvZombiesKilled}/${pvZombiesToKill}`;
+                    pvUpdateToolbar();
+                    continue; 
+                }
+                
+                let plantInWay = pvPlants.find(p => p.row === e.row && Math.abs((p.col * PV_CELL_SIZE + PV_CELL_SIZE/2) - e.x) < PV_CELL_SIZE/1.5);
+                
+                if (plantInWay) {
+                    plantInWay.hp -= 30 * (dt / 1000);
+                    if (plantInWay.hp <= 0) {
+                        pvPlants = pvPlants.filter(p => p !== plantInWay);
+                    }
+                } else {
+                    e.x -= e.speed * (dt / 1000); // Speed
+                }
+                
+                if (e.x < 0) {
+                    pvGameOver();
+                    return;
+                }
+            }
+
+            // Win check
+            if (pvZombiesKilled >= pvZombiesToKill && pvEnemies.length === 0) {
+                pvLevelComplete();
+            }
+        }
+
+        function pvDraw() {
+            pvCtx.clearRect(0, 0, pvCanvas.width, pvCanvas.height);
+            pvCtx.fillStyle = '#6b2414'; // Lighter Mars red/brown background
+            pvCtx.fillRect(0, 0, pvCanvas.width, pvCanvas.height);
+            
+            pvCtx.save();
+            pvCtx.translate(PV_OFFSET_X, PV_OFFSET_Y);
+            
+            // Draw grid
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 9; c++) {
+                    pvCtx.fillStyle = (r + c) % 2 === 0 ? '#a84628' : '#8f371d'; // Lighter red/orange Mars dirt
+                    pvCtx.fillRect(c * PV_CELL_SIZE, r * PV_CELL_SIZE, PV_CELL_SIZE, PV_CELL_SIZE);
+                }
+            }
+            
+            // Draw plants
+            pvCtx.textAlign = "center";
+            pvCtx.textBaseline = "middle";
+            for (let p of pvPlants) {
+                pvCtx.font = `${PV_CELL_SIZE * 0.6}px Arial`;
+                const wobble = Math.sin(p.frame / 200) * 5;
+                pvCtx.fillText(p.def.emoji, p.col * PV_CELL_SIZE + PV_CELL_SIZE/2, p.row * PV_CELL_SIZE + PV_CELL_SIZE/2 + wobble);
+                
+                // Bigger, clearer HP bar for plants
+                const barW = PV_CELL_SIZE - 16;
+                const barH = 8;
+                const barX = p.col * PV_CELL_SIZE + 8;
+                const barY = p.row * PV_CELL_SIZE + PV_CELL_SIZE - 12;
+                
+                pvCtx.fillStyle = '#000000'; // Black border
+                pvCtx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+                pvCtx.fillStyle = '#ff0000'; // Red background (missing health)
+                pvCtx.fillRect(barX, barY, barW, barH);
+                pvCtx.fillStyle = '#00ff00'; // Green current health
+                pvCtx.fillRect(barX, barY, barW * (p.hp / p.def.maxHp), barH);
+            }
+            
+            // Draw projectiles
+            pvCtx.fillStyle = '#ffff00';
+            for (let proj of pvProjectiles) {
+                pvCtx.beginPath();
+                pvCtx.arc(proj.x, proj.row * PV_CELL_SIZE + PV_CELL_SIZE/2, PV_CELL_SIZE * 0.15, 0, Math.PI*2);
+                pvCtx.fill();
+                pvCtx.lineWidth = 2;
+                pvCtx.strokeStyle = '#000';
+                pvCtx.stroke();
+            }
+            
+            // Draw enemies
+            pvCtx.font = `bold ${PV_CELL_SIZE * 0.5}px 'Press Start 2P', cursive`;
+            for (let e of pvEnemies) {
+                const wobble = Math.sin(e.frame / 150) * 3;
+                pvCtx.fillStyle = e.flash > 0 ? '#ffffff' : '#ff4444';
+                pvCtx.fillText("67", e.x, e.row * PV_CELL_SIZE + PV_CELL_SIZE/2 + wobble);
+            }
+            
+            pvCtx.restore();
+        }
+
+        window.onload = () => { init(); animate(0); };
+    </script>
+</body>
+</html>
+
+
+
