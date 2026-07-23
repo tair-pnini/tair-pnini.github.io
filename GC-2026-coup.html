@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coup Cheat Sheet - A4 Print</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --c-header: #333333;
+            --c-duke: #8B5CF6; /* סגול */
+            --c-assassin: #333333;
+            --c-contessa: #8B4513; /* חום */
+            --c-captain: #67A7C7;
+            --c-ambassador: #97B727;
+            --c-border: #d1d5db;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #e5e7eb;
+            color: #1f2937;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            letter-spacing: 0.3px;
+        }
+
+        /* הגדרת דף A4 לרוחב */
+        .a4-page {
+            width: 297mm;
+            height: 210mm;
+            background-color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(2, 140mm);
+            grid-template-rows: repeat(2, 100mm);
+            justify-content: center;
+            align-content: center;
+            gap: 4mm;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* הגדרת כרטיסיה לרוחב */
+        .card {
+            width: 140mm;
+            height: 100mm;
+            border: 1px dashed #9ca3af;
+            box-sizing: border-box;
+            padding: 3mm 5mm; /* ריווח קטן יותר כדי למנוע גלישה */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden; /* מונע גלישה ויזואלית החוצה */
+        }
+
+        .coup-table {
+            border: 1px solid var(--c-border);
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5px; /* פונט מעט קטן יותר לטבלה */
+            margin-bottom: 3px;
+            table-layout: fixed; /* שומר על רוחב העמודות בדיוק לפי האחוזים */
+        }
+        
+        .coup-table th {
+            background-color: var(--c-header);
+            color: white;
+            font-weight: 500;
+            padding: 3px; /* ריווח פנימי מוקטן */
+            border: 1px solid var(--c-border);
+            text-align: right;
+            line-height: 1.1;
+        }
+
+        .coup-table td {
+            border: 1px solid var(--c-border);
+            padding: 2px 4px; /* הקטנו מעט את הגובה הפנימי כדי לפנות מקום לתיבה למטה */
+            vertical-align: middle;
+            line-height: 1.1;
+            word-wrap: break-word; /* מונע גלישת מילים מחוץ לתא */
+        }
+
+        .coup-table tbody tr:nth-child(even) td:not(.char-cell) {
+            background-color: #f9fafb;
+        }
+
+        .char-cell {
+            color: white;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        
+        .bg-duke { background-color: var(--c-duke); }
+        .bg-assassin { background-color: var(--c-assassin); }
+        .bg-contessa { background-color: var(--c-contessa); }
+        .bg-captain { background-color: var(--c-captain); }
+        .bg-ambassador { background-color: var(--c-ambassador); }
+        
+        .bg-mixed {
+            background: linear-gradient(135deg, var(--c-captain) 50%, var(--c-ambassador) 50%);
+            color: white;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .char-badge {
+            display: inline-block;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: white;
+            font-weight: 500;
+            font-size: 10px;
+            margin: 1px;
+            letter-spacing: 0.3px;
+        }
+
+        .unblockable {
+            text-align: center;
+            line-height: 1.1;
+        }
+        .unblockable-x {
+            color: #ef4444;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .unblockable-text {
+            color: #dc2626;
+            font-size: 9px;
+            font-weight: 600;
+            display: block;
+        }
+
+        .rule-box {
+            margin-top: auto;
+            border: 1px solid var(--c-border);
+            border-radius: 4px;
+            display: flex;
+            background-color: #fef2f2;
+            border-right: 4px solid #ef4444;
+            overflow: hidden;
+            font-size: 10.5px; 
+            font-weight: 500;
+            margin-bottom: 0px;
+            flex-shrink: 0; /* פקודה חשובה: מונעת מהתיבה להתכווץ ולהיחתך אם חסר מקום */
+        }
+        .rule-icon {
+            padding: 2px 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .rule-text {
+            padding: 2px 5px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape; /* הדפסה לרוחב! */
+                margin: 0;
+            }
+            body {
+                background-color: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                gap: 0;
+            }
+            .a4-page {
+                box-shadow: none;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            .no-print {
+                display: none !important;
+            }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded text-sm text-center font-bold max-w-2xl">
+        🖨️ הוראות הדפסה לכרטיסיות רוחביות:<br>
+        1. לחצי Ctrl+P.<br>
+        2. בחרי פריסה: <strong>לרוחב (Landscape)</strong>.<br>
+        3. בחרי הדפסה <strong>דו-צדדית (Flip on short edge / היפוך לרוחב) - קריטי!</strong>.<br>
+        4. הגדרות קנה מידה (Scale) ל-<strong>100% או Actual Size</strong>.<br>
+        5. סמני הדפסת צבעי רקע (Background graphics).
+    </div>
+
+    <!-- דף 1: קדימה (לפי דמות) -->
+    <div class="a4-page" id="page-1"></div>
+
+    <!-- דף 2: אחורה (לפי פעולה) -->
+    <div class="a4-page" id="page-2"></div>
+
+    <template id="template-front">
+        <div class="card">
+            <!-- כותרת מפוצלת -->
+            <div class="flex items-center justify-between mb-1.5 pb-1 border-b border-gray-300 shrink-0">
+                <img src="https://cdn-media.web-view.net/i/zxwxdxdscsps/__________________51.png?cache=1718281345891" alt="אורנים קמה" class="h-6 object-contain">
+                <div class="text-left flex flex-col justify-center">
+                    <span class="text-[9px] text-gray-500 font-medium leading-none mb-0.5">מזכרת מ-</span>
+                    <strong class="text-[#1f2937] text-[13px] font-bold uppercase tracking-wider leading-none">Game Changer 2026</strong>
+                </div>
+            </div>
+
+            <div class="bg-[#333] text-white text-center py-1 text-[11px] font-medium uppercase tracking-wider mb-1.5 rounded-sm shrink-0">
+                Coup — פעולות לפי תפקיד (דמות)
+            </div>
+            
+            <table class="coup-table">
+                <thead>
+                    <tr>
+                        <th class="w-[7%] text-center">קלף</th>
+                        <th class="w-[14%] text-center">דמות</th>
+                        <th class="w-[43%]">פעולה</th>
+                        <th class="w-[20%] text-center leading-tight">פעולת נגד<br><span class="text-[8.5px] font-normal">(שהדמות מבצעת)</span></th>
+                        <th class="w-[16%] text-center leading-tight">נחסמת ע"י</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- פעולות כלליות -->
+                    <tr>
+                        <td class="text-center font-medium text-gray-400">—</td>
+                        <td class="text-center font-medium text-gray-400">—</td>
+                        <td class="font-medium text-[10.5px]">הכנסה 🪙 <span class="text-gray-600 mr-1">קחי מטבע אחד</span></td>
+                        <td class="empty-cell text-center text-gray-400 text-xs">❌</td>
+                        <td class="unblockable"><span class="unblockable-x">❌</span><span class="unblockable-text">אי אפשר לחסום!</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center font-medium text-gray-400">—</td>
+                        <td class="text-center font-medium text-gray-400">—</td>
+                        <td class="font-medium text-[10.5px]">סיוע זר 🪙🪙 <span class="text-gray-600 mr-1">קחי 2 מטבעות</span></td>
+                        <td class="empty-cell text-center text-gray-400 text-xs">❌</td>
+                        <td class="text-center"><span class="char-badge bg-duke">דוכס (K)</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center font-medium text-gray-400">—</td>
+                        <td class="text-center font-medium text-gray-400">—</td>
+                        <td class="font-medium text-[10.5px]">הפיכה 💀 <span class="text-gray-600 mr-1">שלמי 7 🪙 וחסלי דמות</span></td>
+                        <td class="empty-cell text-center text-gray-400 text-xs">❌</td>
+                        <td class="unblockable"><span class="unblockable-x">❌</span><span class="unblockable-text">אי אפשר לחסום!</span></td>
+                    </tr>
+                    
+                    <!-- דמויות -->
+                    <tr>
+                        <td class="text-center font-semibold text-[13px] text-purple-700">K</td>
+                        <td class="char-cell bg-duke">דוכס</td>
+                        <td class="font-medium text-purple-800 text-[10.5px]">מס: קחי 3 מטבעות</td>
+                        <td class="font-medium text-purple-800 leading-tight text-center text-[10px]">חוסמת סיוע זר</td>
+                        <td class="unblockable"><span class="unblockable-x">❌</span><span class="unblockable-text">אי אפשר לחסום!</span></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="text-center font-semibold text-[13px] text-gray-800">A</td>
+                        <td class="char-cell bg-assassin">מתנקש</td>
+                        <td class="font-medium text-gray-800 text-[10.5px]">התנקשות: שלמי 3 🪙 <span class="text-gray-600 mr-1">וחסלי קלף של שחקנית אחרת</span></td>
+                        <td class="empty-cell text-center text-gray-400 text-xs">❌</td>
+                        <td class="text-center"><span class="char-badge bg-contessa">רוזנת (Q)</span></td>
+                    </tr>
+    
+                    <tr>
+                        <td class="text-center font-semibold text-[13px] text-amber-900">Q</td>
+                        <td class="char-cell bg-contessa">רוזנת</td>
+                        <td class="empty-cell text-center text-gray-400 text-xs">❌</td>
+                        <td class="font-medium text-amber-900 leading-tight text-center text-[10px]">חוסמת התנקשות</td>
+                        <td class="empty-cell text-center text-gray-400 text-xs">❌</td>
+                    </tr>
+    
+                    <tr>
+                        <td class="text-center font-semibold text-[13px] text-blue-700">J</td>
+                        <td class="char-cell bg-captain">קפטן</td>
+                        <td class="font-medium text-blue-800 text-[10.5px]">סחיטה: גנבי 2 🪙 <span class="text-gray-600 mr-1">משחקנית אחרת</span></td>
+                        <td class="font-medium text-blue-800 leading-tight text-center text-[10px]">חוסמת סחיטה</td>
+                        <td class="text-center leading-tight py-0.5">
+                            <span class="char-badge bg-captain">קפטן (J)</span>
+                            <span class="text-[8px] font-medium mx-0.5">או</span>
+                            <span class="char-badge bg-ambassador">שגרירה (10)</span>
+                        </td>
+                    </tr>
+    
+                    <tr>
+                        <td class="text-center font-semibold text-[13px] text-green-700">10</td>
+                        <td class="char-cell bg-ambassador">שגרירה</td>
+                        <td class="font-medium text-green-800 text-[10.5px] leading-tight">החלפה: שלפי 2 קלפים מהקופה, צרפי לקלפים שבידך והחזרי לקופה 2 לבחירתך.</td>
+                        <td class="font-medium text-green-800 leading-tight text-center text-[10px]">חוסמת סחיטה</td>
+                        <td class="unblockable"><span class="unblockable-x">❌</span><span class="unblockable-text">אי אפשר לחסום!</span></td>
+                    </tr>
+                </tbody>
+            </table>
+    
+            <div class="rule-box">
+                <div class="rule-icon">⚠️</div>
+                <div class="rule-text"><strong>חוק ברזל:</strong> הגעת ל-10 מטבעות? את חייבת לבצע הפיכה בתורך!</div>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-back">
+        <div class="card">
+            <!-- כותרת מפוצלת -->
+            <div class="flex items-center justify-between mb-1.5 pb-1 border-b border-gray-300 shrink-0">
+                <img src="https://cdn-media.web-view.net/i/zxwxdxdscsps/__________________51.png?cache=1718281345891" alt="אורנים קמה" class="h-6 object-contain">
+                <div class="text-left flex flex-col justify-center">
+                    <span class="text-[9px] text-gray-500 font-medium leading-none mb-0.5">מזכרת מ-</span>
+                    <strong class="text-[#1f2937] text-[13px] font-bold uppercase tracking-wider leading-none">Game Changer 2026</strong>
+                </div>
+            </div>
+
+            <!-- הכנת המשחק בשורה אחת -->
+            <div class="bg-blue-50 border border-blue-200 rounded-sm p-1 mb-1.5 text-gray-800 text-[9.5px] leading-tight shrink-0 flex items-center justify-center gap-2">
+                <strong class="text-blue-800 shrink-0">🎯 הכנת המשחק:</strong>
+                <span>קחו 3 קלפים מכל דמות וערבבו • חלקו 2 קלפים מוסתרים ו-2 מטבעות לכל שחקנית</span>
+            </div>
+    
+            <div class="bg-[#333] text-white text-center py-1 text-[11px] font-medium uppercase tracking-wider mb-1.5 rounded-sm shrink-0">
+                Coup — פירוט לפי סוג פעולה
+            </div>
+    
+            <table class="coup-table">
+                <thead>
+                    <tr>
+                        <th class="w-[18%]">הפעולה</th>
+                        <th class="w-[44%]">השפעה</th>
+                        <th class="w-[19%] text-center">מי מבצעת?</th>
+                        <th class="w-[19%] text-center">מי חוסמת?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-medium text-[10.5px]">הכנסה 🪙</td>
+                        <td class="text-[10.5px]">קחי מטבע 1 מהקופה</td>
+                        <td class="text-center font-medium text-gray-600 text-[10.5px]">כולן</td>
+                        <td class="unblockable"><span class="unblockable-x">❌</span><span class="unblockable-text">אי אפשר לחסום!</span></td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-[10.5px]">סיוע זר 🪙🪙</td>
+                        <td class="text-[10.5px]">קחי 2 מטבעות מהקופה</td>
+                        <td class="text-center font-medium text-gray-600 text-[10.5px]">כולן</td>
+                        <td class="text-center"><span class="char-badge bg-duke">דוכס (K)</span></td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-[10.5px]">הפיכה 💀</td>
+                        <td class="text-[10.5px]">שלמי 7 מטבעות וחסלי קלף של שחקנית לבחירתך</td>
+                        <td class="text-center font-medium text-gray-600 text-[10.5px]">כולן</td>
+                        <td class="unblockable"><span class="unblockable-x">❌</span><span class="unblockable-text">אי אפשר לחסום!</span></td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-[10.5px] text-purple-800">מס 🪙🪙🪙</td>
+                        <td class="text-[10.5px]">קחי 3 מטבעות מהקופה</td>
+                        <td class="text-center"><span class="char-badge bg-duke">דוכס (K)</span></td>
+                        <td class="unblockable"><span class="unblockable-x">❌</span><span class="unblockable-text">אי אפשר לחסום!</span></td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-[10.5px] text-gray-800">התנקשות 💀</td>
+                        <td class="text-[10.5px]">שלמי 3 מטבעות וחסלי קלף של שחקנית לבחירתך</td>
+                        <td class="text-center"><span class="char-badge bg-assassin">מתנקש (A)</span></td>
+                        <td class="text-center"><span class="char-badge bg-contessa">רוזנת (Q)</span></td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-[10.5px] text-blue-800">סחיטה 💰💰</td>
+                        <td class="text-[10.5px]">גנבי 2 מטבעות משחקנית אחרת</td>
+                        <td class="text-center"><span class="char-badge bg-captain">קפטן (J)</span></td>
+                        <td class="text-center leading-tight py-0.5">
+                            <span class="char-badge bg-captain">קפטן (J)</span>
+                            <span class="text-[8px] font-medium mx-0.5">או</span>
+                            <span class="char-badge bg-ambassador">שגרירה (10)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-medium text-[10.5px] text-green-800">החלפה 🔄</td>
+                        <td class="text-[10.5px] leading-tight">שלפי 2 קלפים מהקופה, צרפי לקלפים שבידך והחזרי לקופה 2 לבחירתך.</td>
+                        <td class="text-center"><span class="char-badge bg-ambassador">שגרירה (10)</span></td>
+                        <td class="unblockable"><span class="unblockable-x">❌</span><span class="unblockable-text">אי אפשר לחסום!</span></td>
+                    </tr>
+                </tbody>
+            </table>
+    
+            <div class="rule-box">
+                <div class="rule-icon">⚠️</div>
+                <div class="rule-text"><strong>חוק ברזל:</strong> הגעת ל-10 מטבעות? את חייבת לבצע הפיכה בתורך!</div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const page1 = document.getElementById('page-1');
+            const page2 = document.getElementById('page-2');
+            const templateFront = document.getElementById('template-front').content;
+            const templateBack = document.getElementById('template-back').content;
+
+            // יצירת 4 כרטיסיות בכל דף במקום 6 בגלל המעבר ל-Landscape
+            for (let i = 0; i < 4; i++) {
+                page1.appendChild(document.importNode(templateFront, true));
+                page2.appendChild(document.importNode(templateBack, true));
+            }
+        });
+    </script>
+</body>
+</html>
