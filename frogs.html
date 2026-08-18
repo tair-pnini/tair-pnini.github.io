@@ -340,6 +340,53 @@
             }
         }
 
+        let simulationTimer = null;
+
+        function resetSimulation() {
+            if (simulationTimer) {
+                clearTimeout(simulationTimer);
+                simulationTimer = null;
+            }
+            gameOver = false;
+            pc1 = 0;
+            pc2 = 0;
+            confirmed = false;
+            frog1HasVisitedFriend = false;
+            frog2HasVisitedFriend = false;
+            currentStep = 0;
+            jumpCount = 0;
+
+            const runBtn = document.getElementById('runBtn');
+            const stepBtn = document.getElementById('stepBtn');
+            if (runBtn) {
+                runBtn.disabled = true;
+                runBtn.style.opacity = '0.5';
+            }
+            if (stepBtn) {
+                stepBtn.disabled = true;
+                stepBtn.style.opacity = '0.5';
+            }
+
+            const statusMsg = document.getElementById('statusMessage');
+            if (statusMsg) statusMsg.textContent = '';
+
+            const celebrationOverlay = document.getElementById('celebrationOverlay');
+            if (celebrationOverlay) celebrationOverlay.style.display = 'none';
+
+            const buttons = document.querySelectorAll('.commands button, .commands select, .commands input');
+            buttons.forEach(el => el.disabled = false);
+
+            applyDistance();
+            updateFrogIndicators(null, null);
+            updateCommandList();
+        }
+
+        function clearCode() {
+            resetSimulation();
+            commands = [];
+            updateCommandList();
+        }
+
         function updateCommandList() {
             const list = document.getElementById('codeList');
             list.innerHTML = '';
@@ -525,18 +572,20 @@
             stepBtn.disabled = true;
             
             function runStep() {
-                if (( pc1 >= commands.length && pc2 >= commands.length) || 
+                if (!confirmed || ( pc1 >= commands.length && pc2 >= commands.length) || 
                     document.getElementById('statusMessage').textContent) {
                     // Re-enable buttons when simulation ends
-                    runBtn.disabled = false;
-                    stepBtn.disabled = false;
+                    if (confirmed) {
+                        runBtn.disabled = false;
+                        stepBtn.disabled = false;
+                    }
                     return;
                 }
                 
                 stepSimulation();
                 
                 // Continue with next step after delay
-                setTimeout(runStep, 800); // 800ms delay between steps
+                simulationTimer = setTimeout(runStep, 800); // 800ms delay between steps
             }
             
             // Start the simulation
