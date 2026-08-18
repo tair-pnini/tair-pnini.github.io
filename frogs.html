@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סימולטור קפיצות צפרדעים</title>
+    <style>
+        body { font-family: 'Assistant', sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+        .pond-wrapper { position: relative; overflow-x: hidden; overflow-y: hidden; margin: 40px 0; border: 1px solid #ccc; background-color: #A1DDF1; padding: 0 40px; }
+        .pond { position: relative; height: 200px; width: 100%; }
+        .frog-wrapper { position: absolute; bottom: 10px; width: 80px; display: flex; flex-direction: column; align-items: center; text-align: center; transform: translateX(-40px); transition: left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .frog-name { font-weight: bold; font-size: 14px; margin-bottom: 2px; }
+        .frog-image { width: 60px; height: auto; }
+        .position-label { position: absolute; top: -25px; font-weight: bold; background-color: #FFB3B3; border-radius: 4px; padding: 2px 6px; }
+        .axis { position: absolute; bottom: 0; left: 0; width: 100%; height: 6px; background-color: #222; }
+        .input-group, .status-bar { margin-top: 20px; background-color: #fdd76a; padding: 10px; border-radius: 6px; }
+        button { padding: 8px 12px; background-color: #D9EC3B; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #c7d53d; }
+        input[type="number"] { width: 60px; padding: 5px; }
+        .lily-pad { position: absolute; bottom: 0; width: 60px; height: 20px; background-color: #4FA7E2; border-radius: 50%; z-index: 0; transform: translateX(-30px); transition: left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        #lilyPad1 { left: 25%; }
+        #lilyPad2 { left: 75%; }
+        .celebration-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .celebration-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1001;
+            max-width: 520px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 4px solid #4CAF50;
+            animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .close-popup-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .close-popup-btn:hover {
+            background-color: #d32f2f;
+            transform: scale(1.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            from { 
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            to { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(30);
+                opacity: 0;
+            }
+        }
+
+        .command-item {
+            position: relative;
+            margin-bottom: 8px;
+            padding: 10px 14px 10px 45px;
+            background-color: #ffffff;
+            border: 2px solid #8bc34a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .command-item.editable {
+            cursor: pointer;
+        }
+
+        .command-item.editable:hover {
+            background-color: #ffebee;
+            border-color: #ef5350;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 28px; color: #2c3e50; text-align: center; line-height: 1.6;"> חידת הצפרדעים הקופצות! 🐸🐸 <br> מומלץ להשתמש בסימולטור מהמחשב </h1>
+    
+    <p style="font-size: 20px; text-align: center; color: #2e7d32; font-weight: bold; margin: 15px 0;">עליך לגרום לצפרדעים להפגש, בהצלחה!</p>
+    
+    <div style="text-align: center; margin-bottom: 20px;">
+        <button id="toggleInstructionsBtn" onclick="toggleInstructions()" style="background-color: #4CAF50; color: white; border: none; padding: 10px 22px; font-size: 16px; border-radius: 20px; cursor: pointer; transition: background-color 0.3s, transform 0.2s; box-shadow: 0 3px 6px rgba(0,0,0,0.15);">
+            ℹ️ הצגת הנחיות נוספות
+        </button>
+    </div>
+
+    <div id="instructionsContainer" style="display: none; background-color: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #c8e6c9; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+        <p style="font-size: 18px; line-height: 1.8; color: #333; margin: 0;">
+            <strong style="color: #c0392b; font-size: 20px;">החידה:</strong><br> לפניכם קו ישר אינסופי ועליו שתי שלוליות. על כל שלולית עומדת צפרדע, אך המרחק בין הצפרדעים אינו ידוע.<br> שתי הצפרדעים מקבלות את אותה רשימת הנחיות — ממוספרת וסופית — ומתחילות לבצע אותה בו זמנית וקופצות באותו הקצב.<br><br> משימתכם היא לכתוב רשימת הנחיות שתבטיח שהצפרדעים ייפגשו.<br> <strong>רשימה מנצחת</strong> היא כזו שמבטיחה מפגש בכל מקרה (בלי קשר למרחק ההתחלתי), ובכמה שפחות קפיצות — כמעט לכל מרחק.
+        </p>
+        <p style="margin-top: 1em; font-size: 16px; color: #555; margin-bottom: 0;"> 💡 היעזרו בסימולטור מטה כדי לבנות את ההנחיות ולבחון את תוצאתן עבור מרחקים התחלתיים שונים. </p>
+    </div>
+
+    <div class="input-group">
+        <label for="distanceInput"><strong>המרחק בין השלוליות:</strong></label>
+        <input id="distanceInput" type="number" value="5" min="1" max="200" />
+        <button onclick="applyDistance()">הגדר</button>
+        <br><br>
+        <label for="maxStepsInput">כדי להימנע מריצה עד אינסוף ללא מפגש - הסימולציה תיעצר אוטומטית לאחר:</label>
+        <input id="maxStepsInput" type="number" value="30" readonly /> קפיצות </div>
+    <div class="status-bar">
+        <div>מספר קפיצות: <span id="jumpCounter">0</span></div>
+        <div id="statusMessage"></div>
+    </div>
+
+    <div class="pond-wrapper" id="pondWrapper">
+        <div class="pond" id="pond">
+            <div class="lily-pad" id="lilyPad1"></div>
+            <div class="lily-pad" id="lilyPad2"></div>
+            <div class="axis" id="axis"></div>
+            <div class="frog-wrapper" id="frog1Wrapper">
+                <div class="position-label" id="pos1Label">0</div>
+                <div class="frog-name">צפרדי</div>
+                <img src="https://lh3.googleusercontent.com/pw/AP1GczMzM9956VOPDXalXdj1DCx-DfCN-gn7dUNl_81Z3z01MMJd2TnSbt1QWLGP6TL-CNVRKT-srpC-tKXI1y3EpD9K7alCejR3vC2VWl4OV9wscSBdKV3dbSMgYUSguxZHqjfO4AGveKMZzICgFG3bkKUW=w869-h869-s-no-gm" class="frog-image" alt="צפרדי">
+            </div>
+            <div class="frog-wrapper" id="frog2Wrapper">
+                <div class="position-label" id="pos2Label">4</div>
+                <div class="frog-name">קרפד</div>
+                <img src="https://lh3.googleusercontent.com/pw/AP1GczNDSWLpmftrAG4uabpShAPVOONvsUsugqMvw2TWuUZuSMrBx73juHGSNvyfBqJtPtXEATUNOnwgD6xBxX9pvnh0x4j4KMLlsuFDrqgwu9VOTa57k4Cpjw7cOHCXebBk-76frFDJJ0_5i3pp-W-8wDsa=w869-h869-s-no-gm" class="frog-image" alt="קרפד">
+            </div>
+        </div>
+    </div>
+
+    <div id="celebrationOverlay" class="celebration-overlay" onclick="if(event.target === this) this.style.display='none'">
+        <div class="celebration-popup">
+            <button class="close-popup-btn" onclick="document.getElementById('celebrationOverlay').style.display='none'" title="סגור">✕</button>
+            <h2 style="font-size: 28px; color: #2e7d32; margin-bottom: 10px;">🎉 כל הכבוד! הצפרדעים נפגשו! 🎉</h2>
+            <p style="font-size: 20px; font-weight: bold; margin: 10px 0; color: #1565c0;">
+                עבודה נפלאה! הגעתם למפגש אחרי <span id="jumpCountDisplay" style="color: #d32f2f; font-size: 24px;"></span> קפיצות!
+            </p>
+            
+            <div style="display: flex; justify-content: center; gap: 15px; margin: 15px 0;">
+                <img src="https://media.giphy.com/media/3o7TKDEhaHWJpBs2Xu/giphy.gif" alt="Celebration" style="width: 150px; border-radius: 10px;">
+                <img src="https://media.giphy.com/media/26tOZ42Mg6pbTUPHW/giphy.gif" alt="Dancing Frogs" style="width: 150px; border-radius: 10px;">
+            </div>
+
+            <div style="background-color: #f1f8e9; border: 2px dashed #7cb342; border-radius: 12px; padding: 15px; margin: 15px 0; text-align: right;">
+                <h3 style="margin: 0 0 8px 0; color: #33691e; font-size: 18px;">💡 למחשבה והעמקה:</h3>
+                <ul style="margin: 0; padding-right: 20px; font-size: 16px; line-height: 1.6; color: #2e7d32;">
+                    <li><strong>האם הקוד שלך יעבוד לכל סוג של מרחק?</strong></li>
+                    <li><strong>האם קוד אחר ישיג מפגש בפחות קפיצות?</strong></li>
+                </ul>
+            </div>
+
+            <button onclick="document.getElementById('celebrationOverlay').style.display='none'" style="margin-top: 10px; padding: 12px 30px; font-size: 18px; background-color: #4caf50; color: white; border-radius: 30px; border: none; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                סגור והמשך ✖
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Constants and state variables
+        const CommandType = {
+            JUMP_LEFT: 'jump_left',
+            JUMP_RIGHT: 'jump_right',
+            IF_VISITED_FRIEND: 'if_visited_friend',
+            GOTO: 'goto',
+        };
+
+        let pos1 = -2.5, pos2 = 2.5;
+        let distance = 5;
+        let jumpCount = 0;
+        let maxSteps = 30;
+        let commands = [];
+        let frog1HasVisitedFriend = false;  // New state variable for frog1
+        let frog2HasVisitedFriend = false;  // New state variable for frog2
+        let currentStep = 0;
+        let confirmed = false;
+        let MAX_STEPS_MULTIPLIER = 1000;
+        let pc1 = 0;
+        let pc2 = 0;
+        let gameOver = false;
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            applyDistance();
+        });
+
+        // UI Functions
+        function applyDistance() {
+            distance = parseInt(document.getElementById('distanceInput').value);
+            if (isNaN(distance) || distance < 1) distance = 4;
+            if (distance > 200) {
+                alert("המרחק המקסימלי האפשרי הוא 200.");
+                distance = 200;
+                document.getElementById('distanceInput').value = 200;
+            }
+            maxSteps = distance * MAX_STEPS_MULTIPLIER;
+            document.getElementById('maxStepsInput').value = maxSteps;
+            pos1 = -distance/2;
+            pos2 = distance/2;
+            jumpCount = 0;
+            updateFrogPositions();
+        }
+
+        function updateFrogPositions() {
+            const pondElem = document.querySelector('.pond');
+            if (!pondElem) return;
+            const pondWidth = pondElem.offsetWidth || 800;
+            const maxDistance = 200; // Maximum distance in pixels
+            const centerX = pondWidth / 2;
+            const jumpSize = 50; // Pixels per jump
+            
+            // Calculate scale factor to fit within pond
+            const scale = Math.min(1, (pondWidth - 160) / (2 * maxDistance)); // 160px accounts for padding and frog width
+            
+            // Calculate positions relative to center
+            const frog1Pos = centerX + (pos1 * jumpSize * scale);
+            const frog2Pos = centerX + (pos2 * jumpSize * scale);
+            
+            // Update frog positions
+            document.getElementById('frog1Wrapper').style.left = `${frog1Pos}px`;
+            document.getElementById('frog2Wrapper').style.left = `${frog2Pos}px`;
+            
+            // Update lily pad positions to match initial frog positions
+            const lilyPad1Pos = centerX + (-distance/2 * jumpSize * scale);
+            const lilyPad2Pos = centerX + (distance/2 * jumpSize * scale);
+            document.getElementById('lilyPad1').style.left = `${lilyPad1Pos}px`;
+            document.getElementById('lilyPad2').style.left = `${lilyPad2Pos}px`;
+            
+            // Update position labels - add half the distance to make numbers more intuitive
+            document.getElementById('pos1Label').textContent = pos1 + distance/2;
+            document.getElementById('pos2Label').textContent = pos2 + distance/2;
+            document.getElementById('jumpCounter').textContent = jumpCount;
+            
+            // Check if frogs meet
+            if (pos1 === pos2) {
+                document.getElementById('statusMessage').textContent = `🎉 הצפרדעים נפגשו אחרי ${jumpCount} קפיצות!`;
+            }
+        }
+
+        function resetFrogs() {
+            pos1 = -distance/2;
+            pos2 = distance/2;
+            jumpCount = 0;
+            updateFrogPositions();
+        }
+
+        function addCommand(command) {
+            if (!confirmed) {
+                if (command === 'jump_right') {
+                    commands.push({ type: CommandType.JUMP_RIGHT });
+                } else if (command === 'jump_left') {
+                    commands.push({ type: CommandType.JUMP_LEFT });
+                } else if (command === 'goto') {
+                    const value = parseInt(document.getElementById('gotoInput').value);
+                    if (!isNaN(value) && value > 0) {
+                        commands.push({ type: CommandType.GOTO, target: value - 1 }); // Convert to 0-based index
+                    }
+                }
+                // add if visited friend and contain the next command in it
+                updateCommandList();
+            }
+        }
+
+        function toggleConditionalInput() {
+            const select = document.getElementById('conditionalSelect');
+            const input = document.getElementById('conditionalValue');
+            input.style.display = select.value === 'goto' ? 'inline-block' : 'none';
+        }
+
+        function confirmCode() {
+            confirmed = true;
+            document.getElementById('runBtn').disabled = false;
+            document.getElementById('runBtn').style.opacity = 1;
+            document.getElementById('stepBtn').disabled = false;
+            document.getElementById('stepBtn').style.opacity = 1;
+            const buttons = document.querySelectorAll('.commands button, .commands select, .commands input');
+            buttons.forEach(el => el.disabled = true);
+            updateCommandList();
+        }
+
+        function removeCommand(index) {
+            if (!confirmed) {
+                commands.splice(index, 1);
+                updateCommandList();
+            }
+        }
+
+        function updateCommandList() {
+            const list = document.getElementById('codeList');
+            list.innerHTML = '';
+            commands.forEach((cmd, index) => {
+                const li = document.createElement('li');
+                li.className = 'command-item' + (!confirmed ? ' editable' : '');
+                
+                if (!confirmed) {
+                    li.title = 'לחצי להסרת הנחייה זו';
+                    li.onclick = function() {
+                        removeCommand(index);
+                    };
+                }
+
+                // Frog indicators container
+                const frogContainer = document.createElement('div');
+                frogContainer.style.position = 'absolute';
+                frogContainer.style.left = '8px';
+                frogContainer.style.top = '50%';
+                frogContainer.style.transform = 'translateY(-50%)';
+                frogContainer.style.display = 'flex';
+                frogContainer.style.gap = '2px';
+
+                const frog1Indicator = document.createElement('span');
+                frog1Indicator.textContent = '🐸';
+                frog1Indicator.style.opacity = '0.3';
+                frog1Indicator.style.transition = 'opacity 0.2s';
+                frog1Indicator.id = `frog1-ind-${index}`;
+                
+                const frog2Indicator = document.createElement('span');
+                frog2Indicator.textContent = '🐸';
+                frog2Indicator.style.opacity = '0.3';
+                frog2Indicator.style.transition = 'opacity 0.2s';
+                frog2Indicator.id = `frog2-ind-${index}`;
+
+                frogContainer.appendChild(frog1Indicator);
+                frogContainer.appendChild(frog2Indicator);
+                li.appendChild(frogContainer);
+
+                // Content wrapper (Number + Text)
+                const contentSpan = document.createElement('div');
+                contentSpan.style.display = 'flex';
+                contentSpan.style.alignItems = 'center';
+                contentSpan.style.gap = '8px';
+
+                const numBadge = document.createElement('span');
+                numBadge.textContent = `${index + 1}.`;
+                numBadge.style.color = '#2e7d32';
+                numBadge.style.fontWeight = 'bold';
+                numBadge.style.minWidth = '24px';
+
+                let cmdText = '';
+                if (cmd.type === CommandType.JUMP_RIGHT) {
+                    cmdText = 'קפצי ימינה';
+                } else if (cmd.type === CommandType.JUMP_LEFT) {
+                    cmdText = 'קפצי שמאלה';
+                } else if (cmd.type === CommandType.IF_VISITED_FRIEND) {
+                    const innerCmd = cmd.command;
+                    let actionText;
+                    if (innerCmd.type === CommandType.GOTO) {
+                        actionText = `עברי אל הנחייה מספר ${innerCmd.target + 1}`;
+                    } else {
+                        actionText = innerCmd.type === CommandType.JUMP_RIGHT ? 'קפצי ימינה' : 'קפצי שמאלה';
+                    }
+                    cmdText = `אם ביקרת בשלולית של חברתך - ${actionText}`;
+                } else if (cmd.type === CommandType.GOTO) {
+                    cmdText = `עברי אל הנחייה מספר ${cmd.target + 1}`;
+                }
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = cmdText;
+
+                contentSpan.appendChild(numBadge);
+                contentSpan.appendChild(textSpan);
+                li.appendChild(contentSpan);
+
+                // Delete icon when list is in edit mode
+                if (!confirmed) {
+                    const deleteBadge = document.createElement('span');
+                    deleteBadge.textContent = '✕';
+                    deleteBadge.style.color = '#e53935';
+                    deleteBadge.style.fontSize = '14px';
+                    deleteBadge.style.marginRight = '8px';
+                    deleteBadge.style.fontWeight = 'bold';
+                    li.appendChild(deleteBadge);
+                }
+
+                list.appendChild(li);
+            });
+        }
+
+        function updateFrogIndicators(frog1Step, frog2Step) {
+            // Reset all indicators
+            commands.forEach((_, index) => {
+                const frog1Ind = document.getElementById(`frog1-ind-${index}`);
+                const frog2Ind = document.getElementById(`frog2-ind-${index}`);
+                if (frog1Ind) frog1Ind.style.opacity = '0.3';
+                if (frog2Ind) frog2Ind.style.opacity = '0.3';
+            });
+            
+            // Highlight current positions
+            if (frog1Step !== null && frog1Step !== undefined) {
+                const frog1Current = document.getElementById(`frog1-ind-${frog1Step}`);
+                if (frog1Current) frog1Current.style.opacity = '1';
+            }
+            if (frog2Step !== null && frog2Step !== undefined) {
+                const frog2Current = document.getElementById(`frog2-ind-${frog2Step}`);
+                if (frog2Current) frog2Current.style.opacity = '1';
+            }
+        }
+
+        function stepSimulation() {
+            if (!confirmed) return;
+
+            const startDistance = distance;
+            const maxDistance = startDistance * 5;
+            
+            // Save previous positions
+            const prevPos1 = pos1;
+            const prevPos2 = pos2;
+
+            // Get next jumps
+            const next1 = getJump(pc1, frog1HasVisitedFriend);
+            pc1 = next1.nextPc;
+            const next2 = getJump(pc2, frog2HasVisitedFriend);
+            pc2 = next2.nextPc;
+            // Execute jumps and update visited states
+            if (next1.jump !== 0) {
+                const newPos1 = pos1 + next1.jump;
+                // Check if frog1 has reached or passed through frog2's initial position
+                if ((pos1 <= distance/2 && newPos1 >= distance/2) || 
+                    (pos1 >= distance/2 && newPos1 <= distance/2)) {
+                    frog1HasVisitedFriend = true;
+                }
+                pos1 = newPos1;
+                jumpCount++;
+            }
+            if (next2.jump !== 0) {
+                const newPos2 = pos2 + next2.jump;
+                // Check if frog2 has reached or passed through frog1's initial position
+                if ((pos2 <= -distance/2 && newPos2 >= -distance/2) || 
+                    (pos2 >= -distance/2 && newPos2 <= -distance/2)) {
+                    frog2HasVisitedFriend = true;
+                }
+                pos2 = newPos2;
+                jumpCount++;
+            }
+            
+            // Update UI
+            updateFrogPositions();
+            updateFrogIndicators(next1.jumpPc, next2.jumpPc);
+            
+            // Check if frogs meet (including passing through each other)
+            if ((prevPos1 <= prevPos2 && pos1 >= pos2) || 
+                (prevPos1 >= prevPos2 && pos1 <= pos2) ||
+                pos1 === pos2) {
+                document.getElementById('statusMessage').textContent = `🎉 הצפרדעים נפגשו אחרי ${jumpCount} קפיצות!`;
+                showCelebration();
+                return;
+            }
+            
+            if (Math.abs(pos1 - pos2) >= maxDistance) {
+                document.getElementById('statusMessage').textContent = "📏 נראה שהצפרדעים רק מתרחקות – לא הפתרון הנכון.";
+                return;
+            }
+            
+            // Update program counter        
+            currentStep = Math.max(next1.nextPc, next2.nextPc);
+            
+            if (jumpCount >= maxSteps) {
+                document.getElementById('statusMessage').textContent = "🛑 סימולציה הופסקה – ייתכן לולאה אינסופית.";
+                return;
+            }
+        }
+
+        function runSimulation() {
+            if (!confirmed) return;
+            
+            // Disable run button while simulation is in progress
+            const runBtn = document.getElementById('runBtn');
+            const stepBtn = document.getElementById('stepBtn');
+            runBtn.disabled = true;
+            stepBtn.disabled = true;
+            
+            function runStep() {
+                if (( pc1 >= commands.length && pc2 >= commands.length) || 
+                    document.getElementById('statusMessage').textContent) {
+                    // Re-enable buttons when simulation ends
+                    runBtn.disabled = false;
+                    stepBtn.disabled = false;
+                    return;
+                }
+                
+                stepSimulation();
+                
+                // Continue with next step after delay
+                setTimeout(runStep, 800); // 800ms delay between steps
+            }
+            
+            // Start the simulation
+            runStep();
+        }
+
+        function addConditionalCommand() {
+            if (!confirmed) {
+                const select = document.getElementById('conditionalSelect');
+                const input = document.getElementById('conditionalValue');
+                const action = select.value;
+                let command;
+                
+                if (action === 'goto') {
+                    const value = parseInt(input.value);
+                    if (!isNaN(value) && value > 0) {
+                        command = {
+                            type: CommandType.IF_VISITED_FRIEND,
+                            command: { type: CommandType.GOTO, target: value - 1 }
+                        };
+                    }
+                } else {
+                    command = {
+                        type: CommandType.IF_VISITED_FRIEND,
+                        command: { 
+                            type: action === 'jump_right' ? CommandType.JUMP_RIGHT : CommandType.JUMP_LEFT 
+                        }
+                    };
+                }
+                
+                if (command) {
+                    commands.push(command);
+                    updateCommandList();
+                }
+            }
+        }
+
+        function getJump(pc, hasVisitedOtherPond) {
+            if (gameOver || pc >= commands.length) {
+                return { jump: 0, nextPc: pc, jumpPc: null };
+            }
+
+            const cmd = commands[pc];
+            
+            // Handle regular GOTO
+            if (cmd.type === CommandType.GOTO) {
+                return getJump(cmd.target, hasVisitedOtherPond);
+            }
+            
+            if (cmd.type === CommandType.IF_VISITED_FRIEND) {
+                if (hasVisitedOtherPond) {
+                    const innerCommand = cmd.command;
+                    if (innerCommand.type === CommandType.JUMP_LEFT || innerCommand.type === CommandType.JUMP_RIGHT) {
+                        return {
+                            jump: innerCommand.type === CommandType.JUMP_LEFT ? -1 : 1,
+                            nextPc: pc + 1,
+                            jumpPc: pc
+                        };
+                    } else if (innerCommand.type === CommandType.GOTO) {
+                        return getJump(innerCommand.target, hasVisitedOtherPond);
+                    }
+                }
+                return getJump(pc + 1, hasVisitedOtherPond);
+            }    
+            
+            // Handle simple jumps
+            if (cmd.type === CommandType.JUMP_LEFT || cmd.type === CommandType.JUMP_RIGHT) {
+                return {
+                    jump: cmd.type === CommandType.JUMP_LEFT ? -1 : 1,
+                    nextPc: pc + 1,
+                    jumpPc: pc
+                };
+            }
+            
+            // If we don't recognize the command, just move to next instruction
+            return { jump: 0, nextPc: pc + 1, jumpPc: null };
+        }
+
+        function createFirework(x, y, color) {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.left = x + 'px';
+            firework.style.top = y + 'px';
+            firework.style.backgroundColor = color;
+            document.body.appendChild(firework);
+            
+            setTimeout(() => {
+                document.body.removeChild(firework);
+            }, 1000);
+        }
+
+        function showCelebration() {
+            const overlay = document.getElementById('celebrationOverlay');
+            document.getElementById('jumpCountDisplay').textContent = jumpCount;
+            overlay.style.display = 'block';
+
+            // Create fireworks
+            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
+            const interval = setInterval(() => {
+                for (let i = 0; i < 3; i++) {
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * window.innerHeight;
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    createFirework(x, y, color);
+                }
+            }, 300);
+
+            // Stop fireworks after 3 seconds
+            setTimeout(() => clearInterval(interval), 3000);
+        }
+
+        function toggleInstructions() {
+            const container = document.getElementById('instructionsContainer');
+            const btn = document.getElementById('toggleInstructionsBtn');
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                btn.textContent = 'ℹ️ הסתרת הנחיות';
+            } else {
+                container.style.display = 'none';
+                btn.textContent = 'ℹ️ הצגת הנחיות נוספות';
+            }
+        }
+    </script>
+
+    <div class="controls" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+        <button onclick="confirmCode()">✅ רשימת ההנחיות שלי מוכנה!</button>
+        <button onclick="runSimulation()" id="runBtn" disabled style="opacity: 0.5;">🚀 הרץ סימולציה עד הסוף</button>
+        <button onclick="stepSimulation()" id="stepBtn" disabled style="opacity: 0.5;">🎯 בצע את הקפיצה הבאה (צעד-צעד)</button>
+        <button onclick="resetSimulation()">🔄 אפס את הסימולציה</button>
+        <button onclick="clearCode()">❌ נקה את רשימת ההנחיות</button>
+    </div>
+    <h2 style="font-size: 20px; color: #2c3e50; margin-top: 20px; background-color: #e8f5e9; padding: 10px; border-radius: 8px;"> 📘 <strong>איך מוסיפים הנחיות?</strong><br> לחצו על הנחייה כדי להוסיף אותה אל הרשימה שלכם. יש הנחיות שבהן תוכלו לבחור פרמטרים — בחרו תחילה את האפשרות הרצויה, ורק אז לחצו להוספה. </h2>
+    <div class="code-box" style="margin-top: 20px; display: flex; gap: 20px;">
+        <div class="commands" style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="addCommand('jump_right')">קפצי ימינה</button>
+            <button onclick="addCommand('jump_left')">קפצי שמאלה</button>
+            <div class="command-row" style="display: flex; align-items: center; gap: 10px;">
+                <button onclick="addConditionalCommand()">אם ביקרת בשלולית של חברתך - בצעי:</button>
+                <select id="conditionalSelect" onchange="toggleConditionalInput()">
+                    <option value="jump_right">קפצי ימינה</option>
+                    <option value="jump_left">קפצי שמאלה</option>
+                    <option value="goto">עברי אל הנחייה מספר</option>
+                </select>
+                <input id="conditionalValue" type="number" value="1" min="1" style="display: none; width: 60px;" />
+            </div>
+            <div class="command-row">
+                <button onclick="addCommand('goto')">עברי אל הנחייה מספר</button>
+                <input id="gotoInput" type="number" value="1" min="1" />
+            </div>
+        </div>
+        <div class="program" style="flex: 1; border: 2px solid #4CAF50; background-color: #f1f8e9; padding: 10px; min-height: 200px; border-radius: 5px;">
+            <strong>רשימת ההנחיות:</strong>
+            <ol id="codeList" style="padding-right: 20px; list-style-position: inside;"></ol>
+        </div>
+    </div>
+</body>
+</html>
