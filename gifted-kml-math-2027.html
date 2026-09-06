@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>קהילת מורות ומורי מתמטיקה למחוננים | תשפ"ז</title>
+    <!-- Preconnect & Fast Font Loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #FAF8F5;
+            --card-bg: #FFFFFF;
+            --text-primary: #2C3531;
+            --text-secondary: #5A6561;
+            --primary: #344E41;
+            --primary-hover: #263A30;
+            --accent: #D4A373;
+            --accent-warm: #C86B4B;
+            --accent-light: #F4EBE1;
+            --border-color: #E6E0D6;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --shadow-subtle: 0 4px 20px -2px rgba(44, 53, 49, 0.05);
+            --shadow-float: 0 10px 30px -5px rgba(44, 53, 49, 0.08);
+            
+            /* WhatsApp brand color */
+            --wa-color: #25D366;
+            --wa-bg: #E8F5E9;
+            --wa-text: #2E7D32;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Rubik', 'Assistant', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation Header */
+        .navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .nav-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-light);
+            color: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cta-nav-btn {
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--primary);
+            color: #FFFFFF !important;
+            border-radius: 20px;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .cta-nav-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Main Layout Grid */
+        .main-container {
+            flex: 1;
+            width: 100%;
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 32px 16px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* --- MARKETING COMPONENTS --- */
+        .hero-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px 36px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--accent-warm));
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--accent-light);
+            color: var(--accent-warm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1.25;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .year-highlight {
+            background-color: var(--accent-warm);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .hero-pitch {
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        /* WhatsApp Mentors Section */
+        .hero-mentors {
+            margin-bottom: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .wa-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .wa-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--wa-bg);
+            color: var(--wa-text);
+            border: 1px solid #C8E6C9;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .wa-btn svg {
+            color: var(--wa-color);
+        }
+
+        .wa-btn:hover {
+            background-color: #C8E6C9;
+            transform: translateY(-1px);
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .primary-btn {
+            background-color: var(--primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            font-family: inherit;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(52, 78, 65, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .primary-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        @media (min-width: 640px) {
+            .primary-btn { width: auto; }
+        }
+
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .detail-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .detail-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .detail-card h3 {
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .detail-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Features Section */
+        .section-header {
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .feature-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .feature-num {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-light);
+            color: var(--accent-warm);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .feature-content h3 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .feature-content p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* --- FORM CARD --- */
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            box-shadow: var(--shadow-subtle);
+            scroll-margin-top: 100px;
+        }
+
+        .form-header {
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .form-header h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .form-section {
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 20px;
+        }
+
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+            border-bottom: 2px solid var(--accent-light);
+            padding-bottom: 4px;
+            display: inline-block;
+        }
+
+        .field-group {
+            margin-bottom: 20px;
+        }
+
+        .field-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 0.93rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        label .required {
+            color: var(--accent-warm);
+            margin-right: 2px;
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            font-family: inherit;
+            font-size: 0.95rem;
+            padding: 12px 14px;
+            color: var(--text-primary);
+            background-color: #FCFBF9;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            background-color: #FFFFFF;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 78, 65, 0.12);
+        }
+
+        textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: var(--primary);
+            color: #FFFFFF;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 16px 24px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(52, 78, 65, 0.2);
+        }
+
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .submit-btn:disabled {
+            background-color: #A3B18A;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            display: none;
+            background-color: #FEECEB;
+            color: #C62828;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            margin-top: 16px;
+            font-size: 0.9rem;
+            text-align: center;
+            border: 1px solid #F6CBCA;
+        }
+
+        /* Success Card */
+        .success-card {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 44px 32px;
+            text-align: center;
+            box-shadow: var(--shadow-float);
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .success-card h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .success-card p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.65;
+            margin-bottom: 28px;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            padding: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: auto;
+        }
+
+        /* Desktop Side-by-Side View */
+        @media (min-width: 900px) {
+            .main-container {
+                max-width: 1100px;
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* חצי-חצי בדיוק */
+                gap: 48px;
+                align-items: start; /* מונע מהטופס להימתח לאורך כל העמוד */
+                padding: 40px 24px 80px;
+            }
+            
+            /* Hide elements not needed when form is already visible side-by-side */
+            .desktop-hide {
+                display: none !important;
+            }
+        }
+
+        /* Mobile Responsive adjustments */
+        @media (max-width: 640px) {
+            .nav-container {
+                padding: 10px 14px;
+            }
+            .brand-logo span {
+                font-size: 0.95rem;
+            }
+            .hero-card {
+                padding: 26px 20px;
+            }
+            .form-card {
+                padding: 22px 18px;
+            }
+            h1 {
+                font-size: 1.6rem;
+            }
+            .hero-subtitle {
+                font-size: 1.05rem;
+            }
+            .feature-card {
+                padding: 18px;
+                gap: 12px;
+            }
+            .wa-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+                <div class="brand-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/>
+                    </svg>
+                </div>
+                <span>קהילת מורות ומורי מתמטיקה</span>
+            </a>
+            <div class="nav-links">
+                <button class="cta-nav-btn desktop-hide" onclick="scrollToForm()">להרשמה ✦</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container Layout -->
+    <div class="main-container">
+
+        <!-- Content Column (Right side on Desktop) -->
+        <div class="content-col">
+            
+            <div class="hero-card">
+                <div class="badge">
+                    <span>∞ קהילת קמ"ל | הרשמה לתשפ"ז</span>
+                </div>
+
+                <h1>מקום לחשוב, ליצור ולגדול יחד</h1>
+                <div class="hero-subtitle">
+                    <span>קהילת מורות ומורי מתמטיקה למחוננים</span>
+                    <span class="year-highlight">תשפ"ז</span>
+                </div>
+
+                <p class="hero-pitch">
+                    הוראת מתמטיקה לתלמידים מחוננים ומצטיינים היא מסע מרתק – ולפעמים גם קצת בודד. גם השנה, אנחנו מזמינות אתכם ליצור איתנו מרחב של ביחד. משבצת זמן מיוחדת שמוקדשת לחשיבה ועשייה פדגוגית, יחד עם קולגות מכל הארץ שעוסקים בדיוק באותו התחום.
+                </p>
+
+                <!-- Mentors & WhatsApp Links -->
+                <div class="hero-mentors">
+                    <p style="margin-bottom: 8px;">
+                        <strong>צוות ההנחיה השנה:</strong> תאיר פניני ולירון מיכאלי.<br>
+                        לכל שאלה, התייעצות או מחשבה – מוזמנות ומוזמנים לפנות אלינו בשמחה!
+                    </p>
+                    <div class="wa-buttons">
+                        <a href="https://wa.me/972504011225" target="_blank" class="wa-btn">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                            </svg>
+                            <span>תאיר</span>
+                        </a>
+                        <a href="https://wa.me/972548178708" target="_blank" class="wa-btn">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                            </svg>
+                            <span>לירון</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CTA Button (Hidden on Desktop since form is beside) -->
+                <div class="hero-actions desktop-hide">
+                    <button class="primary-btn" onclick="scrollToForm()">
+                        <span>נשמע מעניין? הירשמו ונהיה בקשר!</span>
+                        <span>↓</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Details Cards -->
+            <div class="details-grid">
+                <div class="detail-card">
+                    <div class="detail-icon">📅</div>
+                    <h3>זמני המפגשים</h3>
+                    <p>ימי שלישי | החל מ-20:00<br>(בערך אחת לשבועיים בזום)</p>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-icon">🎓</div>
+                    <h3>גמול השתלמות</h3>
+                    <p>מוכר ל-30 שעות באופק חדש<br>(בתהליך הרחבה ל-60 שעות)</p>
+                </div>
+            </div>
+
+            <!-- What awaits us in community -->
+            <div class="section-header">
+                <h2>מה מחכה לנו בקהילה השנה?</h2>
+            </div>
+
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <div class="feature-num">1</div>
+                    <div class="feature-content">
+                        <h3>להיות יותר ביחד</h3>
+                        <p>מפגש קולגות לדרך, התייעצות פתוחה בדילמות מהכיתה וחגיגת הצלחות.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-num">2</div>
+                    <div class="feature-content">
+                        <h3>חומרי הוראה ופרקטיקה</h3>
+                        <p>רעיונות לפתיחת שיעור, פתרון בעיות במגוון אסטרטגיות, ליווי פתרון חידות וכלים ישימים לכיתה.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-num">3</div>
+                    <div class="feature-content">
+                        <h3>חקירת סוגיות מורכבות בהוראה</h3>
+                        <p>הוראה מודעת מגדר, מענה לתלמידי קצה, ועוד סוגיות שתרצו להעלות.</p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Form Column (Left side on Desktop) -->
+        <div class="form-col">
+            
+            <main class="form-card" id="formContainer">
+                <div class="form-header">
+                    <h2>הרשמה ויצירת קשר</h2>
+                    <p>
+                        טופס זה נועד לעזור לנו להכיר אותך מעט, לוודא התאמה למטרות הקהילה, וליצור איתך קשר לקראת פתיחת ההרשמה הרשמית.
+                    </p>
+                </div>
+
+                <form id="registrationForm" novalidate>
+
+                    <!-- Section 1: Contact Details -->
+                    <div class="form-section">
+                        <div class="form-section-title">פרטי קשר</div>
+
+                        <div class="field-group">
+                            <label for="fullName">שם מלא <span class="required">*</span></label>
+                            <input type="text" id="fullName" name="fullName" placeholder="לדוגמה: אמי נתר" required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="phone">מספר טלפון נייד <span class="required">*</span></label>
+                            <div class="helper-text">לצורך שיחת היכרות קצרה ועדכונים</div>
+                            <input type="tel" id="phone" name="phone" placeholder="050-0000000" pattern="^05\d-?\d{7}$" title="מספר טלפון נייד חוקי בישראל, למשל: 050-1234567" required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="email">כתובת מייל <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Professional Background -->
+                    <div class="form-section">
+                        <div class="form-section-title">קצת עלייך</div>
+
+                        <div class="field-group">
+                            <label for="teachingContext">איפה את/ה מלמד/ת השנה ובאילו שכבות גיל? <span class="required">*</span></label>
+                            <div class="helper-text">אנא ציינ/י את סוג המסגרת ושכבות הגיל שבהן את/ה מלמד/ת מחוננים השנה (למשל: כיתת אם, מרכז מחוננים וכו').</div>
+                            <textarea id="teachingContext" name="teachingContext" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Expectations & Community Connection -->
+                    <div class="form-section">
+                        <div class="form-section-title">חיבור לקהילה</div>
+
+                        <div class="field-group">
+                            <label for="expectations">בכמה מילים – מה היית רוצה לקבל מהקהילה השנה? <span class="required">*</span></label>
+                            <div class="helper-text">רעיונות להוראה, מענה לאתגר מסוים, קולגות לחשיבה משותפת...</div>
+                            <textarea id="expectations" name="expectations" required></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="contribution">מה לדעתך תוכל/י להביא או לתרום לקהילה? <span class="required">*</span></label>
+                            <div class="helper-text">ניסיון בתחום מסוים, רעיונות לפעילויות, שיתוף בדילמות, אנרגיה טובה...</div>
+                            <textarea id="contribution" name="contribution" required></textarea>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="discovery">אם זו פעם ראשונה שלך איתנו – איך שמעת על הקהילה?</label>
+                            <input type="text" id="discovery" name="discovery">
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Open Space -->
+                    <div class="form-section">
+                        <div class="field-group">
+                            <label for="additionalNotes">יש משהו נוסף שתרצה/י לשתף אותנו, או שאלה שיש לך אלינו?</label>
+                            <textarea id="additionalNotes" name="additionalNotes" style="min-height: 70px;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Submit Error Message Display -->
+                    <div id="submitError" class="error-message"></div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">שליחת טופס ההרשמה</span>
+                        <div class="spinner" id="btnSpinner"></div>
+                    </button>
+                </form>
+            </main>
+
+            <!-- Success Card Overlay -->
+            <div class="success-card" id="successCard">
+                <div class="success-icon">✓</div>
+                <h2>הטופס התקבל בהצלחה!</h2>
+                <p>אנחנו שמחות מאוד על ההתעניינות - נהיה בקשר בקרוב!</p>
+                <button class="primary-btn desktop-hide" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">חזרה לראש העמוד</button>
+            </div>
+            
+        </div> <!-- End Form Col -->
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>קהילת מורות ומורי מתמטיקה למחוננים | תשפ"ז | בהובלת תאיר פניני ולירון מיכאלי</p>
+    </footer>
+
+    <script>
+        // Google Sheets Apps Script Integration
+        const GOOGLE_SHEETS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPOfPSucQ3p-Nb5J6K4ra-MxWv8JumNOjfV0TrpkNI-AK9COWuX2wHvwHvAZI5vJ30/exec"; 
+
+        // Smooth scroll to form for mobile devices
+        function scrollToForm() {
+            const formContainer = document.getElementById('formContainer');
+            const navHeight = document.querySelector('.navbar').offsetHeight;
+            const topPosition = formContainer.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+            
+            window.scrollTo({
+                top: topPosition,
+                behavior: 'smooth'
+            });
+        }
+
+        // Form Submit Handler
+        const form = document.getElementById('registrationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const formContainer = document.getElementById('formContainer');
+        const successCard = document.getElementById('successCard');
+        const submitError = document.getElementById('submitError');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            submitError.style.display = 'none';
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Custom Validation before showing loader
+            const phoneVal = document.getElementById('phone').value.trim();
+            const phoneRegex = /^05\d-?\d{7}$/;
+            if (!phoneRegex.test(phoneVal)) {
+                submitError.textContent = "אנא הזינו מספר טלפון נייד תקין בישראל (למשל: 050-1234567).";
+                submitError.style.display = 'block';
+                return;
+            }
+
+            const emailVal = document.getElementById('email').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailVal)) {
+                submitError.textContent = "אנא הזינו כתובת אימייל תקינה.";
+                submitError.style.display = 'block';
+                return;
+            }
+
+            // UI Loading state
+            submitBtn.disabled = true;
+            btnText.textContent = 'שולח...';
+            btnSpinner.style.display = 'block';
+
+            // Collect Form Values
+            const formData = {
+                timestamp: new Date().toLocaleString('he-IL'),
+                fullName: document.getElementById('fullName').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                teachingContext: document.getElementById('teachingContext').value.trim(),
+                expectations: document.getElementById('expectations').value.trim(),
+                contribution: document.getElementById('contribution').value.trim(),
+                discovery: document.getElementById('discovery').value.trim(),
+                additionalNotes: document.getElementById('additionalNotes').value.trim()
+            };
+
+            try {
+                if (GOOGLE_SHEETS_SCRIPT_URL && GOOGLE_SHEETS_SCRIPT_URL.trim() !== "") {
+                    await fetch(GOOGLE_SHEETS_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                } else {
+                    // Simulation delay for test mode without URL
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
+
+                // Show Success Card
+                formContainer.style.display = 'none';
+                successCard.style.display = 'block';
+                form.reset();
+                
+                // On mobile, scroll up slightly to ensure success card is clearly visible
+                if (window.innerWidth < 900) {
+                     const navHeight = document.querySelector('.navbar').offsetHeight;
+                     const topPosition = successCard.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+                     window.scrollTo({ top: topPosition, behavior: 'smooth' });
+                }
+
+            } catch (error) {
+                console.error("Submission error:", error);
+                submitError.textContent = "אירעה שגיאה בעת השליחה. אנא נסו שוב או פנו אלינו ישירות.";
+                submitError.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = 'שליחת טופס ההרשמה';
+                btnSpinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
