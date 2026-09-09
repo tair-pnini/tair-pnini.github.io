@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>תרגול גדילה ודעיכה להקרנה</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --primary: #1e40af;
+      --primary-light: #eff6ff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #cbd5e1;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      font-size: 1.25rem;
+      line-height: 1.6;
+    }
+
+    /* סרגל עליון קבוע לניהול הקרנה */
+    .top-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0f172a;
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .top-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toolbar-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tool-btn {
+      background: #1e293b;
+      color: #ffffff;
+      border: 1px solid #334155;
+      padding: 7px 14px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .tool-btn:hover {
+      background: #334155;
+      border-color: #64748b;
+    }
+
+    .tool-btn.active {
+      background: #2563eb;
+      border-color: #60a5fa;
+    }
+
+    .tool-btn-casio {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      border-color: #93c5fd;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    }
+
+    .tool-btn-casio:hover {
+      background: linear-gradient(135deg, #1d4ed8, #1d4ed8);
+    }
+
+    /* מערכת לשוניות קומפקטית להקרנה */
+    .tabs-bar {
+      background: #ffffff;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      gap: 6px;
+      padding: 4px 16px 0 16px;
+      position: sticky;
+      top: 56px;
+      z-index: 90;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+
+    .tab-btn {
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      padding: 5px 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: #1e40af;
+      border-color: #2563eb;
+      border-bottom: 2px solid #ffffff;
+      margin-bottom: -2px;
+      box-shadow: 0 -2px 6px rgba(37, 99, 235, 0.08);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* פריסת עמוד עם סרגל צד */
+    .page-layout {
+      display: flex;
+      flex-direction: row-reverse; /* סרגל צד מימין */
+      min-height: calc(100vh - 110px);
+      position: relative;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: #ffffff;
+      border-left: 2px solid #e2e8f0;
+      padding: 14px 12px;
+      position: sticky;
+      top: 110px;
+      height: calc(100vh - 110px);
+      overflow-y: auto;
+      transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.03);
+      font-size: 0.95rem;
+    }
+
+    .sidebar.closed {
+      margin-right: calc(-1 * var(--sidebar-width));
+      box-shadow: none;
+    }
+
+    .sidebar-header {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #1e3a8a;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #dbeafe;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .formula-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      border-right: 3px solid #2563eb;
+    }
+
+    .formula-card-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .formula-display {
+      direction: ltr;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin: 6px 0;
+      letter-spacing: 0.5px;
+    }
+
+    .formula-notes {
+      font-size: 0.84rem;
+      color: #475569;
+      line-height: 1.4;
+    }
+
+    .formula-notes ul {
+      padding-right: 14px;
+      margin: 4px 0;
+    }
+
+    /* עיצוב LTR להמרות אחוזים */
+    .ltr-card-content {
+      direction: ltr;
+      text-align: left;
+      font-family: Consolas, monospace;
+      font-size: 0.88rem;
+      margin-top: 4px;
+    }
+
+    .ltr-rule-badge {
+      background: #f1f5f9;
+      border-left: 3px solid #0284c7;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+      color: #0369a1;
+    }
+
+    .ltr-examples-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      color: #334155;
+      padding-left: 4px;
+    }
+
+    /* תוכן השאלות הראשי */
+    .main-content {
+      flex: 1;
+      padding: 24px 30px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      color: #1e293b;
+      text-align: center;
+      margin-top: 5px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 1.45rem;
+      color: #1e3a8a;
+      border-right: 6px solid var(--primary);
+      padding-right: 12px;
+      margin-top: 32px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    ol {
+      margin: 8px 0 0 0;
+      padding-right: 28px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 1.05rem;
+      display: block;
+      margin-top: 4px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin: 14px 0;
+      background: #ffffff;
+      width: 100%;
+      max-width: 650px;
+    }
+
+    th, td {
+      border: 1.5px solid #94a3b8;
+      padding: 8px 14px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      font-weight: 700;
+    }
+
+    /* גריד של משוואות מהצורה ax^n = b */
+    .equations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .equation-card {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.4rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      transition: transform 0.1s, border-color 0.1s;
+    }
+
+    .equation-card:hover {
+      border-color: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    .eq-num {
+      color: #64748b;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .eq-math {
+      direction: ltr;
+      font-weight: 800;
+      color: #1e3a8a;
+      letter-spacing: 0.5px;
+    }
+
+    /* מחשבון CASIO צף */
+    .casio-wrapper {
+      position: fixed;
+      top: 75px;
+      left: 20px;
+      z-index: 1000;
+      width: 370px;
+      background: #111418;
+      border-radius: 24px;
+      padding: 14px 14px 18px;
+      box-shadow: 0 22px 55px rgba(0, 0, 0, 0.65), 0 0 0 1px #262b34;
+      display: none;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      direction: ltr;
+    }
+
+    .casio-wrapper.open {
+      display: block;
+    }
+
+    .casio-drag-handle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: grab;
+      padding: 2px 4px 8px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid #212630;
+    }
+
+    .casio-drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .casio-top-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .casio-brand {
+      color: #f8fafc;
+      font-weight: 900;
+      letter-spacing: 2px;
+      font-size: 1.15rem;
+    }
+
+    .casio-solar {
+      width: 60px;
+      height: 15px;
+      background: linear-gradient(90deg, #2e1a0f, #4d2b17, #2e1a0f);
+      border: 1px solid #5c341b;
+      border-radius: 2px;
+    }
+
+    .casio-model {
+      color: #94a3b8;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      font-weight: bold;
+    }
+
+    .casio-close {
+      background: #334155;
+      color: #94a3b8;
+      border: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .casio-close:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    /* מסך ClassWiz */
+    .casio-screen-frame {
+      background: #080a0d;
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1.5px solid #1f2530;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+    }
+
+    .casio-lcd {
+      background: #0d1117;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: 'Courier New', Courier, monospace;
+      color: #e2e8f0;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .lcd-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: #64748b;
+      margin-bottom: 3px;
+      border-bottom: 1px solid #161d27;
+      padding-bottom: 2px;
+    }
+
+    .status-pill {
+      background: #1e293b;
+      color: #94a3b8;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 0.6rem;
+    }
+
+    .status-pill.active {
+      background: #f59e0b;
+      color: #000;
+      font-weight: 900;
+    }
+
+    .status-pill.alpha-active {
+      background: #10b981;
+      color: #000;
+      font-weight: 900;
+    }
+
+    .lcd-input {
+      font-size: 1.15rem;
+      min-height: 28px;
+      word-break: break-all;
+      line-height: 1.25;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .lcd-result {
+      font-size: 1.6rem;
+      text-align: right;
+      font-weight: 800;
+      min-height: 32px;
+      margin-top: 2px;
+      color: #38bdf8;
+    }
+
+    /* לוח מקשים מורחב */
+    .casio-control-pad {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 0 4px;
+    }
+
+    .ctrl-col {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ctrl-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .casio-dpad {
+      width: 86px;
+      height: 86px;
+      background: radial-gradient(circle, #2a313d 0%, #171a20 70%);
+      border: 2px solid #333c4a;
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.06);
+    }
+
+    .dpad-center {
+      width: 32px;
+      height: 32px;
+      background: #101216;
+      border-radius: 50%;
+      border: 1px solid #232832;
+    }
+
+    .dpad-arrow {
+      position: absolute;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: color 0.1s;
+    }
+    .dpad-arrow:hover { color: #f8fafc; }
+    .dpad-up { top: 4px; left: 50%; transform: translateX(-50%); }
+    .dpad-down { bottom: 4px; left: 50%; transform: translateX(-50%); }
+    .dpad-left { left: 4px; top: 50%; transform: translateY(-50%); }
+    .dpad-right { right: 4px; top: 50%; transform: translateY(-50%); }
+
+    .key-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .key-sub {
+      font-size: 0.58rem;
+      font-weight: 700;
+      color: #f59e0b;
+      line-height: 1;
+      height: 11px;
+      margin-bottom: 2px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .key-sub.sub-alpha {
+      color: #10b981;
+    }
+
+    .btn-key {
+      width: 100%;
+      background: #252b35;
+      color: #f1f5f9;
+      border: 1px solid #1c212a;
+      border-radius: 6px;
+      padding: 6px 2px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 0 #0d1014;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.05s ease;
+      min-height: 28px;
+    }
+
+    .btn-key:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 0 #0d1014;
+      background: #333a47;
+    }
+
+    .btn-shift {
+      color: #f59e0b;
+      font-size: 0.72rem;
+      font-weight: 900;
+      border-color: #3b321a;
+      background: #23272e;
+    }
+    .btn-shift.active-mode {
+      background: #f59e0b;
+      color: #000;
+    }
+
+    .btn-alpha {
+      color: #10b981;
+      font-size: 0.72rem;
+      font-weight: 900;
+      background: #23272e;
+    }
+
+    .btn-ctrl {
+      font-size: 0.72rem;
+      background: #20242c;
+    }
+
+    .casio-func-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 5px 4px;
+      margin-bottom: 8px;
+    }
+
+    .casio-num-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px 4px;
+    }
+
+    .btn-digit {
+      background: #2e3541;
+      color: #ffffff;
+      font-size: 1.18rem;
+      border-color: #242a34;
+      min-height: 34px;
+    }
+    .btn-digit:hover {
+      background: #373f4e;
+    }
+
+    .btn-del {
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 0.95rem;
+      border-color: #991b1b;
+      box-shadow: 0 2px 0 #7f1d1d;
+    }
+
+    .btn-ac {
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 0.95rem;
+      border-color: #991b1b;
+      box-shadow: 0 2px 0 #7f1d1d;
+    }
+
+    .btn-equal {
+      background: #16a34a;
+      color: #ffffff;
+      font-size: 1.3rem;
+      border-color: #15803d;
+      box-shadow: 0 2px 0 #166534;
+    }
+
+    .btn-math-op {
+      background: #1e242d;
+      font-size: 1.1rem;
+      color: #93c5fd;
+    }
+
+    /* התאמה למסכים קטנים */
+    @media (max-width: 900px) {
+      .tabs-bar {
+        overflow-x: auto;
+        padding: 8px 12px 0 12px;
+      }
+      .tab-btn {
+        font-size: 1rem;
+        padding: 8px 14px;
+        white-space: nowrap;
+      }
+      .page-layout {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-left: none;
+        border-bottom: 2px solid #e2e8f0;
+      }
+      .sidebar.closed {
+        display: none;
+        margin-right: 0;
+      }
+      .casio-wrapper {
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-width: 365px;
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- סרגל כלים עליון -->
+  <div class="top-toolbar">
+    <div class="top-title">
+      <span>📐 תרגול גדילה ודעיכה מעריכית</span>
+    </div>
+
+    <div class="toolbar-buttons">
+      <!-- כפתור פתיחת מחשבון קסיו -->
+      <button class="tool-btn tool-btn-casio" id="btn-toggle-casio" onclick="toggleCasio()">
+        <span>🧮 מחשבון CASIO</span>
+      </button>
+
+      <!-- כפתור הצגת/הסתרת סרגל נוסחאות -->
+      <button class="tool-btn active" id="btn-toggle-sidebar" onclick="toggleSidebar()">
+        <span>📑 סרגל נוסחאות ועזרים</span>
+      </button>
+
+      <!-- התאמת גודל כתב להקרנה -->
+      <button class="tool-btn" onclick="adjustZoom(0.1)" title="הגדל כתב">A+</button>
+      <button class="tool-btn" onclick="adjustZoom(-0.1)" title="הקטן כתב">A-</button>
+    </div>
+  </div>
+
+  <!-- סרגל לשוניות קומפקטי וממוקד -->
+  <nav class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('tab-final-amounts', this)">
+      1. כמות סופית
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-equations', this)">
+      2. משוואות ax<sup>n</sup> = b
+    </button>
+    <button class="tab-btn" onclick="switchTab('tab-word-problems', this)">
+      3. שאלות מילוליות (מציאת q)
+    </button>
+  </nav>
+
+  <div class="page-layout">
+
+    <!-- סרגל צד לנוסחאות ועזרים -->
+    <aside class="sidebar" id="formulas-sidebar">
+      <div class="sidebar-header">
+        <span>דף נוסחאות ועזרים</span>
+      </div>
+
+      <!-- 1. נוסחת גדילה ודעיכה -->
+      <div class="formula-card">
+        <div class="formula-card-title">1. נוסחת גדילה ודעיכה</div>
+        <div class="formula-display">A<sub>t</sub> = A<sub>0</sub> · q<sup>t</sup></div>
+        <div class="formula-notes">
+          <ul>
+            <li><strong>A<sub>0</sub></strong>: כמות התחלתית</li>
+            <li><strong>q</strong>: מקדם השינוי</li>
+            <li><strong>t</strong>: מספר יחידות זמן</li>
+            <li><strong>A<sub>t</sub></strong>: כמות סופית</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 2. מקדם השינוי באחוזים -->
+      <div class="formula-card">
+        <div class="formula-card-title">2. מקדם השינוי (q) באחוזים</div>
+        <div class="formula-display" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span>q =</span>
+          <div style="display: inline-flex; flex-direction: column; align-items: center; font-size: 1.05rem; line-height: 1.15;">
+            <span style="border-bottom: 2px solid #1d4ed8; padding: 0 4px 2px;">100 ± p</span>
+            <span style="padding-top: 2px;">100</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. המרת אחוז לעשרוני (משמאל לימין) -->
+      <div class="formula-card">
+        <div class="formula-card-title" style="direction: rtl;">3. אחוז &larr; עשרוני</div>
+        <div class="ltr-card-content">
+          <div class="ltr-rule-badge">&divide; 100 (2 steps left)</div>
+          <div class="ltr-examples-list">
+            <div>2% &rarr; 0.02</div>
+            <div>6% &rarr; 0.06</div>
+            <div>1.3% &rarr; 0.013</div>
+            <div>10% &rarr; 0.10</div>
+            <div>15% &rarr; 0.15</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. המרת עשרוני לאחוז (משמאל לימין) -->
+      <div class="formula-card">
+        <div class="formula-card-title" style="direction: rtl;">4. עשרוני &larr; אחוז</div>
+        <div class="ltr-card-content">
+          <div class="ltr-rule-badge">&times; 100 (2 steps right)</div>
+          <div class="ltr-examples-list">
+            <div>0.05 &rarr; 5%</div>
+            <div>0.06 &rarr; 6%</div>
+            <div>0.95 &rarr; 95%</div>
+            <div>1.04 &rarr; 104%</div>
+            <div>0.1 &rarr; 10%</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content" id="main-questions">
+
+      <!-- ================= לשונית 1: מציאת כמות סופית (קיים) ================= -->
+      <div class="tab-content active" id="tab-final-amounts">
+        <h1>תרגילים: מציאת הכמות הסופית (A<sub>t</sub>)</h1>
+
+        <h2>חלק א': מציאת הכמות הסופית אחרי מספר יחידות זמן</h2>
+
+        <div class="card">
+          <div class="card-title">שאלה 1</div>
+          <p>מספר החיידקים בתרבית גדל פי 2 בכל שעה בהשוואה לשעה שקדמה לה. בתחילת הניסוי היו 150 חיידקים.</p>
+          <ol type="א">
+            <li>חשבו את מספר החיידקים אחרי 11 שעות מתחילת הניסוי.</li>
+            <li>חשבו את מספר החיידקים אחרי 12 שעות מתחילת הניסוי.</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 2</div>
+          <p>היום יש ביער 2000 טון עץ. כמות העץ ביער גדלה כל שנה פי 1.04.</p>
+          <ol type="א">
+            <li>מה תהיה כמות העץ ביער בעוד 8 שנים?</li>
+            <li>מה תהיה כמות העץ ביער בעוד 13 שנים?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 3</div>
+          <p>כמות הדגים בבריכה גדלה כל חודש ב-6%. היום יש בבריכה 12 טונות דגים.</p>
+          <ol type="א">
+            <li>מה תהיה כמות הדגים בבריכה בעוד 7 חודשים?</li>
+            <li>מה תהיה כמות הדגים בבריכה בעוד שנה?</li>
+            <li>בכמה אחוזים גדולה כמות הדגים שתהיה בעוד שנה מכמות הדגים שתהיה בעוד 7 חודשים?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 4</div>
+          <p>מספר הפילים בשמורת טבע קטן בצורה מעריכית. כיום יש בשמורה 400 פילים. בעוד 3 חודשים יהיו בשמורה 380 פילים.</p>
+          <ol type="א">
+            <li>מצאו בכמה אחוזים קטן מספר הפילים בשמורה כל 3 חודשים.</li>
+            <li>
+              כמה פילים יהיו בשמורה בעוד שלוש וחצי שנים?
+              <span class="hint">(הדרכה: חשבו תחילה את מספר החודשים שיש בשלוש וחצי שנים. את התוצאה שקיבלתם חלקו ב-3 וכך תמצאו את מספר יחידות הזמן).</span>
+            </li>
+            <li>בכמה אחוזים קטן מספר הפילים שיהיו בשמורה בעוד שלוש וחצי שנים ממספר הפילים שיש כיום בשמורה?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 5</div>
+          <p>האוכלוסיה במדינה מסוימת גדלה כל שנה ב-1.3%. בתאריך 01.01.2019 נערך מפקד אוכלוסין והתברר שמספר התושבים היה 22.7 מיליון.</p>
+          <ol type="א">
+            <li>מה יהיה גודל האוכלוסיה במדינה בתאריך 01.01.2029?</li>
+            <li>האם בתאריך 01.01.2033 יהיו במדינה יותר מ-27 מיליון תושבים?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 6</div>
+          <p>כמות של חומר רדיואקטיבי קטנה באופן מעריכי. בתחילת הניסוי היו 250 גרם של החומר. אחרי חודש היו 230 גרם של החומר.</p>
+          <ol type="א">
+            <li>
+              (1) מצאו את מקדם הדעיכה.<br>
+              (2) בכמה אחוזים קטנה כמות החומר כל חודש?
+            </li>
+            <li>איזו כמות תישאר מהחומר אחרי 9 חודשים?</li>
+            <li>
+              (1) איזו כמות תישאר מהחומר אחרי שנה?<br>
+              (2) כמה גרמים הפסיד החומר ממשקלו אחרי שנה?
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 7</div>
+          <p>מספר הצבים בשמורת טבע קטן באופן מעריכי. הטבלה שלפניכם מתארת את המצב:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>השנה</th>
+                <th>בהתחלה</th>
+                <th>אחרי שנה</th>
+                <th>אחרי 9 שנים</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>מספר הצבים</td>
+                <td>300</td>
+                <td>270</td>
+                <td>?</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>היעזרו בטבלה וענו על הסעיפים הבאים:</p>
+          <ol type="א">
+            <li>מצאו בכמה אחוזים קטן מספר הצבים בשמורה בכל שנה.</li>
+            <li>השלימו את הטבלה — מצאו את מספר הצבים בשמורה אחרי 9 שנים.</li>
+            <li>מצאו בכמה אחוזים קטן מספר הצבים אחרי 9 שנים ממספר הצבים בהתחלה (עגלו לאחוזים שלמים).</li>
+          </ol>
+        </div>
+
+        <h2>חלק ב': מציאת הכמות הסופית לפני מספר יחידות זמן</h2>
+
+        <div class="card">
+          <div class="card-title">שאלה 1</div>
+          <p>בשמורת טבע יש היום 200 אריות. מספר האריות גדל כל שנה ב-10%.</p>
+          <ol type="א">
+            <li>כמה אריות היו בשמורה לפני 8 שנים?</li>
+            <li>כמה אריות יהיו בשמורה בעוד 8 שנים?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 2</div>
+          <p>מספר התושבים ביישוב גדל פי 1.06 בכל שנה. היום יש ביישוב 8018 תושבים.</p>
+          <ol type="א">
+            <li>כמה תושבים היו ביישוב לפני 20 שנה?</li>
+            <li>בכמה אחוזים גדל מספר התושבים ביישוב ב-20 השנים האחרונות?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 3</div>
+          <p>אוכלוסיה במדינה מסוימת גדלה כל שנה ב-1.4%. בתאריך 01.01.2010 נערך מפקד אוכלוסין והתברר שמספר התושבים במדינה הוא 12.7 מיליון.</p>
+          <ol type="א">
+            <li>מה יהיה גודל האוכלוסיה בתאריך 01.01.2025?</li>
+            <li>מה היה גודל האוכלוסיה בתאריך 01.01.2000?</li>
+            <li>בכמה אחוזים יהיה מספר התושבים בתאריך 01.01.2025 גדול ממספר התושבים בתאריך 01.01.2000?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 4</div>
+          <p>עוצמת הקרינה של חומר רדיואקטיבי קטנה כל 3 שעות ב-15%. בשעה 21:00 בערב עוצמת הקרינה של החומר הייתה 60 בקרל.<br>
+          <span class="hint">(הערה: בקרל היא יחידה למדידת עוצמת הקרינה).</span></p>
+          <ol type="א">
+            <li>מה הייתה עוצמת הקרינה בשעה 18:00 בערב באותו היום?</li>
+            <li>מה הייתה עוצמת הקרינה בשעה 3:00 לפנות בוקר באותו היום?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 5</div>
+          <p>בשמורת טבע סופרים את מספר חיות הבר מדי שנה באותו התאריך. בספירה הראשונה נספרו 1400 חיות. בספירה השנייה שנערכה כעבור שנה נספרו 1260 חיות. אוכלוסיית החיות קטנה באופן מעריכי.</p>
+          <ol type="א">
+            <li>מהו אחוז הדעיכה של מספר החיות בשמורת הטבע?</li>
+            <li>מה היה (בקירוב) מספר החיות 8 שנים לפני הספירה הראשונה?</li>
+            <li>בכמה אחוזים ירד מספר החיות במשך 8 השנים הנ"ל?</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- ================= לשונית 2: משוואות למציאת הבסיס (חדש) ================= -->
+      <div class="tab-content" id="tab-equations">
+        <h1>פתרון משוואות מהצורה ax<sup>n</sup> = b &nbsp; (x &gt; 0)</h1>
+        <p style="text-align:center; color: var(--muted); margin-bottom: 25px;">
+          חלצו את x בעזרת שורש מסדר n במחשבון: <code>x = ⁿ√(b / a)</code>
+        </p>
+
+        <div class="equations-grid">
+          <div class="equation-card">
+            <span class="eq-num">(1)</span>
+            <span class="eq-math">3x<sup>3</sup> = 24</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(2)</span>
+            <span class="eq-math">2x<sup>4</sup> = 162</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(3)</span>
+            <span class="eq-math">4x<sup>3</sup> = 500</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(4)</span>
+            <span class="eq-math">5x<sup>5</sup> = 160</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(5)</span>
+            <span class="eq-math">2x<sup>5</sup> = 486</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(6)</span>
+            <span class="eq-math">3x<sup>4</sup> = 768</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(7)</span>
+            <span class="eq-math">160x<sup>5</sup> = 5</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(8)</span>
+            <span class="eq-math">486x<sup>5</sup> = 2</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(9)</span>
+            <span class="eq-math">768x<sup>4</sup> = 3</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(10)</span>
+            <span class="eq-math">450x<sup>7</sup> = 600</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(11)</span>
+            <span class="eq-math">200x<sup>12</sup> = 300</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(12)</span>
+            <span class="eq-math">5000x<sup>9</sup> = 9000</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(13)</span>
+            <span class="eq-math">3000x<sup>10</sup> = 2000</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(14)</span>
+            <span class="eq-math">5200x<sup>8</sup> = 4000</span>
+          </div>
+          <div class="equation-card">
+            <span class="eq-num">(15)</span>
+            <span class="eq-math">22,000x<sup>20</sup> = 18,000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= לשונית 3: שאלות מילוליות - מציאת המקדם (חדש) ================= -->
+      <div class="tab-content" id="tab-word-problems">
+        <h1>מציאת מקדם הגדילה או הדעיכה על פי כמויות בשתי יחידות זמן שאינן עוקבות</h1>
+
+        <div class="card">
+          <div class="card-title">שאלה 1</div>
+          <p>בשמורת טבע סופרים את מספר העופות הדורסים מדי שנה באותו התאריך. בספירה ראשונה שנערכה נספרו 1500 עופות דורסים. אחרי 5 שנים נספרו 1915 עופות דורסים. אוכלוסיית העופות הדורסים גדלה באופן מעריכי.</p>
+          <ol type="א">
+            <li>
+              (1) פי כמה גדל מספר העופות הדורסים כל שנה?<br>
+              (2) בכמה אחוזים גדל מספר העופות הדורסים כל שנה?
+            </li>
+            <li>מה יהיה מספר העופות הדורסים 8 שנים אחרי הספירה הראשונה?</li>
+            <li>מה היה מספר העופות הדורסים 8 שנים לפני הספירה הראשונה?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 2</div>
+          <p>האוכלוסיה במדינה מסוימת גדלה באופן מעריכי.<br>
+          בתאריך 01.01.2010 היו במדינה 7 מיליון תושבים.<br>
+          בתאריך 01.01.2019 היו במדינה 16.51 מיליון תושבים.</p>
+          <ol type="א">
+            <li>
+              (1) מצאו פי כמה גדלה האוכלוסיה כל שנה.<br>
+              (2) מצאו בכמה אחוזים גדלה האוכלוסיה כל שנה.
+            </li>
+            <li>מה היה מספר התושבים במדינה בתאריך 01.01.2000?</li>
+            <li>האם בתאריך 01.01.2030 יהיו במדינה יותר מ-47 מיליון תושבים?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 3</div>
+          <p>מספר התושבים בעיר מסוימת גדל בצורה מעריכית. בשנה מסוימת היו בעיר 499,400 תושבים. 4 שנים לאחר מכן היו בעיר 549,097 תושבים.</p>
+          <ol type="א">
+            <li>
+              (1) מהו מקדם הגדילה?<br>
+              (2) בכמה אחוזים גדל מספר התושבים בכל שנה?
+            </li>
+            <li>בכמה אחוזים גדל מספר התושבים במשך 4 השנים הנ"ל?</li>
+            <li>
+              השלימו את הטבלה הבאה:
+              <table>
+                <thead>
+                  <tr>
+                    <th>השנה</th>
+                    <th>9 שנים לפני השנה המסוימת</th>
+                    <th>השנה המסוימת</th>
+                    <th>4 שנים אחרי השנה המסוימת</th>
+                    <th>9 שנים אחרי השנה המסוימת</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>מספר התושבים</td>
+                    <td>?</td>
+                    <td>499,400</td>
+                    <td>549,097</td>
+                    <td>?</td>
+                  </tr>
+                </tbody>
+              </table>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 4</div>
+          <p>עוצמת הקרינה של חומר רדיואקטיבי קטנה בכל 3 שעות באחוז קבוע. בטבלה מתוארות התוצאות שהתקבלו במעבדה:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>השעה</th>
+                <th>3:00</th>
+                <th>6:00</th>
+                <th>9:00</th>
+                <th>18:00</th>
+                <th>24:00</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>עוצמת הקרינה (בקרל)</td>
+                <td>63</td>
+                <td>?</td>
+                <td>50</td>
+                <td>?</td>
+                <td>?</td>
+              </tr>
+            </tbody>
+          </table>
+          <ol type="א">
+            <li>מצאו פי כמה קטנה הקרינה בכל 3 שעות.</li>
+            <li>מצאו את גודל הקרינה בשעה 6:00.</li>
+            <li>מצאו את גודל הקרינה בשעה 18:00 ובשעה 24:00.</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 5</div>
+          <p>מספר החולים במחלה מסוימת קטן כל שנה באופן מעריכי. בשנה מסוימת היו 50,000 חולים במחלה. אחרי 3 שנים קטן מספר החולים ב-27.1%.</p>
+          <ol type="א">
+            <li>כמה חולים היו אחרי 3 שנים?</li>
+            <li>באיזה אחוז ירד מספר החולים כל שנה?</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card-title">שאלה 6</div>
+          <p>כמות הדגים בבריכה גדלה כל חודש באחוז קבוע. בתחילת חודש ינואר היו בבריכה 20 טון דגים. אחרי שנה כמות הדגים בבריכה גדלה ב-61%.</p>
+          <ol type="א">
+            <li>מצאו את כמות הדגים בבריכה אחרי השנה הנ"ל.</li>
+            <li>מצאו באיזה אחוז לחודש גדלה כמות הדגים בבריכה בשנה הנ"ל.</li>
+            <li>מצאו את כמות הדגים שהייתה בתחילת חודש ינואר, שנתיים לפני חודש ינואר שבתחילת השנה הנ"ל.</li>
+          </ol>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- מחשבון CASIO צף ומדעי -->
+  <div class="casio-wrapper" id="casio-calculator">
+    <div class="casio-drag-handle" id="casio-header" title="גרור כדי להזיז">
+      <div class="casio-top-info">
+        <div class="casio-brand">CASIO</div>
+        <div class="casio-solar"></div>
+        <div class="casio-model">fx-991EX ClassWiz</div>
+      </div>
+      <button class="casio-close" onclick="toggleCasio()" title="סגור מחשבון">&times;</button>
+    </div>
+
+    <!-- מסך LCD מודרני -->
+    <div class="casio-screen-frame">
+      <div class="casio-lcd">
+        <div class="lcd-status">
+          <span class="status-pill">DEG</span>
+          <span class="status-pill">FRAC</span>
+          <span class="status-pill">NORM</span>
+          <span class="status-pill" id="flag-shift">S</span>
+          <span class="status-pill" id="flag-alpha">A</span>
+          <span style="flex:1;"></span>
+          <span id="casio-ans-flag" style="font-size:0.65rem; color:#94a3b8;"></span>
+        </div>
+        <div class="lcd-input" id="casio-input">0</div>
+        <div class="lcd-result" id="casio-output"></div>
+      </div>
+    </div>
+
+    <!-- אזור בקרה עליון: SHIFT, ALPHA, D-PAD, MENU -->
+    <div class="casio-control-pad">
+      <div class="ctrl-col">
+        <div class="ctrl-row">
+          <div class="key-unit" style="flex:1;">
+            <button class="btn-key btn-shift" id="btn-shift-toggle" onclick="casioShift()">SHIFT</button>
+          </div>
+          <div class="key-unit" style="flex:1;">
+            <button class="btn-key btn-alpha" id="btn-alpha-toggle" onclick="casioAlpha()">ALPHA</button>
+          </div>
+        </div>
+        <div class="ctrl-row">
+          <div class="key-unit" style="flex:1;">
+            <button class="btn-key btn-ctrl" onclick="casioInput('(')">OPTN</button>
+          </div>
+          <div class="key-unit" style="flex:1;">
+            <div class="key-sub">SOLVE =</div>
+            <button class="btn-key btn-ctrl" onclick="casioCalculate()">CALC</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- D-Pad ניווט -->
+      <div class="casio-dpad">
+        <button class="dpad-arrow dpad-up" onclick="casioDpad('up')">▲</button>
+        <button class="dpad-arrow dpad-down" onclick="casioDpad('down')">▼</button>
+        <button class="dpad-arrow dpad-left" onclick="casioDpad('left')">◀</button>
+        <button class="dpad-arrow dpad-right" onclick="casioDpad('right')">▶</button>
+        <div class="dpad-center"></div>
+      </div>
+
+      <div class="ctrl-col">
+        <div class="ctrl-row">
+          <div class="key-unit" style="flex:1;">
+            <button class="btn-key btn-ctrl" onclick="casioAC()">MENU</button>
+          </div>
+          <div class="key-unit" style="flex:1;">
+            <button class="btn-key btn-ctrl" onclick="adjustZoom(0.05)">⚙</button>
+          </div>
+        </div>
+        <div class="ctrl-row">
+          <div class="key-unit" style="flex:1;">
+            <div class="key-sub">d/dx</div>
+            <button class="btn-key btn-ctrl" onclick="casioInput('(')">∫□</button>
+          </div>
+          <div class="key-unit" style="flex:1;">
+            <div class="key-sub sub-alpha">x</div>
+            <button class="btn-key btn-ctrl" onclick="casioInput('x')">x</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- שורות פונקציות מתמטיות (6 עמודות) -->
+    <div class="casio-func-grid">
+      <div class="key-unit">
+        <div class="key-sub">■ ■/□</div>
+        <button class="btn-key" onclick="casioFrac()" title="שבר">■/□</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">∛□</div>
+        <button class="btn-key" onclick="casioSqrt()" title="שורש ריבועי / שורש 3 עם Shift">√□</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">x³</div>
+        <button class="btn-key" onclick="casioSquare()" title="בריבוע / בשלישית">x²</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub" style="font-weight:900;">ⁿ√□</div>
+        <button class="btn-key" onclick="casioPower()" title="חזקה / שורש מסדר n עם Shift">x<sup>■</sup></button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">10<sup>■</sup></div>
+        <button class="btn-key" onclick="casioLogBase()" title="לוג">log<sub>■</sub></button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">e<sup>■</sup></div>
+        <button class="btn-key" onclick="casioLn()" title="לן">ln</button>
+      </div>
+
+      <div class="key-unit">
+        <div class="key-sub">log</div>
+        <button class="btn-key" onclick="casioNeg()" title="סימן מינוס">(-)</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">FACT</div>
+        <button class="btn-key" onclick="casioInput('°')" title="מעלות">° ' ''</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">x!</div>
+        <button class="btn-key" onclick="casioInverse()" title="הופכי">x⁻¹</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">sin⁻¹</div>
+        <button class="btn-key" onclick="casioTrig('sin')" title="סינוס">sin</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">cos⁻¹</div>
+        <button class="btn-key" onclick="casioTrig('cos')" title="קוסינוס">cos</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">tan⁻¹</div>
+        <button class="btn-key" onclick="casioTrig('tan')" title="טנגנס">tan</button>
+      </div>
+
+      <div class="key-unit">
+        <div class="key-sub">RECALL</div>
+        <button class="btn-key" onclick="casioInput('Ans')">STO</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">∠</div>
+        <button class="btn-key" onclick="casioInput('×10^3')">ENG</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">%</div>
+        <button class="btn-key" onclick="casioParenOpen()" title="סוגר פותח / אחוזים עם Shift">(</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">,</div>
+        <button class="btn-key" onclick="casioInput(')')" title="סוגר סוגר">)</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">a b/c⇔d/c</div>
+        <button class="btn-key" onclick="casioSDToggle()" title="המרה שבר/עשרוני">S⇔D</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">M-</div>
+        <button class="btn-key" onclick="casioInput('+Ans')">M+</button>
+      </div>
+    </div>
+
+    <!-- שורות מספרים ומקשים ראשיים (5 עמודות) -->
+    <div class="casio-num-grid">
+      <div class="key-unit">
+        <div class="key-sub">CONST</div>
+        <button class="btn-key btn-digit" onclick="casioInput('7')">7</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">CONV</div>
+        <button class="btn-key btn-digit" onclick="casioInput('8')">8</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">RESET</div>
+        <button class="btn-key btn-digit" onclick="casioInput('9')">9</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">INS</div>
+        <button class="btn-key btn-del" onclick="casioDel()">DEL</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">CLRv</div>
+        <button class="btn-key btn-ac" onclick="casioAC()">AC</button>
+      </div>
+
+      <div class="key-unit">
+        <div class="key-sub">MATRIX</div>
+        <button class="btn-key btn-digit" onclick="casioInput('4')">4</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">VECTOR</div>
+        <button class="btn-key btn-digit" onclick="casioInput('5')">5</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub"></div>
+        <button class="btn-key btn-digit" onclick="casioInput('6')">6</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">nPr</div>
+        <button class="btn-key btn-math-op" onclick="casioInput('×')">×</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">nCr</div>
+        <button class="btn-key btn-math-op" onclick="casioInput('÷')">÷</button>
+      </div>
+
+      <div class="key-unit">
+        <div class="key-sub"></div>
+        <button class="btn-key btn-digit" onclick="casioInput('1')">1</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">CMPLX</div>
+        <button class="btn-key btn-digit" onclick="casioInput('2')">2</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub"></div>
+        <button class="btn-key btn-digit" onclick="casioInput('3')">3</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">Pol</div>
+        <button class="btn-key btn-math-op" onclick="casioInput('+')">+</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">Rec</div>
+        <button class="btn-key btn-math-op" onclick="casioInput('−')">−</button>
+      </div>
+
+      <div class="key-unit">
+        <div class="key-sub">Ran#</div>
+        <button class="btn-key btn-digit" onclick="casioInput('0')">0</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">RanInt</div>
+        <button class="btn-key btn-digit" onclick="casioInput('.')">.</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">π</div>
+        <button class="btn-key" onclick="casioExp()" title="כפול 10 בחזקת / פאי עם Shift">×10<sup>x</sup></button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub">e</div>
+        <button class="btn-key" onclick="casioAnsBtn()" title="התשובה הקודמת Ans / e עם Shift">Ans</button>
+      </div>
+      <div class="key-unit">
+        <div class="key-sub"></div>
+        <button class="btn-key btn-equal" onclick="casioCalculate()" title="חשב">=</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ניהול לשוניות */
+    function switchTab(tabId, btnElement) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btnElement.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* לוגיקת מחשבון CASIO */
+    let calcExpr = '';
+    let lastResult = '';
+    let isEvaluated = false;
+    let isShiftActive = false;
+    let isAlphaActive = false;
+    let displayFormatFraction = false;
+
+    const inputEl = document.getElementById('casio-input');
+    const outputEl = document.getElementById('casio-output');
+    const ansFlagEl = document.getElementById('casio-ans-flag');
+    const shiftFlagEl = document.getElementById('flag-shift');
+    const alphaFlagEl = document.getElementById('flag-alpha');
+    const btnShift = document.getElementById('btn-shift-toggle');
+    const btnAlpha = document.getElementById('btn-alpha-toggle');
+
+    function updateDisplay() {
+      inputEl.textContent = calcExpr || '0';
+      shiftFlagEl.classList.toggle('active', isShiftActive);
+      btnShift.classList.toggle('active-mode', isShiftActive);
+      alphaFlagEl.classList.toggle('alpha-active', isAlphaActive);
+    }
+
+    function casioShift() {
+      isShiftActive = !isShiftActive;
+      if (isShiftActive) isAlphaActive = false;
+      updateDisplay();
+    }
+
+    function casioAlpha() {
+      isAlphaActive = !isAlphaActive;
+      if (isAlphaActive) isShiftActive = false;
+      updateDisplay();
+    }
+
+    function consumeShift() {
+      if (isShiftActive) {
+        isShiftActive = false;
+        updateDisplay();
+        return true;
+      }
+      return false;
+    }
+
+    function consumeAlpha() {
+      if (isAlphaActive) {
+        isAlphaActive = false;
+        updateDisplay();
+        return true;
+      }
+      return false;
+    }
+
+    function casioInput(val) {
+      if (isEvaluated) {
+        if (['+', '−', '-', '×', '÷', '^', ' ⁿ√ ', '%'].includes(val)) {
+          calcExpr = 'Ans ' + val;
+        } else {
+          calcExpr = '';
+        }
+        isEvaluated = false;
+      }
+
+      if (['+', '−', '×', '÷'].includes(val)) {
+        calcExpr += ' ' + val + ' ';
+      } else {
+        calcExpr += val;
+      }
+      consumeShift();
+      consumeAlpha();
+      updateDisplay();
+    }
+
+    function casioPower() {
+      if (consumeShift()) {
+        casioInput(' ⁿ√ ');
+      } else {
+        casioInput('^');
+      }
+    }
+
+    function casioSqrt() {
+      if (consumeShift()) {
+        casioInput('3 ⁿ√ ');
+      } else {
+        casioInput('√(');
+      }
+    }
+
+    function casioSquare() {
+      if (consumeShift()) {
+        casioInput('^3');
+      } else {
+        casioInput('^2');
+      }
+    }
+
+    function casioInverse() {
+      if (consumeShift()) {
+        casioInput('!');
+      } else {
+        casioInput('^(-1)');
+      }
+    }
+
+    function casioFrac() {
+      casioInput('/');
+    }
+
+    function casioLogBase() {
+      if (consumeShift()) {
+        casioInput('10^');
+      } else {
+        casioInput('log(');
+      }
+    }
+
+    function casioLn() {
+      if (consumeShift()) {
+        casioInput('e^');
+      } else {
+        casioInput('ln(');
+      }
+    }
+
+    function casioNeg() {
+      if (consumeShift()) {
+        casioInput('log(');
+      } else {
+        casioInput('-');
+      }
+    }
+
+    function casioTrig(name) {
+      if (consumeShift()) {
+        casioInput('a' + name + '(');
+      } else {
+        casioInput(name + '(');
+      }
+    }
+
+    function casioParenOpen() {
+      if (consumeShift()) {
+        casioInput('%');
+      } else {
+        casioInput('(');
+      }
+    }
+
+    function casioExp() {
+      if (consumeShift()) {
+        casioInput('π');
+      } else {
+        casioInput('×10^');
+      }
+    }
+
+    function casioAnsBtn() {
+      if (consumeShift()) {
+        casioInput('e');
+      } else {
+        casioInput('Ans');
+      }
+    }
+
+    function casioDel() {
+      if (isEvaluated) {
+        casioAC();
+        return;
+      }
+      if (calcExpr.endsWith(' ⁿ√ ')) {
+        calcExpr = calcExpr.slice(0, -4);
+      } else if (calcExpr.endsWith('^(-1)')) {
+        calcExpr = calcExpr.slice(0, -5);
+      } else if (calcExpr.endsWith('^2') || calcExpr.endsWith('^3') || calcExpr.endsWith('√(')) {
+        calcExpr = calcExpr.slice(0, -2);
+      } else if (calcExpr.endsWith('×10^') || calcExpr.endsWith('log(')) {
+        calcExpr = calcExpr.slice(0, -4);
+      } else if (calcExpr.endsWith('ln(')) {
+        calcExpr = calcExpr.slice(0, -3);
+      } else if (calcExpr.endsWith(' ')) {
+        calcExpr = calcExpr.trimEnd();
+      } else {
+        calcExpr = calcExpr.slice(0, -1);
+      }
+      updateDisplay();
+    }
+
+    function casioAC() {
+      calcExpr = '';
+      outputEl.textContent = '';
+      isEvaluated = false;
+      isShiftActive = false;
+      isAlphaActive = false;
+      displayFormatFraction = false;
+      updateDisplay();
+    }
+
+    function casioDpad(dir) {
+      if (dir === 'left' || dir === 'right') {
+        isEvaluated = false;
+      } else if (dir === 'up' && lastResult !== '') {
+        calcExpr = String(lastResult);
+        updateDisplay();
+      }
+    }
+
+    function casioSDToggle() {
+      if (lastResult === '' || isNaN(Number(lastResult))) return;
+      const num = Number(lastResult);
+      displayFormatFraction = !displayFormatFraction;
+
+      if (displayFormatFraction) {
+        const frac = toFraction(num);
+        if (frac) {
+          outputEl.textContent = frac;
+          return;
+        }
+      }
+      outputEl.textContent = Number(Math.round(num * 10000) / 10000);
+    }
+
+    function toFraction(decimal) {
+      if (Number.isInteger(decimal)) return decimal.toString();
+      const tolerance = 1.0E-6;
+      let h1 = 1, h2 = 0, k1 = 0, k2 = 1;
+      let b = decimal;
+      do {
+        let a = Math.floor(b);
+        let aux = h1; h1 = a * h1 + h2; h2 = aux;
+        aux = k1; k1 = a * k1 + k2; k2 = aux;
+        b = 1 / (b - a);
+      } while (Math.abs(decimal - h1 / k1) > decimal * tolerance && k1 < 10000);
+      return k1 > 1 ? `${h1}/${k1}` : null;
+    }
+
+    function casioCalculate() {
+      if (!calcExpr && lastResult === '') return;
+
+      try {
+        let parsed = calcExpr;
+
+        parsed = parsed.replace(/π/g, '(Math.PI)');
+        parsed = parsed.replace(/\be\b/g, '(Math.E)');
+        parsed = parsed.replace(/Ans/g, lastResult !== '' ? `(${lastResult})` : '0');
+        parsed = parsed.replace(/×10\^/g, '* 10**');
+        parsed = parsed.replace(/([0-9.]+)\s*%/g, '($1/100)');
+
+        parsed = parsed.replace(/([0-9]+)!/g, (m, n) => {
+          let f = 1;
+          for (let i = 2; i <= parseInt(n); i++) f *= i;
+          return f;
+        });
+
+        while (parsed.includes('ⁿ√')) {
+          const before = parsed;
+          parsed = parsed.replace(/(\([^\(\)]+\)|[0-9.]+)\s*ⁿ√\s*(\([^\(\)]+\)|[0-9.]+)/, (m, p1, p2) => {
+            return `(Math.pow(${p2}, 1/(${p1})))`;
+          });
+          if (parsed === before) break;
+        }
+
+        while (parsed.includes('√')) {
+          const before = parsed;
+          parsed = parsed.replace(/√\s*(\([^\(\)]+\)|[0-9.]+)/, (m, p1) => `(Math.sqrt(${p1}))`);
+          if (parsed === before) break;
+        }
+
+        parsed = parsed.replace(/log\(/g, '(Math.log10(');
+        parsed = parsed.replace(/ln\(/g, '(Math.log(');
+        parsed = parsed.replace(/sin\(([^)]+)\)/g, '(Math.sin(($1) * Math.PI / 180))');
+        parsed = parsed.replace(/cos\(([^)]+)\)/g, '(Math.cos(($1) * Math.PI / 180))');
+        parsed = parsed.replace(/tan\(([^)]+)\)/g, '(Math.tan(($1) * Math.PI / 180))');
+        parsed = parsed.replace(/asin\(([^)]+)\)/g, '((Math.asin($1) * 180 / Math.PI))');
+        parsed = parsed.replace(/acos\(([^)]+)\)/g, '((Math.acos($1) * 180 / Math.PI))');
+        parsed = parsed.replace(/atan\(([^)]+)\)/g, '((Math.atan($1) * 180 / Math.PI))');
+
+        parsed = parsed.replace(/×/g, '*');
+        parsed = parsed.replace(/÷/g, '/');
+        parsed = parsed.replace(/−/g, '-');
+        parsed = parsed.replace(/\^/g, '**');
+
+        const openP = (parsed.match(/\(/g) || []).length;
+        const closeP = (parsed.match(/\)/g) || []).length;
+        if (openP > closeP) {
+          parsed += ')'.repeat(openP - closeP);
+        }
+
+        if (!/^[0-9+\-*/().\s*Math.powsqrtlogEPIasincoet]+$/.test(parsed)) {
+          outputEl.textContent = 'Syntax ERROR';
+          return;
+        }
+
+        const result = Function('"use strict"; return (' + parsed + ')')();
+
+        if (isNaN(result) || !isFinite(result)) {
+          outputEl.textContent = 'Math ERROR';
+        } else {
+          const formatted = Number(Math.round(result * 10000) / 10000);
+          outputEl.textContent = formatted;
+          lastResult = formatted;
+          ansFlagEl.textContent = 'Ans = ' + formatted;
+          isEvaluated = true;
+          displayFormatFraction = false;
+        }
+      } catch (err) {
+        outputEl.textContent = 'Syntax ERROR';
+      }
+    }
+
+    function toggleCasio() {
+      const calc = document.getElementById('casio-calculator');
+      const btn = document.getElementById('btn-toggle-casio');
+      const isOpen = calc.classList.toggle('open');
+      btn.classList.toggle('active', isOpen);
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('formulas-sidebar');
+      const btn = document.getElementById('btn-toggle-sidebar');
+      const isClosed = sidebar.classList.toggle('closed');
+      btn.classList.toggle('active', !isClosed);
+    }
+
+    let currentZoom = 1.25;
+    function adjustZoom(delta) {
+      currentZoom = Math.min(Math.max(currentZoom + delta, 0.9), 1.9);
+      document.body.style.fontSize = currentZoom + 'rem';
+    }
+
+    (function makeDraggable() {
+      const el = document.getElementById('casio-calculator');
+      const handle = document.getElementById('casio-header');
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      handle.addEventListener('mousedown', startDrag);
+      handle.addEventListener('touchstart', startDragTouch, { passive: false });
+
+      function startDrag(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = el.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', stopDrag);
+        e.preventDefault();
+      }
+
+      function onDrag(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        el.style.left = (initialLeft + dx) + 'px';
+        el.style.top = (initialTop + dy) + 'px';
+        el.style.right = 'auto';
+      }
+
+      function stopDrag() {
+        isDragging = false;
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('mouseup', stopDrag);
+      }
+
+      function startDragTouch(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        const rect = el.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        document.addEventListener('touchmove', onDragTouch, { passive: false });
+        document.addEventListener('touchend', stopDragTouch);
+      }
+
+      function onDragTouch(e) {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        el.style.left = (initialLeft + dx) + 'px';
+        el.style.top = (initialTop + dy) + 'px';
+        el.style.right = 'auto';
+        e.preventDefault();
+      }
+
+      function stopDragTouch() {
+        isDragging = false;
+        document.removeEventListener('touchmove', onDragTouch);
+        document.removeEventListener('touchend', stopDragTouch);
+      }
+    })();
+
+    window.addEventListener('keydown', (e) => {
+      const calc = document.getElementById('casio-calculator');
+      if (!calc.classList.contains('open')) return;
+
+      if (e.key >= '0' && e.key <= '9') casioInput(e.key);
+      else if (e.key === '.') casioInput('.');
+      else if (e.key === '+') casioInput('+');
+      else if (e.key === '-') casioInput('−');
+      else if (e.key === '*') casioInput('×');
+      else if (e.key === '/') { e.preventDefault(); casioInput('÷'); }
+      else if (e.key === '^') casioInput('^');
+      else if (e.key === '(' || e.key === ')') casioInput(e.key);
+      else if (e.key === 'Enter' || e.key === '=') casioCalculate();
+      else if (e.key === 'Backspace') casioDel();
+      else if (e.key === 'Escape') casioAC();
+    });
+  </script>
+</body>
+</html>
