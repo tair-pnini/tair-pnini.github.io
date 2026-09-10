@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מאגר שאלות וגרפים במתמטיקה - תצוגה והוראה</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Assistant', 'Heebo', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Assistant', 'Heebo', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    .graph-aspect-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 480 / 380;
+      overflow: hidden;
+      background: #ffffff;
+      border-radius: 1rem;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .graph-svg-root {
+      width: 100%;
+      height: 100%;
+      display: block;
+      user-select: none;
+      touch-action: pan-y pinch-zoom;
+    }
+    .graph-grid-line {
+      stroke: #cbd5e1;
+      stroke-width: 0.8;
+      vector-effect: non-scaling-stroke;
+    }
+    .graph-grid-line-bold {
+      stroke: #94a3b8;
+      stroke-width: 1.3;
+      vector-effect: non-scaling-stroke;
+    }
+    .graph-axis {
+      stroke: #0f172a;
+      stroke-width: 2.2;
+      vector-effect: non-scaling-stroke;
+    }
+    .graph-line {
+      fill: none;
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+    .graph-point {
+      cursor: pointer;
+      transition: r 0.15s ease, stroke-width 0.15s ease;
+    }
+    .graph-point:hover {
+      r: 6.5;
+    }
+    .crosshair-line {
+      stroke: #6366f1;
+      stroke-width: 1.5;
+      stroke-dasharray: 4, 3;
+      pointer-events: none;
+      vector-effect: non-scaling-stroke;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .question-card {
+        page-break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scroll selection:bg-indigo-100 selection:text-indigo-900">
+
+  <header class="no-print sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-200">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">מאגר גרפים ושאלות במתמטיקה</h1>
+          <p class="text-xs text-slate-500 hidden sm:block">נוסח מדויק מתוך הקובץ • מותאם לקריאה, הקרנה והוראה</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions Toolbar -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- View Mode Switcher -->
+        <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200">
+          <button id="btn-mode-single" onclick="setViewMode('single')" class="px-3 py-1.5 rounded-lg text-sm font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            <span>שאלה בודדת (מצב הקרנה)</span>
+          </button>
+          <button id="btn-mode-all" onclick="setViewMode('all')" class="px-3 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            <span>כל השאלות ברצף</span>
+          </button>
+        </div>
+
+        <!-- Font Size Adjuster -->
+        <div class="flex items-center bg-slate-100 rounded-xl border border-slate-200 p-1">
+          <button onclick="changeFontSize(-1)" title="הקטן גופן" class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-white rounded-lg transition font-bold text-xs">א-</button>
+          <span id="font-size-label" class="px-2 text-xs font-semibold text-slate-600">רגיל</span>
+          <button onclick="changeFontSize(1)" title="הגדל גופן" class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-white rounded-lg transition font-bold text-sm">א+</button>
+        </div>
+
+        <!-- Toggle Guidelines / Crosshair -->
+        <button id="btn-toggle-crosshair" onclick="toggleCrosshair()" title="הפעל סרגלי עזר לקריאת נקודות" class="px-3 py-2 rounded-xl text-sm font-medium border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 transition">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          <span class="hidden md:inline">סרגלי עזר</span>
+        </button>
+
+        <!-- Fullscreen Button -->
+        <button onclick="toggleFullScreen()" title="מסך מלא" class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center gap-2 overflow-x-auto custom-scroll border-t border-slate-100 text-sm">
+      <span class="text-xs font-bold text-slate-400 shrink-0">נושאים:</span>
+      <button onclick="filterCategory('all')" class="cat-pill active px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-indigo-600 text-white transition">הכל (15)</button>
+      <button onclick="filterCategory('motion')" class="cat-pill px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 transition">בעיות תנועה (4)</button>
+      <button onclick="filterCategory('filling')" class="cat-pill px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 transition">בעיות מילוי (1)</button>
+      <button onclick="filterCategory('non_uniform')" class="cat-pill px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 transition">קצב שינוי לא אחיד (2)</button>
+      <button onclick="filterCategory('unusual')" class="cat-pill px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 transition">גרפים לא שגרתיים (3)</button>
+      <button onclick="filterCategory('bars')" class="cat-pill px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 transition">דיאגרמות עמודות (5)</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full">
+    
+    <!-- SINGLE QUESTION VIEW (Presentation Mode) -->
+    <div id="single-view-container" class="block space-y-6">
+      
+      <!-- Top Question Navigation Bar -->
+      <div class="no-print flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-200 shadow-sm gap-2">
+        <button onclick="navigateQuestion(-1)" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-bold transition">
+          <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          <span class="hidden sm:inline">שאלה קודמת</span>
+        </button>
+
+        <div class="flex items-center gap-2 text-center">
+          <span class="text-xs sm:text-sm font-semibold text-slate-500">שאלה</span>
+          <select id="question-jump-select" onchange="jumpToQuestion(parseInt(this.value))" class="bg-indigo-50 border border-indigo-200 text-indigo-900 font-black text-sm sm:text-base rounded-xl px-3 py-1.5 cursor-pointer focus:ring-2 focus:ring-indigo-500">
+            <!-- Populated via JS -->
+          </select>
+          <span id="question-total-count" class="text-xs sm:text-sm font-semibold text-slate-500">מתוך 15</span>
+        </div>
+
+        <button onclick="navigateQuestion(1)" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 font-bold transition">
+          <span class="hidden sm:inline">שאלה הבאה</span>
+          <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Current Question Card Target -->
+      <div id="current-question-card" class="transition-all duration-300">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+    </div>
+
+    <!-- ALL QUESTIONS VIEW (Continuous Reading Mode) -->
+    <div id="all-view-container" class="hidden space-y-8">
+      <!-- Rendered dynamically via JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- Enlarged Graph Modal for Clear Classroom Projection -->
+  <div id="graph-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" onclick="closeGraphModal(event)">
+    <div class="bg-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 flex flex-col max-h-[95vh]" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+        <div>
+          <span id="modal-category-badge" class="text-xs font-bold text-indigo-600 uppercase tracking-wider block"></span>
+          <h3 id="modal-title" class="text-lg sm:text-xl font-black text-slate-900"></h3>
+        </div>
+        <button onclick="closeGraphModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition">✕</button>
+      </div>
+      <div class="flex-1 w-full overflow-hidden flex items-center justify-center p-2 bg-slate-50 rounded-2xl border border-slate-100">
+        <div id="modal-graph-container" class="w-full max-w-2xl graph-aspect-container shadow-sm">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+      <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
+        <span>הגרף מוצג בפרופורציה מלאה ללא עיוות. העבירו עכבר לקריאת ערכים.</span>
+        <button onclick="closeGraphModal()" class="px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-800 transition">סגור</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="no-print bg-white border-t border-slate-200 py-4 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+      <div class="flex items-center gap-4">
+        <span>מקשי קיצור: <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-slate-700">←</kbd> / <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-slate-700">→</kbd> מעבר שאלות</span>
+        <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-slate-700">T</kbd> הצג/הסתר תשובות</span>
+      </div>
+      <div>
+        <span>הנוסח מועתק במדויק מתוך קובץ העבודה "גרפים1.docx"</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Exact questions data matching the images verbatim
+    const questionsData = [
+      {
+        id: 1,
+        sourceNum: 8,
+        category: 'motion',
+        categoryName: 'בעיות תנועה (קצב השינוי הממוצע אחיד)',
+        title: 'שביל ישראל - מטייל במהירות קבועה',
+        text: `הגרף שלפניכם מתאר את המרחק של מטייל בשביל ישראל מנקודת המוצא לפי הזמן. (הגרף הוא קו ישר ולכן הוא מתאר הליכה במהירות קבועה).
+א. באיזה מרחק מנקודת המוצא היה המטייל אחרי שעתיים?
+ב. מהי מהירותו של המטייל?
+ג. מה היה המרחק של המטייל מנקודת המוצא בסיום השעה השלישית? (הדרכה: השעה השלישית אינה מופיעה בגרף ולכן לא ניתן למצוא את המרחק על ידי התבוננות בגרף).
+כדי למצוא את המרחק יש שתי דרכים:
+(1) להיעזר במהירות המטייל.
+(2) למצוא את המרחק שעבר בשעה, זהו אותו המרחק שעבר בשעה השלישית.`,
+        answers: `א. 10 ק"מ.
+ב. 5 קמ"ש (חישוב: 10 ק"מ / 2 שעות = 5 קמ"ש).
+ג. 15 ק"מ (חישוב: 5 קמ"ש * 3 שעות = 15 ק"מ).`,
+        graphType: 'line_trail'
+      },
+      {
+        id: 2,
+        sourceNum: 9,
+        category: 'motion',
+        categoryName: 'בעיות תנועה (קצב השינוי הממוצע אחיד)',
+        title: 'אצנית מרתון - יישומון Runkeeper',
+        text: `אצנית מרתון השתמשה ביישומון Runkeeper במהלך ריצת אימון.
+בסיום הריצה התקבל הגרף שמשמאל, המתאר את מרחקה מנקודת המוצא לפי הזמן.
+א. באיזו שעה יצאה האצנית לריצה?
+ב. איזה מרחק עברה האצנית עד השעה: (1) 8:30? (2) 10:00?
+ג. באיזה מרחק מנקודת המוצא היתה האצנית בשעה 9:00?
+ד. מצאו באיזו שעה היתה האצנית במרחק של:
+(1) 5 ק"מ מנקודת המוצא. (2) 25 ק"מ מנקודת המוצא.
+ה. מה היתה מהירותה של האצנית?
+ו. באיזה מרחק מנקודת המוצא היתה האצנית בשעה 12:00?
+(הדרכה: ראו הדרכה לתרגיל 8 ג').`,
+        answers: `א. 7:00 (בנקודה זו המרחק הוא 0 ק"מ).
+ב. (1) 15 ק"מ. (2) 30 ק"מ.
+ג. 20 ק"מ.
+ד. (1) 7:30. (2) 9:30.
+ה. 10 קמ"ש (עברה 30 ק"מ ב-3 שעות: 30 / 3 = 10 קמ"ש).
+ו. 50 ק"מ (מהשעה 7:00 עד 12:00 חלפו 5 שעות: 5 * 10 = 50 ק"מ).`,
+        graphType: 'line_runner'
+      },
+      {
+        id: 3,
+        sourceNum: 10,
+        category: 'motion',
+        categoryName: 'בעיות תנועה (קצב השינוי הממוצע אחיד)',
+        title: 'הולך רגל מיישוב א\' ליישוב ב\' וחזרה',
+        text: `הולך רגל הלך מיישוב א' ליישוב ב', התעכב ביישוב ב' וחזר ליישוב א'. הגרף בציור מתאר את המרחק של הולך הרגל מהיישוב א' לפי הזמן.
+א. מהו המרחק בין היישובים א' ו-ב'?
+ב. באיזו שעה הגיע הולך הרגל ליישוב ב' וכמה זמן שהה בו?
+ג. מה הייתה מהירות הולך הרגל בדרכו מהיישוב א' ליישוב ב'?
+ד. מה הייתה מהירות הולך הרגל בדרכו חזרה מהיישוב ב' ליישוב א'?
+ה. באילו שעות היה הולך הרגל במרחק של 6 ק"מ מהיישוב א'?
+ו. איזה מרחק עבר הולך הרגל בסך הכול?`,
+        answers: `א. 12 ק"מ.
+ב. הגיע בשעה 10:00, שהה בו שעה אחת (בין 10:00 ל-11:00).
+ג. 6 קמ"ש (12 ק"מ בשעתיים: 12 / 2 = 6 קמ"ש).
+ד. 4 קמ"ש (12 ק"מ ב-3 שעות: 12 / 3 = 4 קמ"ש).
+ה. בשעות 9:00 (בהלוך) ו-12:30 (בחזור).
+ו. 24 ק"מ (12 ק"מ הלוך + 12 ק"מ חזור).`,
+        graphType: 'line_walker'
+      },
+      {
+        id: 4,
+        sourceNum: 11,
+        category: 'motion',
+        categoryName: 'בעיות תנועה (קצב השינוי הממוצע אחיד)',
+        title: 'נסיעת מכונית מת"א למושב בערבה ובחזרה',
+        text: `מכונית נסעה מת"א למושב בערבה ובחזרה.
+הגרף מתאר את המרחק של המכונית מת"א לפי הזמן.
+א. מהו המרחק בין ת"א למושב?
+ב. כמה זמן התעכבה המכונית במושב?
+ג. מה הייתה מהירות המכונית בדרכה מת"א למושב?
+ד. מה הייתה מהירות המכונית בדרכה חזרה מהמושב לת"א?
+ה. כמה ק"מ בסה"כ עברה המכונית בין השעות 5:00 ל-11:00?`,
+        answers: `א. 180 ק"מ.
+ב. שעה אחת (בין השעות 7:00 ל-8:00 המרחק לא השתנה).
+ג. 90 קמ"ש (180 ק"מ בשעתיים: 180 / 2 = 90 קמ"ש).
+ד. 60 קמ"ש (180 ק"מ ב-3 שעות, בין 8:00 ל-11:00: 180 / 3 = 60 קמ"ש).
+ה. 360 ק"מ (180 ק"מ הלוך + 180 ק"מ חזור).`,
+        graphType: 'line_car'
+      },
+      {
+        id: 5,
+        sourceNum: 2,
+        category: 'filling',
+        categoryName: 'בעיות מילוי (קצב השינוי הממוצע אחיד)',
+        title: 'כמות היין בחבית ביקב במצפה רמון',
+        text: `הגרף שלפניכם מתאר את כמות היין בחבית ביקב במצפה רמון לפי הזמן שחלף מתחילת מילוי היין.
+א. כמה יין היה בחבית 4 דקות מתחילת מילוי היין?
+ב. באילו זמנים היו בחבית בדיוק 40 ליטר?
+ג. מה הייתה כמות היין הגדולה ביותר בחבית?
+ד. האם בין הדקה ה-8 לדקה ה-12 גדלה או קטנה כמות היין? נמקו.
+ה. האם בין הדקה ה-2 לדקה ה-4 גדלה או קטנה כמות היין? נמקו.
+ו. כמה יין הוזרם לחבית בין הדקה ה-2 לדקה ה-4?
+ז. באילו זמנים לא היה שינוי בכמות היין בחבית?
+ח. איזה אחוז מהווה כמות היין בחבית בדקה ה-10 מכמות היין המקסימלית שבחבית?`,
+        answers: `א. 80 ליטר.
+ב. בדקה ה-2 ובדקה ה-12.
+ג. 80 ליטר.
+ד. קטנה. נימוק: הגרף יורד מ-80 ליטר ל-40 ליטר (הוצא יין מהחבית).
+ה. גדלה. נימוק: הגרף עולה מ-40 ליטר ל-80 ליטר.
+ו. 40 ליטר (80 - 40 = 40 ליטר).
+ז. בין הדקה ה-4 לדקה ה-8 (הקו אופקי, כמות היין נשארה 80 ליטר).
+ח. 75% (בדקה ה-10 היו 60 ליטר; 60 מתוך 80 שווה 60/80 = 3/4 = 75%).`,
+        graphType: 'line_wine'
+      },
+      {
+        id: 6,
+        sourceNum: 2,
+        category: 'non_uniform',
+        categoryName: 'גרפים רגילים (קצב השינוי הממוצע אינו אחיד)',
+        title: 'טמפרטורה בבריכת גידול אצות',
+        text: `בציור שלפניכם מתוארת הטמפרטורה בבריכת גידול אצות, לפי הזמן במשך כמה שעות.
+א. מהי הטמפרטורה בשעה 6:00 ומהי הטמפרטורה בשעה 10:00?
+ב. מהו ההפרש בשעות בין השעה 6:00 לשעה 10:00 ומהו ההפרש במעלות בין הטמפרטורה שבשעה 6:00 לטמפרטורה שבשעה 10:00?
+ג. מהו קצב השינוי הממוצע של הטמפרטורה משעה 6:00 ועד לשעה 10:00?
+(הדרכה: קצב שינוי ממוצע = הפרש הטמפרטורות / הפרש השעות, ראו את הפתרון של סעיף ח' בדוגמה שבעמוד הקודם).
+ד. מהו קצב השינוי הממוצע של הטמפרטורה משעה 12:00 עד לשעה 16:00?
+ה. בין אילו שעות עלתה הטמפרטורה ובין אילו שעות היא ירדה?`,
+        answers: `א. בשעה 6:00: 4°, בשעה 10:00: 12°.
+ב. הפרש שעות: 4 שעות (10 - 6 = 4). הפרש מעלות: 8° (12 - 4 = 8).
+ג. 2° לשעה (8° / 4 שעות = 2° לשעה).
+ד. 2.5°- לשעה (בשעה 12:00 הייתה 14°, בשעה 16:00 הייתה 4°. הפרש טמפ': 4 - 14 = -10°. הפרש שעות: 4. קצב: -10 / 4 = -2.5° לשעה).
+ה. עלתה: בין 6:00 ל-12:00, ירדה: בין 12:00 ל-17:00.`,
+        graphType: 'curve_algae'
+      },
+      {
+        id: 7,
+        sourceNum: 3,
+        category: 'non_uniform',
+        categoryName: 'גרפים רגילים (קצב השינוי הממוצע אינו אחיד)',
+        title: 'טמפרטורה בעיירת סקי במשך היממה',
+        text: `בציור שלפניכם מתוארת הטמפרטורה לפי זמן, בעיירת סקי במשך היממה:
+א. מצאו מה הייתה הטמפרטורה בשעה: 10:00, 17:00, 22:00, 2:00.
+ב. מצאו באילו שעות הייתה הטמפרטורה: 6°, 2°, -1°.
+ג. באיזו שעה הייתה הטמפרטורה הגבוהה ביותר ומהי?
+ד. באיזו שעה הייתה הטמפרטורה הנמוכה ביותר ומהי?
+ה. מהו הפרש המעלות בין הטמפרטורה הגבוהה ביותר לטמפרטורה הנמוכה ביותר?
+ו. מהו קצב השינוי הממוצע של הטמפרטורה מהשעה 13:00 ועד השעה 21:00? (הדרכה: ראו הדרכה לסעיף ג' בתרגיל הקודם).
+ז. בין אילו שעות ירדה הטמפרטורה?
+ח. בין אילו שעות הייתה הטמפרטורה בין 6° ל-10° (כולל 6° ו-10°)?`,
+        answers: `א. בשעה 10:00: 6°. בשעה 17:00: 5°. בשעה 22:00: 0°. בשעה 2:00: -4°.
+ב. 6°: בשעות 10:00 ו-16:00.
+   2°: בשעות 8:00 (בבוקר) ו-19:00.
+   -1°: בשעות 22:30 (בערך) ו-4:00 (בבוקר).
+ג. בשעה 13:00, הטמפרטורה הייתה 10°.
+ד. בשעה 1:00, הטמפרטורה הייתה 5°-.
+ה. 15° (10 - (-5) = 15°).
+ו. 1.25°- לשעה (מ-10° בשעה 13:00 ל-0° בשעה 21:00: ירידה של 10 מעלות ב-8 שעות: -10 / 8 = -1.25° לשעה).
+ז. ירדה: בין השעות 13:00 ל-1:00 בלילה.
+ח. בין השעות 10:00 ל-16:00 (כולל).`,
+        graphType: 'curve_ski'
+      },
+      {
+        id: 8,
+        sourceNum: 3,
+        category: 'unusual',
+        categoryName: 'גרפים לא שגרתיים (בדידים / מדרגות)',
+        title: 'ייצור מכוניות במפעל במשך עשרה ימים',
+        text: `הנקודות במערכת הצירים מתארות את מספר המכוניות שיוצרו במפעל במשך עשרה ימים :
+א. כמה מכוניות יוצרו ביום: הראשון? השני? החמישי?
+ב. באילו מהימים יוצרה בכל יום אותה הכמות של מכוניות ומהי כמות זו?
+ג. באיזה יום יוצרה הכמות הגדולה ביותר של מכוניות ומהי?
+ד. באיזה יום, פרט ליום השביעי, יוצרה הכמות הקטנה ביותר של מכוניות ומהי?
+ה. בנו טבלה מתאימה לתיאור הנתונים שבגרף (הדרכה: ראו הדרכה לסעיף ה' בתרגיל הקודם).
+ו. כמה מכוניות יוצרו בסך הכול במשך עשרת הימים הנ"ל?
+ז. הראו בעזרת הטבלה שבחמשת הימים הראשונים יוצרו יותר מכוניות מאשר בחמשת הימים האחרונים.`,
+        answers: `א. יום ראשון: 25. יום שני: 40. יום חמישי: 20.
+ב. בימים הרביעי, השמיני והעשירי; כמות זו היא 30 מכוניות.
+ג. ביום התשיעי, 50 מכוניות.
+ד. ביום השישי, 5 מכוניות.
+ה. טבלת נתונים:
+[יום: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10]
+[מכוניות: 25 | 40 | 15 | 30 | 20 | 5 | 0 | 30 | 50 | 30]
+ו. 245 מכוניות (25 + 40 + 15 + 30 + 20 + 5 + 0 + 30 + 50 + 30 = 245).
+ז. 5 ימים ראשונים: 25 + 40 + 15 + 30 + 20 = 130 מכוניות.
+   5 ימים אחרונים: 5 + 0 + 30 + 50 + 30 = 115 מכוניות.
+   130 > 115 ולכן בחמשת הימים הראשונים יוצרו יותר.`,
+        graphType: 'scatter_cars'
+      },
+      {
+        id: 9,
+        sourceNum: 6,
+        category: 'unusual',
+        categoryName: 'גרפים לא שגרתיים (בדידים / מדרגות)',
+        title: 'טמפרטורת מי הים בעומקים שונים',
+        text: `מדדו את הטמפרטורה בים בעומקים שונים (ראו ציור).
+א. חברו בקטע כל שתי נקודות סמוכות.
+ב. היעזרו בקטעים שציירתם ומצאו מהי בקירוב הטמפרטורה בעומק של: (1) 300 מ'. (2) 500 מ'. (3) 700 מ'. (4) 850 מ'.
+ג. מצאו באיזה עומק בקירוב הטמפרטורה היא: (1) 18°. (2) 3°. (3) 12°.
+ד. מה הייתה הטמפרטורה על פני המים?
+ה. בכמה אחוזים הייתה הטמפרטורה בעומק של 400 מטר נמוכה מהטמפרטורה בעומק של 200 מטר?`,
+        answers: `א. מחברים בקו ישר בין כל נקודה סמוכה (ראו כפתור "חבר קטעים" בגרף).
+ב. (1) 300 מ': כ-13°.
+   (2) 500 מ': כ-8°.
+   (3) 700 מ': כ-5°.
+   (4) 850 מ': כ-3.5°.
+ג. (1) 18°: כ-100 מ'.
+   (2) 3°: כ-900 מ'.
+   (3) 12°: כ-330 מ'.
+ד. 20° (עומק 0 מטר).
+ה. 37.5% (בעומק 200 מ': 16°, בעומק 400 מ': 10°. ירידה של 6 מעלות: 6 / 16 = 0.375 = 37.5%).`,
+        graphType: 'scatter_ocean'
+      },
+      {
+        id: 10,
+        sourceNum: 8,
+        category: 'unusual',
+        categoryName: 'גרפים לא שגרתיים (בדידים / מדרגות)',
+        title: 'מהירות משאית לפי מהירות מותרת באזורים שונים',
+        text: `הגרף שלפניכם מציג מהירות של משאית שנסעה במהירות קבועה במספר מקומות בהתאם למהירות המותרת. (בכל מקום היא נסעה במהירות קבועה אחרת). המשאית נסעה, לאו דווקא בסדר זה, בשכונה (שבה המהירות המותרת היא הנמוכה ביותר), בשטח עירוני ובשטח בין עירוני. (הערה: ההנחה בתרגיל זה שהמעבר של המשאית ממהירות למהירות הוא מיידי למרות שבמציאות מעבר ממהירות למהירות לוקח זמן גם אם זמן קצר). בחלק מהזמן המשאית עצרה. המשאית יצאה לדרך בשעה 6:00.
+א. מצאו את המהירות המותרת: (1) בשכונה. (2) בשטח עירוני. (3) בשטח בין עירוני.
+ב. בין אילו שעות המשאית עצרה?
+ג. באיזו מהירות נסעה המשאית בין השעות 6:00 ל- 7:30? היכן היא נסעה?
+ד. בין אילו שעות נסעה המשאית במהירות של 90 קמ"ש?
+ה. חשבו את המרחק שהמשאית עברה:
+(1) בשכונה. (הדרכה: כדי לחשב את המרחק שעברה המשאית צריך להכפיל את מהירות המשאית בזמן).
+(2) בשטח עירוני.
+(3) בשטח בין עירוני.
+ו. באיזה אחוז מזמן כל הנסיעה של המשאית (כולל העצירה שלה) היא נסעה בשכונה?`,
+        answers: `א. (1) בשכונה: 30 קמ"ש (המהירות הנמוכה ביותר שאינה 0).
+   (2) בשטח עירוני: 50 קמ"ש.
+   (3) בשטח בין עירוני: 90 קמ"ש.
+ב. בין השעות 7:30 ל- 8:30 (מהירות 0).
+ג. נסעה במהירות 50 קמ"ש, בשטח עירוני.
+ד. בין השעות 10:00 ל- 12:00.
+ה. (1) בשכונה: 45 ק"מ (שעה וחצי בין 8:30 ל-10:00 במהירות 30 קמ"ש: 1.5 * 30 = 45 ק"מ).
+   (2) בשטח עירוני: 75 ק"מ (שעה וחצי בין 6:00 ל-7:30 במהירות 50 קמ"ש: 1.5 * 50 = 75 ק"מ).
+   (3) בשטח בין עירוני: 180 ק"מ (שעתיים בין 10:00 ל-12:00 במהירות 90 קמ"ש: 2 * 90 = 180 ק"מ).
+ו. 25% (זמן בשכונה: 1.5 שעות; סה"כ זמן כולל עצירה מ-6:00 עד 12:00 הוא 6 שעות; 1.5 / 6 = 25%).`,
+        graphType: 'step_truck'
+      },
+      {
+        id: 11,
+        sourceNum: 5,
+        category: 'bars',
+        categoryName: 'דיאגרמת עמודות – קריאת מידע',
+        title: 'שטח גידולי חקלאי (דונמים)',
+        text: `חקלאי גידל ארבעה גידולים: עגבניות, מלפפונים, בצל, פלפל.
+דיאגרמת העמודות שלפניכם מייצגת את מספר הדונמים מכל גידול שהחקלאי גידל.
+א. האם ערכי המשתנה הם כמותיים או איכותיים? נמקו.
+ב. מצאו את מספר הדונמים שהחקלאי גידל עליהם: (1) עגבניות (2) פלפל.
+ג. מצאו את הגידול שהחקלאי גידל על: (1) 3 דונמים בדיוק. (2) 7 דונמים בדיוק.
+ד. מהו גודל השטח שעליו החקלאי גידל את ארבעת הגידולים?
+ה. בכמה אחוזים שטח המלפפונים יותר קטן משטח העגבניות? (עגלו לאחוזים שלמים את התשובה).`,
+        answers: `א. איכותיים. נימוק: ערכי המשתנה הם שמות של גידולים (עגבניות, פלפל וכו') ולא מספרים.
+ב. (1) עגבניות: 11 דונמים. (2) פלפל: 9 דונמים.
+ג. (1) 3 דונמים בדיוק: בצל. (2) 7 דונמים בדיוק: מלפפונים.
+ד. 30 דונמים (11 + 7 + 3 + 9 = 30 דונם).
+ה. כ-36% (הפרש: 11 - 7 = 4 דונמים; 4 מתוך 11 שווה 4/11 = 0.3636... שהם כ-36%).`,
+        graphType: 'bar_crops'
+      },
+      {
+        id: 12,
+        sourceNum: 6,
+        category: 'bars',
+        categoryName: 'דיאגרמת עמודות – קריאת מידע',
+        title: 'מספר זוגות אופניים בכל משפחה בבניין',
+        text: `בבניין דירות ספרו את מספר זוגות האופניים שיש לכל משפחה.
+דיאגרמת העמודות שלפניכם מייצגת את התוצאות שהתקבלו.
+א. האם ערכי המשתנה הם כמותיים או איכותיים?
+ב. מצאו את מספר המשפחות שיש להן: (1) 2 זוגות אופניים. (2) 3 זוגות אופניים.
+ג. מצאו את מספר המשפחות שבבניין.
+ד. מצאו את מספר זוגות האופניים שיש בבניין.`,
+        answers: `א. כמותיים (ערכי המשתנה הם מספרים: 0, 1, 2, 3, 4 זוגות אופניים).
+ב. (1) 2 זוגות אופניים: 4 משפחות. (2) 3 זוגות אופניים: 3 משפחות.
+ג. 16 משפחות (2 + 5 + 4 + 3 + 2 = 16 משפחות).
+ד. 30 זוגות אופניים בסה"כ (חישוב: 0*2 + 1*5 + 2*4 + 3*3 + 4*2 = 0 + 5 + 8 + 9 + 8 = 30).`,
+        graphType: 'bar_bikes'
+      },
+      {
+        id: 13,
+        sourceNum: 7,
+        category: 'bars',
+        categoryName: 'דיאגרמת עמודות – קריאת מידע',
+        title: 'מבחני נהיגה (טסטים) אצל המורה נתן',
+        text: `המורה לנהיגה ששמו נתן רשם לעצמו, במשך תקופה מסוימת, בכמה "טסטים" (מבחני נהיגה) נבחן כל אחד מהתלמידים שלו עד שקיבל את רישיון הנהיגה.
+דיאגרמת העמודות שלפניכם מייצגת את תוצאות הרישום של המורה נתן.
+א. האם ערכי המשתנה הם כמותיים או איכותיים? נמקו.
+ב. כמה תלמידים עברו את הטסט בפעם הראשונה?
+ג. כמה תלמידים עברו את הטסט בפעם השנייה?
+ד. כמה תלמידים בסך הכול למדו אצל המורה נתן בתקופה הנ"ל?
+ה. איזה אחוז מהתלמידים עבר את הטסט בפעם השלישית?
+ו. בכמה טסטים בסך הכול נבחנו התלמידים של נתן בתקופה הנ"ל? (הדרכה: כדי למצוא, למשל, את מספר הטסטים שנבחנו התלמידים שעברו את הטסט בפעם השנייה צריך לכפול את מספר הטסטים שהוא 2 במספר התלמידים שהוא 8. נקבל 16 = 2 * 8, כלומר 16 טסטים).`,
+        answers: `א. כמותיים. נימוק: ערכי המשתנה הם מספר הטסטים (1, 2, 3, 4, 5) - ערכים מספריים נספרים.
+ב. 5 תלמידים.
+ג. 8 תלמידים.
+ד. 25 תלמידים (5 + 8 + 6 + 4 + 2 = 25 תלמידים).
+ה. 24% (6 תלמידים מתוך 25: 6 / 25 = 24/100 = 24%).
+ו. 65 טסטים בסך הכול (חישוב: 1*5 + 2*8 + 3*6 + 4*4 + 5*2 = 5 + 16 + 18 + 16 + 10 = 65 טסטים).`,
+        graphType: 'bar_tests'
+      },
+      {
+        id: 14,
+        sourceNum: 8,
+        category: 'bars',
+        categoryName: 'דיאגרמת עמודות – קריאת מידע',
+        title: 'תוצאות בחירות להנהגת מפלגה',
+        text: `הדיאגרמה הבאה מתארת את התפלגות הקולות בבחירות להנהגת מפלגה מסוימת:
+א. האם ערכי המשתנה הם כמותיים או איכותיים? נמקו.
+ב. כמה אנשים הצביעו בסך הכול בבחירות?
+ג. כמה אחוזים מכלל המצביעים הצביעו עבור ארז?
+ד. כמה אחוזים מכלל המצביעים הצביעו עבור ניר?
+ה. ברגע האחרון התגלתה עוד קלפי ובה 300 קולות נוספים. לאחר חישוב הקולות הנוספים, התברר שהתשובה לסעיף ד' לא השתנתה.
+כמה קולות מתוך הקלפי הנוספת קיבל ניר?`,
+        answers: `א. איכותיים. נימוק: שמות המועמדים (ארז, ניר, תום, רון) הם שמות וקטגוריות מילוליות ולא ערכים מספריים.
+ב. 80,000 אנשים (36,000 + 28,000 + 12,000 + 4,000 = 80,000).
+ג. 45% (36,000 מתוך 80,000: 36/80 = 9/20 = 45%).
+ד. 35% (28,000 מתוך 80,000: 28/80 = 7/20 = 35%).
+ה. 105 קולות (מאחר שהאחוז לא השתנה, ניר קיבל 35% גם מהקלפי הנוספת: 35% מתוך 300 = 0.35 * 300 = 105 קולות).`,
+        graphType: 'bar_elections'
+      },
+      {
+        id: 15,
+        sourceNum: 3,
+        category: 'bars',
+        categoryName: 'דיאגרמת עמודות אופקיות',
+        title: 'סקר אימוץ כלבים ביישוב',
+        text: `בסקר שנערך ביישוב מסוים התקבלו התוצאות הבאות (ראו ציור משמאל) לגבי מספר הכלבים שמאמצת כל משפחה.
+א. השלימו את הטבלה הבאה:
+[טבלה: מספר הכלבים | מספר המשפחות]
+ב. כמה משפחות יש ביישוב?
+ג. כמה כלבים יש ביישוב?
+ד. קבעו אם הטענה הבאה נכונה: "לרוב המשפחות ביישוב אין כלבים"
+ה. לאחר הסקר החליטו 5 משפחות מבין אלו שאין להן כלב, לאמץ כלב אחד כל אחת.
+השלימו את הטבלה הנ"ל לאחר השינוי הנ"ל. (הערה: בטבלה החדשה יש גם משפחות שיש להן 4 כלבים לכל משפחה).`,
+        answers: `א. טבלה:
+   [מספר הכלבים: 0 | 1 | 2 | 3]
+   [מספר המשפחות: 120 | 80 | 40 | 10]
+ב. 250 משפחות (120 + 80 + 40 + 10 = 250).
+ג. 190 כלבים (0*120 + 1*80 + 2*40 + 3*10 = 0 + 80 + 80 + 30 = 190 כלבים).
+ד. הטענה אינה נכונה. נימוק: 120 מתוך 250 משפחות הן 48% (120/250 = 0.48), וזה פחות ממחצית (פחות מ-50%), לכן זהו אינו רוב.
+ה. טבלה מעודכנת לאחר השינוי:
+   [מספר הכלבים: 0 | 1 | 2 | 3]
+   [מספר המשפחות: 115 | 85 | 40 | 10]
+   (5 משפחות עברו מקבוצת ה-0 לקבוצת ה-1).`,
+        graphType: 'bar_dogs_horizontal'
+      }
+    ];
+
+    // Application state
+    let currentIndex = 0;
+    let currentCategory = 'all';
+    let currentViewMode = 'single'; // 'single' or 'all'
+    let fontSizeDelta = 0; // -1, 0, 1, 2
+    let crosshairEnabled = false;
+    let connectSegmentsOcean = false; // special interactive toggle for question 9
+    const cardGraphScales = {}; // keeps track of user zoom per graph
+
+    // Font size classes
+    const textSizes = {
+      '-1': { base: 'text-sm', title: 'text-lg', sub: 'text-xs', line: 'leading-relaxed' },
+      '0':  { base: 'text-base', title: 'text-xl', sub: 'text-sm', line: 'leading-relaxed' },
+      '1':  { base: 'text-lg', title: 'text-2xl', sub: 'text-base', line: 'leading-loose' },
+      '2':  { base: 'text-xl', title: 'text-3xl', sub: 'text-lg', line: 'leading-loose' }
+    };
+  </script>
+
+  <script>
+    // Helper to generate the common crosshair overlay inside SVG
+    function generateCrosshairMarkup() {
+      return `
+        <g class="crosshair-guide-layer pointer-events-none opacity-0 transition-opacity duration-150">
+          <line class="ch-line-h crosshair-line" x1="0" y1="0" x2="480" y2="0" />
+          <line class="ch-line-v crosshair-line" x1="0" y1="0" x2="0" y2="380" />
+          <g class="ch-bubble-group">
+            <rect class="ch-bubble-bg" rx="5" ry="5" fill="#1e1b4b" opacity="0.9" />
+            <text class="ch-bubble-text" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="central"></text>
+          </g>
+        </g>
+      `;
+    }
+
+    // Vector Graph Generators with strict viewBox preservation
+    function renderGraphSVG(type, qId) {
+      const w = 480;
+      const h = 380;
+      const svgBase = `viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" class="graph-svg-root" data-qid="${qId}"`;
+      
+      switch(type) {
+        // 1. שביל ישראל - מטייל (0 עד 2 שעות, 0 עד 11 ק"מ)
+        case 'line_trail': {
+          return `
+            <svg ${svgBase} data-graph="trail">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Grid lines -->
+              ${Array.from({length: 12}, (_, i) => {
+                const y = 320 - i * 24;
+                return `<line x1="70" y1="${y}" x2="420" y2="${y}" class="${i%5===0?'graph-grid-line-bold':'graph-grid-line'}" />
+                        <text x="55" y="${y+4}" font-size="11" text-anchor="end" fill="#475569" font-weight="600">${i}</text>`;
+              }).join('')}
+              ${Array.from({length: 6}, (_, i) => {
+                const x = 70 + i * 70;
+                return `<line x1="${x}" y1="56" x2="${x}" y2="320" class="${i%1===0?'graph-grid-line-bold':'graph-grid-line'}" />
+                        ${i <= 2 ? `<text x="${x}" y="338" font-size="12" text-anchor="middle" fill="#475569" font-weight="600">${i===0?'0':i}</text>` : ''}`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="70" y1="320" x2="440" y2="320" class="graph-axis" marker-end="url(#arrow)" />
+              <line x1="70" y1="320" x2="70" y2="40" class="graph-axis" marker-end="url(#arrow)" />
+
+              <!-- Labels -->
+              <text x="440" y="340" font-size="12" font-weight="bold" fill="#0f172a">הזמן בשעות</text>
+              <text x="65" y="348" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="end">נקודת מוצא</text>
+              <text x="70" y="26" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">המרחק בק"מ</text>
+
+              <!-- Line: (0,0) -> (2, 10) -->
+              <line x1="70" y1="320" x2="224" y2="56" stroke="#16a34a" class="graph-line" />
+
+              <!-- Points -->
+              <circle cx="70" cy="320" r="4.5" fill="#16a34a" class="graph-point" data-tip="(0, 0 ק״מ)" />
+              <circle cx="140" cy="200" r="4.5" fill="#16a34a" class="graph-point" data-tip="(1 שעה, 5 ק״מ)" />
+              <circle cx="210" cy="80" r="4.5" fill="#16a34a" class="graph-point" data-tip="(שעתיים, 10 ק״מ)" />
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 2. אצנית Runkeeper (7:00 עד 10:00, 0 עד 30 ק"מ)
+        case 'line_runner': {
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horizontal grid: 0, 5, 10, 15, 20, 25, 30 -->
+              ${[0, 5, 10, 15, 20, 25, 30].map((v, i) => {
+                const y = 320 - i * 40;
+                return `<line x1="75" y1="${y}" x2="430" y2="${y}" class="graph-grid-line" />
+                        <text x="65" y="${y+4}" font-size="11" text-anchor="end" fill="#475569" font-weight="600">${v}</text>`;
+              }).join('')}
+
+              <!-- Vertical grid: 7:00, 7:30, 8:00, 8:30, 9:00, 9:30, 10:00, 10:30 -->
+              ${Array.from({length: 8}, (_, i) => {
+                const x = 75 + i * 45;
+                const hours = ['7:00','','8:00','','9:00','','10:00',''];
+                return `<line x1="${x}" y1="80" x2="${x}" y2="320" class="${i%2===0?'graph-grid-line-bold':'graph-grid-line'}" />
+                        ${hours[i] ? `<text x="${x}" y="338" font-size="11" text-anchor="middle" fill="#475569" font-weight="600">${hours[i]}</text>` : ''}`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="75" y1="320" x2="440" y2="320" class="graph-axis" marker-end="url(#arrow2)" />
+              <line x1="75" y1="320" x2="75" y2="60" class="graph-axis" marker-end="url(#arrow2)" />
+
+              <text x="440" y="340" font-size="12" font-weight="bold" fill="#0f172a">השעה</text>
+              <text x="75" y="45" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">המרחק בק"מ</text>
+
+              <line x1="75" y1="320" x2="345" y2="80" stroke="#0284c7" class="graph-line" />
+
+              <circle cx="75" cy="320" r="4.5" fill="#0284c7" class="graph-point" data-tip="(7:00, 0 ק״מ)" />
+              <circle cx="165" cy="200" r="4.5" fill="#0284c7" class="graph-point" data-tip="(8:30, 15 ק״מ)" />
+              <circle cx="210" cy="160" r="4.5" fill="#0284c7" class="graph-point" data-tip="(9:00, 20 ק״מ)" />
+              <circle cx="255" cy="120" r="4.5" fill="#0284c7" class="graph-point" data-tip="(9:30, 25 ק״מ)" />
+              <circle cx="345" cy="80" r="4.5" fill="#0284c7" class="graph-point" data-tip="(10:00, 30 ק״מ)" />
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 3. הולך רגל (יישוב א' עד יישוב ב' 12 ק"מ, 8:00 עד 14:00)
+        case 'line_walker': {
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow3" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0, 2, 4, 6, 8, 10, 12 -->
+              ${[0, 2, 4, 6, 8, 10, 12].map((v, i) => {
+                const y = 320 - i * 36;
+                const label = v === 0 ? "0 (א')" : (v === 12 ? "12 (ב')" : v);
+                return `<line x1="75" y1="${y}" x2="430" y2="${y}" class="graph-grid-line" />
+                        <text x="65" y="${y+4}" font-size="11" text-anchor="end" fill="#475569" font-weight="600">${label}</text>`;
+              }).join('')}
+
+              <!-- Vert grid: 8:00 to 14:00 with half hours -->
+              ${Array.from({length: 13}, (_, i) => {
+                const x = 75 + i * 27;
+                const hours = ['8:00','','9:00','','10:00','','11:00','','12:00','','13:00','','14:00'];
+                return `<line x1="${x}" y1="104" x2="${x}" y2="320" class="${i%2===0?'graph-grid-line-bold':'graph-grid-line'}" />
+                        ${hours[i] ? `<text x="${x}" y="338" font-size="10" text-anchor="middle" fill="#475569" font-weight="600">${hours[i]}</text>` : ''}`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="75" y1="320" x2="435" y2="320" class="graph-axis" marker-end="url(#arrow3)" />
+              <line x1="75" y1="320" x2="75" y2="80" class="graph-axis" marker-end="url(#arrow3)" />
+
+              <text x="435" y="340" font-size="12" font-weight="bold" fill="#0f172a">השעה</text>
+              <text x="75" y="65" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">המרחק בק"מ</text>
+
+              <polyline points="75,320 183,104 237,104 399,320" fill="none" stroke="#7c3aed" class="graph-line" />
+
+              <circle cx="75" cy="320" r="4.5" fill="#7c3aed" class="graph-point" data-tip="(8:00, יישוב א')" />
+              <circle cx="183" cy="104" r="4.5" fill="#7c3aed" class="graph-point" data-tip="(10:00, הגיע ליישוב ב')" />
+              <circle cx="237" cy="104" r="4.5" fill="#7c3aed" class="graph-point" data-tip="(11:00, יצא מחזרה מיישוב ב')" />
+              <circle cx="399" cy="320" r="4.5" fill="#7c3aed" class="graph-point" data-tip="(14:00, חזר ליישוב א')" />
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 4. מכונית מת"א למושב (180 ק"מ, 5:00 עד 11:00)
+        case 'line_car': {
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow4" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0, 40, 80, 120, 160, 180 (מושב), 200 -->
+              ${[
+                {v: 0, l: 'ת"א 0', y: 320},
+                {v: 40, l: '40', y: 272},
+                {v: 80, l: '80', y: 224},
+                {v: 120, l: '120', y: 176},
+                {v: 160, l: '160', y: 128},
+                {v: 180, l: 'מושב 180', y: 104},
+                {v: 200, l: '200', y: 80}
+              ].map(item => `
+                <line x1="75" y1="${item.y}" x2="430" y2="${item.y}" class="${item.v===180?'graph-grid-line-bold':'graph-grid-line'}" />
+                <text x="68" y="${item.y+4}" font-size="10" text-anchor="end" fill="#475569" font-weight="600">${item.l}</text>
+              `).join('')}
+
+              <!-- Vert grid: 5:00 to 11:00 with half hours -->
+              ${Array.from({length: 13}, (_, i) => {
+                const x = 75 + i * 27;
+                const hours = ['5:00','','6:00','','7:00','','8:00','','9:00','','10:00','','11:00'];
+                return `<line x1="${x}" y1="80" x2="${x}" y2="320" class="${i%2===0?'graph-grid-line-bold':'graph-grid-line'}" />
+                        ${hours[i] ? `<text x="${x}" y="338" font-size="10" text-anchor="middle" fill="#475569" font-weight="600">${hours[i]}</text>` : ''}`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="75" y1="320" x2="435" y2="320" class="graph-axis" marker-end="url(#arrow4)" />
+              <line x1="75" y1="320" x2="75" y2="60" class="graph-axis" marker-end="url(#arrow4)" />
+
+              <text x="435" y="340" font-size="12" font-weight="bold" fill="#0f172a">השעה</text>
+              <text x="75" y="45" font-size="12" font-weight="bold" fill="#0f172a" text-anchor="middle">המרחק בק"מ</text>
+
+              <polyline points="75,320 183,104 237,104 399,320" fill="none" stroke="#2563eb" class="graph-line" />
+
+              <circle cx="75" cy="320" r="4.5" fill="#2563eb" class="graph-point" data-tip="(5:00, יציאה מת״א)" />
+              <circle cx="183" cy="104" r="4.5" fill="#2563eb" class="graph-point" data-tip="(7:00, הגעה למושב, 180 ק״מ)" />
+              <circle cx="237" cy="104" r="4.5" fill="#2563eb" class="graph-point" data-tip="(8:00, יציאה מהמושב)" />
+              <circle cx="399" cy="320" r="4.5" fill="#2563eb" class="graph-point" data-tip="(11:00, חזרה לת״א)" />
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 5. מילוי חבית יין (0 עד 12 דקות, 0 עד 100 ליטר)
+        case 'line_wine': {
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow5" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0, 20, 40, 60, 80, 100 -->
+              ${[0, 20, 40, 60, 80, 100].map((v, i) => {
+                const y = 320 - i * 44;
+                return `<line x1="75" y1="${y}" x2="420" y2="${y}" class="graph-grid-line" />
+                        <text x="65" y="${y+4}" font-size="11" text-anchor="end" fill="#475569" font-weight="600">${v}</text>`;
+              }).join('')}
+
+              <!-- Vert grid: 0, 2, 4, 6, 8, 10, 12 -->
+              ${[0, 2, 4, 6, 8, 10, 12].map((v, i) => {
+                const x = 75 + i * 50;
+                return `<line x1="${x}" y1="100" x2="${x}" y2="320" class="graph-grid-line-bold" />
+                        <text x="${x}" y="338" font-size="11" text-anchor="middle" fill="#475569" font-weight="600">${v}</text>`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="75" y1="320" x2="435" y2="320" class="graph-axis" marker-end="url(#arrow5)" />
+              <line x1="75" y1="320" x2="75" y2="80" class="graph-axis" marker-end="url(#arrow5)" />
+
+              <text x="435" y="340" font-size="11" font-weight="bold" fill="#0f172a">הזמן בדקות</text>
+              <text x="75" y="55" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">כמות היין בליטר</text>
+
+              <polyline points="75,320 175,144 275,144 375,232" fill="none" stroke="#be185d" class="graph-line" />
+
+              <circle cx="75" cy="320" r="4.5" fill="#be185d" class="graph-point" data-tip="(0 דקות, 0 ליטר)" />
+              <circle cx="175" cy="144" r="4.5" fill="#be185d" class="graph-point" data-tip="(4 דקות, 80 ליטר)" />
+              <circle cx="275" cy="144" r="4.5" fill="#be185d" class="graph-point" data-tip="(8 דקות, 80 ליטר)" />
+              <circle cx="325" cy="188" r="4.5" fill="#be185d" class="graph-point" data-tip="(10 דקות, 60 ליטר)" />
+              <circle cx="375" cy="232" r="4.5" fill="#be185d" class="graph-point" data-tip="(12 דקות, 40 ליטר)" />
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 6. בריכת גידול אצות (טמפרטורה לאורך שעות היום)
+        case 'curve_algae': {
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow6" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: -2 to 16 -->
+              ${[-2, 0, 2, 4, 6, 8, 10, 12, 14, 16].map(v => {
+                const y = 280 - v * 14;
+                return `<line x1="75" y1="${y}" x2="430" y2="${y}" class="${v===0?'graph-axis':'graph-grid-line'}" />
+                        <text x="65" y="${y+4}" font-size="10" text-anchor="end" fill="#475569" font-weight="600">${v}</text>`;
+              }).join('')}
+
+              <!-- Vert grid: 6:00 to 17:00 -->
+              ${Array.from({length: 12}, (_, i) => {
+                const x = 75 + i * 30;
+                const hours = ['6:00','','8:00','','10:00','','12:00','','14:00','','16:00',''];
+                return `<line x1="${x}" y1="56" x2="${x}" y2="308" class="${i%2===0?'graph-grid-line-bold':'graph-grid-line'}" />
+                        ${hours[i] ? `<text x="${x}" y="325" font-size="9.5" text-anchor="middle" fill="#475569" font-weight="600">${hours[i]}</text>` : ''}`;
+              }).join('')}
+
+              <!-- Main Axes -->
+              <line x1="75" y1="280" x2="440" y2="280" class="graph-axis" marker-end="url(#arrow6)" />
+              <line x1="75" y1="308" x2="75" y2="40" class="graph-axis" marker-end="url(#arrow6)" />
+
+              <text x="440" y="295" font-size="11" font-weight="bold" fill="#0f172a">שעה</text>
+              <text x="75" y="28" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">טמפרטורה (°C)</text>
+
+              <path d="M 75 224 Q 135 150 195 112 T 255 84 Q 315 130 375 224 L 405 252" fill="none" stroke="#f43f5e" class="graph-line" />
+
+              <circle cx="75" cy="224" r="4.5" fill="#f43f5e" class="graph-point" data-tip="(6:00, 4°)" />
+              <circle cx="195" cy="112" r="4.5" fill="#f43f5e" class="graph-point" data-tip="(10:00, 12°)" />
+              <circle cx="255" cy="84" r="4.5" fill="#f43f5e" class="graph-point" data-tip="(12:00, 14° מקסימום)" />
+              <circle cx="375" cy="224" r="4.5" fill="#f43f5e" class="graph-point" data-tip="(16:00, 4°)" />
+              <circle cx="405" cy="252" r="4.5" fill="#f43f5e" class="graph-point" data-tip="(17:00, 2°)" />
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 7. עיירת סקי (טמפרטורה ביממה, ממינוס 6 עד 10)
+        case 'curve_ski': {
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow7" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: -6 to 10 -->
+              ${[-6, -4, -2, 0, 2, 4, 6, 8, 10].map(v => {
+                const y = 200 - v * 15;
+                return `<line x1="65" y1="${y}" x2="435" y2="${y}" class="${v===0?'graph-axis':'graph-grid-line'}" />
+                        <text x="55" y="${y+4}" font-size="10" text-anchor="end" fill="#475569" font-weight="600">${v}</text>`;
+              }).join('')}
+
+              <!-- Vert grid: 8:00 to 8:00 (24h) -->
+              ${Array.from({length: 13}, (_, i) => {
+                const x = 65 + i * 29;
+                const hours = ['8:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','24:00','2:00','4:00','6:00','8:00'];
+                return `<line x1="${x}" y1="50" x2="${x}" y2="290" class="graph-grid-line" />
+                        <text x="${x}" y="306" font-size="8.5" text-anchor="middle" fill="#475569" font-weight="600">${hours[i]}</text>`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="65" y1="200" x2="445" y2="200" class="graph-axis" marker-end="url(#arrow7)" />
+              <line x1="65" y1="290" x2="65" y2="40" class="graph-axis" marker-end="url(#arrow7)" />
+
+              <text x="445" y="215" font-size="11" font-weight="bold" fill="#0f172a">שעה</text>
+              <text x="65" y="26" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">טמפרטורה (°C)</text>
+
+              <path d="M 65 170 C 80 140, 110 70, 137 50 C 160 70, 170 95, 181 110 C 190 120, 200 140, 210 155 C 230 185, 245 200, 268 200 C 285 200, 295 240, 311 275 C 325 295, 340 230, 355 215 C 375 200, 395 170, 413 155" fill="none" stroke="#059669" class="graph-line" />
+
+              <circle cx="65" cy="170" r="4" fill="#059669" class="graph-point" data-tip="(8:00, 2°)" />
+              <circle cx="94" cy="110" r="4" fill="#059669" class="graph-point" data-tip="(10:00, 6°)" />
+              <circle cx="137" cy="50" r="4" fill="#059669" class="graph-point" data-tip="(13:00, 10° מקסימום)" />
+              <circle cx="181" cy="110" r="4" fill="#059669" class="graph-point" data-tip="(16:00, 6°)" />
+              <circle cx="268" cy="200" r="4" fill="#059669" class="graph-point" data-tip="(22:00, 0°)" />
+              <circle cx="311" cy="275" r="4" fill="#059669" class="graph-point" data-tip="(1:00, -5° מינימום)" />
+              <circle cx="325" cy="260" r="4" fill="#059669" class="graph-point" data-tip="(2:00, -4°)" />
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 8. מכוניות שיוצרו (גרף נקודות בדידות)
+        case 'scatter_cars': {
+          const points = [
+            {d:1, v:25}, {d:2, v:40}, {d:3, v:15}, {d:4, v:30}, {d:5, v:20},
+            {d:6, v:5},  {d:7, v:0},  {d:8, v:30}, {d:9, v:50}, {d:10, v:30}
+          ];
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow8" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0, 10, 20, 30, 40, 50 -->
+              ${[0, 10, 20, 30, 40, 50].map((v, i) => {
+                const y = 320 - i * 48;
+                return `<line x1="70" y1="${y}" x2="430" y2="${y}" class="graph-grid-line" />
+                        <text x="60" y="${y+4}" font-size="11" text-anchor="end" fill="#475569" font-weight="600">${v}</text>`;
+              }).join('')}
+
+              <!-- Vert grid: 1 to 10 -->
+              ${Array.from({length: 10}, (_, i) => {
+                const x = 100 + i * 32;
+                return `<line x1="${x}" y1="80" x2="${x}" y2="320" class="graph-grid-line" />
+                        <text x="${x}" y="338" font-size="11" text-anchor="middle" fill="#475569" font-weight="600">${i+1}</text>`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="70" y1="320" x2="445" y2="320" class="graph-axis" marker-end="url(#arrow8)" />
+              <line x1="70" y1="320" x2="70" y2="60" class="graph-axis" marker-end="url(#arrow8)" />
+
+              <text x="445" y="340" font-size="12" font-weight="bold" fill="#0f172a">היום</text>
+              <text x="70" y="45" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">מספר המכוניות</text>
+
+              <!-- Points -->
+              ${points.map(p => {
+                const cx = 100 + (p.d - 1) * 32;
+                const cy = 320 - (p.v / 50) * 240;
+                return `<circle cx="${cx}" cy="${cy}" r="5.5" fill="#ea580c" stroke="#fff" stroke-width="1.5" class="graph-point" data-tip="(יום ${p.d}: ${p.v} מכוניות)" />`;
+              }).join('')}
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 9. טמפרטורה בים בעומקים שונים
+        case 'scatter_ocean': {
+          const oceanPts = [
+            {d: 0, t: 20},
+            {d: 200, t: 16},
+            {d: 400, t: 10},
+            {d: 600, t: 6},
+            {d: 800, t: 4},
+            {d: 1000, t: 2}
+          ];
+          const polyCoords = oceanPts.map(p => {
+            const x = 75 + (p.d / 1000) * 320;
+            const y = 320 - (p.t / 20) * 240;
+            return `${x},${y}`;
+          }).join(' ');
+
+          return `
+            <div class="relative w-full">
+              <div class="no-print flex justify-end mb-2">
+                <button onclick="toggleOceanSegments()" class="px-3 py-1 rounded-lg text-xs font-bold border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition flex items-center gap-1 shadow-sm">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  <span>${connectSegmentsOcean ? 'הסתר קטעים מחברים' : 'סעיף א\': חבר בקטע נקודות סמוכות'}</span>
+                </button>
+              </div>
+              <svg ${svgBase}>
+                <defs>
+                  <marker id="arrow9" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                  </marker>
+                </defs>
+                <!-- Horiz grid: 0 to 20 -->
+                ${[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20].map((v, i) => {
+                  const y = 320 - i * 24;
+                  return `<line x1="75" y1="${y}" x2="420" y2="${y}" class="graph-grid-line" />
+                          <text x="65" y="${y+4}" font-size="10" text-anchor="end" fill="#475569" font-weight="600">${v}</text>`;
+                }).join('')}
+
+                <!-- Vert grid: 0 to 1000m -->
+                ${[0, 200, 400, 600, 800, 1000].map((v, i) => {
+                  const x = 75 + i * 64;
+                  return `<line x1="${x}" y1="80" x2="${x}" y2="320" class="graph-grid-line-bold" />
+                          <text x="${x}" y="338" font-size="10" text-anchor="middle" fill="#475569" font-weight="600">${v}</text>`;
+                }).join('')}
+
+                <!-- Axes -->
+                <line x1="75" y1="320" x2="435" y2="320" class="graph-axis" marker-end="url(#arrow9)" />
+                <line x1="75" y1="320" x2="75" y2="60" class="graph-axis" marker-end="url(#arrow9)" />
+
+                <text x="435" y="340" font-size="11" font-weight="bold" fill="#0f172a">העומק (מ')</text>
+                <text x="75" y="45" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">הטמפרטורה (°C)</text>
+
+                <!-- Optional connected segments (סעיף א') -->
+                ${connectSegmentsOcean ? `<polyline points="${polyCoords}" fill="none" stroke="#4f46e5" stroke-dasharray="4" stroke-width="2.5" />` : ''}
+
+                <!-- Discrete points -->
+                ${oceanPts.map(p => {
+                  const x = 75 + (p.d / 1000) * 320;
+                  const y = 320 - (p.t / 20) * 240;
+                  return `<circle cx="${x}" cy="${y}" r="5.5" fill="#4338ca" stroke="#fff" stroke-width="1.5" class="graph-point" data-tip="(עומק ${p.d} מ': ${p.t}°)" />`;
+                }).join('')}
+                ${generateCrosshairMarkup()}
+              </svg>
+            </div>
+          `;
+        }
+
+        // 10. מהירות משאית (פונקציית מדרגות)
+        case 'step_truck': {
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow10" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0, 20, 40, 60, 80, 100 -->
+              ${[0, 20, 30, 40, 50, 60, 80, 90, 100].map((v) => {
+                const y = 320 - (v / 100) * 240;
+                const isMain = [0, 20, 40, 60, 80, 100].includes(v);
+                return `<line x1="75" y1="${y}" x2="430" y2="${y}" class="${isMain?'graph-grid-line-bold':'graph-grid-line'}" />
+                        ${isMain ? `<text x="65" y="${y+4}" font-size="10" text-anchor="end" fill="#475569" font-weight="600">${v}</text>` : ''}`;
+              }).join('')}
+
+              <!-- Vert grid: 6:00 to 12:00 with half hours -->
+              ${Array.from({length: 13}, (_, i) => {
+                const x = 75 + i * 27;
+                const hours = ['6:00','','7:00','','8:00','','9:00','','10:00','','11:00','','12:00'];
+                return `<line x1="${x}" y1="80" x2="${x}" y2="320" class="${i%2===0?'graph-grid-line-bold':'graph-grid-line'}" />
+                        ${hours[i] ? `<text x="${x}" y="338" font-size="9.5" text-anchor="middle" fill="#475569" font-weight="600">${hours[i]}</text>` : ''}`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="75" y1="320" x2="445" y2="320" class="graph-axis" marker-end="url(#arrow10)" />
+              <line x1="75" y1="320" x2="75" y2="60" class="graph-axis" marker-end="url(#arrow10)" />
+
+              <text x="445" y="340" font-size="11" font-weight="bold" fill="#0f172a">השעה</text>
+              <text x="75" y="45" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">המהירות בקמ"ש</text>
+
+              <!-- Step 1: 6:00 to 7:30 at v=50 -->
+              <line x1="75" y1="200" x2="156" y2="200" stroke="#16a34a" stroke-width="4" />
+              <circle cx="156" cy="200" r="4.5" fill="#1e293b" />
+
+              <!-- Step 2: 7:30 to 8:30 at v=0 (עצרה) -->
+              <line x1="156" y1="320" x2="210" y2="320" stroke="#16a34a" stroke-width="4" />
+              <circle cx="156" cy="320" r="4.5" fill="#fff" stroke="#1e293b" stroke-width="1.5" />
+              <circle cx="210" cy="320" r="4.5" fill="#1e293b" />
+
+              <!-- Step 3: 8:30 to 10:00 at v=30 (בשכונה) -->
+              <line x1="210" y1="248" x2="291" y2="248" stroke="#16a34a" stroke-width="4" />
+              <circle cx="210" cy="248" r="4.5" fill="#fff" stroke="#1e293b" stroke-width="1.5" />
+              <circle cx="291" cy="248" r="4.5" fill="#1e293b" />
+
+              <!-- Step 4: 10:00 to 12:00 at v=90 (בין עירוני) -->
+              <line x1="291" y1="104" x2="399" y2="104" stroke="#16a34a" stroke-width="4" />
+              <circle cx="291" cy="104" r="4.5" fill="#fff" stroke="#1e293b" stroke-width="1.5" />
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 11. גידולי חקלאי (עגבניות, מלפפונים, בצל, פלפל)
+        case 'bar_crops': {
+          const crops = [
+            {name: 'עגבניות', v: 11, color: '#ef4444'},
+            {name: 'מלפפונים', v: 7, color: '#84cc16'},
+            {name: 'בצל', v: 3, color: '#f59e0b'},
+            {name: 'פלפל', v: 9, color: '#a855f7'}
+          ];
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow11" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0 to 12 -->
+              ${Array.from({length: 13}, (_, i) => {
+                const y = 320 - i * 20;
+                return `<line x1="75" y1="${y}" x2="420" y2="${y}" class="graph-grid-line" />
+                        <text x="65" y="${y+4}" font-size="10" text-anchor="end" fill="#475569" font-weight="600">${i}</text>`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="75" y1="320" x2="435" y2="320" class="graph-axis" marker-end="url(#arrow11)" />
+              <line x1="75" y1="320" x2="75" y2="60" class="graph-axis" marker-end="url(#arrow11)" />
+
+              <text x="435" y="340" font-size="11" font-weight="bold" fill="#0f172a">הגידול</text>
+              <text x="75" y="45" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">מספר הדונמים</text>
+
+              <!-- Bars -->
+              ${crops.map((c, i) => {
+                const x = 95 + i * 80;
+                const barH = c.v * 20;
+                const y = 320 - barH;
+                return `
+                  <rect x="${x}" y="${y}" width="34" height="${barH}" fill="${c.color}" stroke="#334155" stroke-width="1.2" rx="2" />
+                  <text x="${x+17}" y="342" font-size="11" font-weight="bold" text-anchor="middle" fill="#0f172a">${c.name}</text>
+                  <text x="${x+17}" y="${y-5}" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#334155">${c.v}</text>
+                `;
+              }).join('')}
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 12. זוגות אופניים (0 עד 4)
+        case 'bar_bikes': {
+          const bikes = [
+            {pair: '0', count: 2, color: '#f87171'},
+            {pair: '1', count: 5, color: '#38bdf8'},
+            {pair: '2', count: 4, color: '#1e3a8a'},
+            {pair: '3', count: 3, color: '#fbbf24'},
+            {pair: '4', count: 2, color: '#dc2626'}
+          ];
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow12" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0 to 6 -->
+              ${[0, 1, 2, 3, 4, 5, 6].map((v, i) => {
+                const y = 320 - i * 40;
+                return `<line x1="75" y1="${y}" x2="420" y2="${y}" class="graph-grid-line" />
+                        <text x="65" y="${y+4}" font-size="11" text-anchor="end" fill="#475569" font-weight="600">${v}</text>`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="75" y1="320" x2="435" y2="320" class="graph-axis" marker-end="url(#arrow12)" />
+              <line x1="75" y1="320" x2="75" y2="60" class="graph-axis" marker-end="url(#arrow12)" />
+
+              <text x="435" y="340" font-size="11" font-weight="bold" fill="#0f172a">זוגות אופניים</text>
+              <text x="75" y="45" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">מספר המשפחות</text>
+
+              <!-- Bars -->
+              ${bikes.map((b, i) => {
+                const x = 100 + i * 60;
+                const barH = b.count * 40;
+                const y = 320 - barH;
+                return `
+                  <rect x="${x}" y="${y}" width="34" height="${barH}" fill="${b.color}" stroke="#334155" stroke-width="1.2" rx="2" />
+                  <text x="${x+17}" y="338" font-size="11" font-weight="bold" text-anchor="middle" fill="#0f172a">${b.pair}</text>
+                  <text x="${x+17}" y="${y-6}" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#334155">${b.count}</text>
+                `;
+              }).join('')}
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 13. טסטים של המורה נתן (1 עד 5)
+        case 'bar_tests': {
+          const tests = [
+            {test: '1', count: 5, color: '#10b981'},
+            {test: '2', count: 8, color: '#0ea5e9'},
+            {test: '3', count: 6, color: '#f97316'},
+            {test: '4', count: 4, color: '#ec4899'},
+            {test: '5', count: 2, color: '#e11d48'}
+          ];
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow13" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0 to 10 -->
+              ${Array.from({length: 11}, (_, i) => {
+                const y = 320 - i * 24;
+                return `<line x1="75" y1="${y}" x2="420" y2="${y}" class="graph-grid-line" />
+                        <text x="65" y="${y+4}" font-size="10" text-anchor="end" fill="#475569" font-weight="600">${i}</text>`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="75" y1="320" x2="435" y2="320" class="graph-axis" marker-end="url(#arrow13)" />
+              <line x1="75" y1="320" x2="75" y2="60" class="graph-axis" marker-end="url(#arrow13)" />
+
+              <text x="435" y="340" font-size="10.5" font-weight="bold" fill="#0f172a">מספר הטסטים עד הרישיון</text>
+              <text x="75" y="45" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">מספר התלמידים</text>
+
+              <!-- Bars -->
+              ${tests.map((t, i) => {
+                const x = 100 + i * 60;
+                const barH = t.count * 24;
+                const y = 320 - barH;
+                return `
+                  <rect x="${x}" y="${y}" width="34" height="${barH}" fill="${t.color}" stroke="#334155" stroke-width="1.2" rx="2" />
+                  <text x="${x+17}" y="338" font-size="11" font-weight="bold" text-anchor="middle" fill="#0f172a">${t.test}</text>
+                  <text x="${x+17}" y="${y-6}" font-size="10.5" font-weight="bold" text-anchor="middle" fill="#334155">${t.count}</text>
+                `;
+              }).join('')}
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 14. בחירות להנהגת מפלגה (ארז, ניר, תום, רון)
+        case 'bar_elections': {
+          const candidates = [
+            {name: 'ארז', votes: 36000, color: '#6ee7b7'},
+            {name: 'ניר', votes: 28000, color: '#fef08a'},
+            {name: 'תום', votes: 12000, color: '#fda4af'},
+            {name: 'רון', votes: 4000, color: '#93c5fd'}
+          ];
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow14" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Horiz grid: 0 to 40,000 in steps of 5,000 -->
+              ${[0, 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000].map((v, i) => {
+                const y = 320 - i * 28;
+                return `<line x1="85" y1="${y}" x2="430" y2="${y}" class="graph-grid-line" />
+                        <text x="75" y="${y+4}" font-size="9" text-anchor="end" fill="#475569" font-weight="600">${v.toLocaleString()}</text>`;
+              }).join('')}
+
+              <!-- Axes -->
+              <line x1="85" y1="320" x2="445" y2="320" class="graph-axis" marker-end="url(#arrow14)" />
+              <line x1="85" y1="320" x2="85" y2="60" class="graph-axis" marker-end="url(#arrow14)" />
+
+              <text x="445" y="340" font-size="11" font-weight="bold" fill="#0f172a">המועמדים</text>
+              <text x="85" y="45" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">מספר המצביעים</text>
+
+              <!-- Bars -->
+              ${candidates.map((c, i) => {
+                const x = 110 + i * 75;
+                const barH = (c.votes / 40000) * 224;
+                const y = 320 - barH;
+                return `
+                  <rect x="${x}" y="${y}" width="42" height="${barH}" fill="${c.color}" stroke="#334155" stroke-width="1.2" rx="2" />
+                  <text x="${x+21}" y="340" font-size="11.5" font-weight="bold" text-anchor="middle" fill="#0f172a">${c.name}</text>
+                  <text x="${x+21}" y="${y-6}" font-size="10" font-weight="bold" text-anchor="middle" fill="#334155">${c.votes.toLocaleString()}</text>
+                `;
+              }).join('')}
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        // 15. סקר אימוץ כלבים (דיאגרמת עמודות אופקיות)
+        case 'bar_dogs_horizontal': {
+          const dogRows = [
+            {dogs: '0', count: 120, color: '#f97316'},
+            {dogs: '1', count: 80, color: '#7e22ce'},
+            {dogs: '2', count: 40, color: '#84cc16'},
+            {dogs: '3', count: 10, color: '#3b82f6'}
+          ];
+          return `
+            <svg ${svgBase}>
+              <defs>
+                <marker id="arrow15" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="#0f172a" />
+                </marker>
+              </defs>
+              <!-- Vert grid lines: 0, 20, 40, 60, 80, 100, 120, 140 -->
+              ${[0, 20, 40, 60, 80, 100, 120, 140].map((v, i) => {
+                const x = 380 - i * 42;
+                return `<line x1="${x}" y1="60" x2="${x}" y2="300" class="graph-grid-line" />
+                        <text x="${x}" y="318" font-size="10" text-anchor="middle" fill="#475569" font-weight="600">${v}</text>`;
+              }).join('')}
+
+              <!-- Main Axes (RTL: origin at right) -->
+              <line x1="380" y1="300" x2="60" y2="300" class="graph-axis" marker-end="url(#arrow15)" />
+              <line x1="380" y1="300" x2="380" y2="45" class="graph-axis" marker-end="url(#arrow15)" />
+
+              <text x="60" y="322" font-size="11" font-weight="bold" fill="#0f172a">מספר המשפחות</text>
+              <text x="385" y="35" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="start">מספר הכלבים</text>
+
+              <!-- Horizontal Bars -->
+              ${dogRows.map((r, i) => {
+                const y = 80 + i * 52;
+                const barW = (r.count / 140) * (42 * 7);
+                const x = 380 - barW;
+                return `
+                  <rect x="${x}" y="${y}" width="${barW}" height="28" fill="${r.color}" stroke="#334155" stroke-width="1.2" rx="2" />
+                  <text x="395" y="${y+18}" font-size="12" font-weight="bold" text-anchor="start" fill="#0f172a">${r.dogs}</text>
+                  <text x="${x-8}" y="${y+19}" font-size="10.5" font-weight="bold" text-anchor="end" fill="#334155">${r.count}</text>
+                `;
+              }).join('')}
+              ${generateCrosshairMarkup()}
+            </svg>
+          `;
+        }
+
+        default:
+          return `<div class="p-8 text-center text-slate-400">גרף בטעינה...</div>`;
+      }
+    }
+  </script>
+
+  <script>
+    // Formatting raw text into clean paragraphs and formatted items
+    function formatQuestionText(text) {
+      const lines = text.split('\n');
+      let html = '';
+      
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+
+        // Sub-clause items like "א.", "ב.", "ג."
+        if (/^[א-י]\./.test(trimmed)) {
+          html += `
+            <div class="mt-4 flex items-start gap-2.5">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-800 font-black text-sm shrink-0 mt-0.5 shadow-sm">
+                ${trimmed.charAt(0)}
+              </span>
+              <div class="flex-1 font-medium text-slate-800">
+                ${trimmed.substring(2).trim()}
+              </div>
+            </div>
+          `;
+        } 
+        // Hints or specific sub-points like "(1)", "(2)"
+        else if (/^\(\d+\)/.test(trimmed)) {
+          html += `
+            <div class="ms-8 mt-1.5 flex items-start gap-2 text-slate-700">
+              <span class="font-bold text-indigo-600">${trimmed.match(/^\(\d+\)/)[0]}</span>
+              <span>${trimmed.replace(/^\(\d+\)/, '').trim()}</span>
+            </div>
+          `;
+        } 
+        // Guidance / hint lines
+        else if (trimmed.includes('הדרכה:')) {
+          html += `
+            <div class="my-2 p-3 bg-amber-50 border-r-4 border-amber-400 rounded-xl text-amber-900 text-sm">
+              ${trimmed}
+            </div>
+          `;
+        } 
+        // Default text paragraph
+        else {
+          html += `<p class="mt-2 text-slate-800 leading-relaxed font-normal">${trimmed}</p>`;
+        }
+      });
+
+      return html;
+    }
+
+    // Creating full HTML card for a question
+    function createQuestionCardHTML(q, isSingle = true) {
+      const s = textSizes[fontSizeDelta.toString()];
+      const currentScale = cardGraphScales[q.id] || 1;
+
+      return `
+        <div class="question-card bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-lg transition-all p-5 sm:p-7 relative overflow-hidden" id="card-${q.id}">
+          
+          <!-- Category & Question Badge Header -->
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 mb-5">
+            <div class="flex items-center gap-3">
+              <span class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black text-sm sm:text-base shadow-sm">
+                שאלה ${q.sourceNum}
+              </span>
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 block">${q.categoryName}</span>
+                <h3 class="${s.title} font-black text-slate-900">${q.title}</h3>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button onclick="toggleAnswer(${q.id})" id="btn-ans-${q.id}" class="no-print px-4 py-2 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 text-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <span>הצג תשובה ופתרון</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Main Content: Graph on one side, Exact Question text on the other -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            
+            <!-- Graph Visual Container (lg: 6 cols) with integrated Zoom controls -->
+            <div class="lg:col-span-6 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-inner relative flex flex-col gap-2">
+              
+              <!-- Graph Toolbar: Zoom & Fullscreen -->
+              <div class="no-print flex items-center justify-between pb-1 text-xs">
+                <div class="flex items-center gap-1.5 bg-white px-2 py-1 rounded-xl border border-slate-200 shadow-sm">
+                  <span class="text-[11px] font-bold text-slate-500">זום גרף:</span>
+                  <button onclick="zoomCardGraph(${q.id}, -0.2)" title="הקטן גרף" class="w-6 h-6 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded font-bold">-</button>
+                  <span id="zoom-label-${q.id}" class="text-[11px] font-semibold text-slate-700 px-1">${Math.round(currentScale * 100)}%</span>
+                  <button onclick="zoomCardGraph(${q.id}, 0.2)" title="הגדל גרף" class="w-6 h-6 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded font-bold">+</button>
+                  <button onclick="resetCardGraphZoom(${q.id})" title="אפס זום" class="text-[10px] text-indigo-600 hover:underline px-1">איפוס</button>
+                </div>
+
+                <button onclick="openGraphModal(${q.id})" title="הצג גרף ענק בחלון נפרד להקרנה" class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-indigo-700 hover:border-indigo-200 font-bold transition shadow-sm">
+                  <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                  <span class="text-[11px]">הגדל להקרנה</span>
+                </button>
+              </div>
+
+              <!-- Stable Aspect-Ratio Frame (Never collapses or distorts) -->
+              <div class="graph-aspect-container" id="graph-frame-${q.id}">
+                <div id="graph-scaler-${q.id}" class="w-full h-full flex items-center justify-center transition-transform duration-200" style="transform: scale(${currentScale}); transform-origin: center center;">
+                  ${renderGraphSVG(q.graphType, q.id)}
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                <span>יחס מימדים וקטורי מוגן</span>
+                <span class="text-indigo-600 font-medium">ריחוף בעכבר לקריאת נקודות</span>
+              </div>
+            </div>
+
+            <!-- Question Text Body (Exact wording from document) (lg: 6 cols) -->
+            <div class="lg:col-span-6 flex flex-col justify-between h-full">
+              <div class="${s.base} ${s.line}">
+                ${formatQuestionText(q.text)}
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Solution / Answer Drawer -->
+          <div id="solution-${q.id}" class="hidden mt-6 pt-5 border-t-2 border-dashed border-indigo-100 transition-all">
+            <div class="p-4 sm:p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 text-slate-800">
+              <div class="flex items-center gap-2 mb-2 font-black text-indigo-900 text-sm sm:text-base">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>תשובות ופתרון מלא מתוך הקובץ:</span>
+              </div>
+              <div class="text-sm sm:text-base whitespace-pre-line leading-relaxed font-medium text-slate-700">
+                ${q.answers}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+  </script>
+
+  <script>
+    // Initialize Jump Selector
+    function populateJumpSelect() {
+      const select = document.getElementById('question-jump-select');
+      select.innerHTML = '';
+      questionsData.forEach((q, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${idx + 1}. שאלה ${q.sourceNum} - ${q.title}`;
+        select.appendChild(opt);
+      });
+    }
+
+    // Render Current View
+    function renderApp() {
+      if (currentViewMode === 'single') {
+        document.getElementById('single-view-container').classList.remove('hidden');
+        document.getElementById('all-view-container').classList.add('hidden');
+        
+        const q = questionsData[currentIndex];
+        document.getElementById('current-question-card').innerHTML = createQuestionCardHTML(q, true);
+        document.getElementById('question-jump-select').value = currentIndex;
+        document.getElementById('question-total-count').textContent = `מתוך ${questionsData.length}`;
+      } else {
+        document.getElementById('single-view-container').classList.add('hidden');
+        document.getElementById('all-view-container').classList.remove('hidden');
+        
+        const filtered = currentCategory === 'all' 
+          ? questionsData 
+          : questionsData.filter(q => q.category === currentCategory);
+
+        const container = document.getElementById('all-view-container');
+        container.innerHTML = filtered.map(q => createQuestionCardHTML(q, false)).join('');
+      }
+
+      attachTooltips();
+      attachSvgCrosshairTracker();
+    }
+
+    // Graph Card Zoom Handlers
+    function zoomCardGraph(qId, delta) {
+      const current = cardGraphScales[qId] || 1;
+      const newScale = Math.min(2.0, Math.max(0.8, Math.round((current + delta) * 10) / 10));
+      cardGraphScales[qId] = newScale;
+      
+      const scaler = document.getElementById(`graph-scaler-${qId}`);
+      if (scaler) {
+        scaler.style.transform = `scale(${newScale})`;
+      }
+      const label = document.getElementById(`zoom-label-${qId}`);
+      if (label) {
+        label.textContent = `${Math.round(newScale * 100)}%`;
+      }
+    }
+
+    function resetCardGraphZoom(qId) {
+      cardGraphScales[qId] = 1;
+      const scaler = document.getElementById(`graph-scaler-${qId}`);
+      if (scaler) {
+        scaler.style.transform = `scale(1)`;
+      }
+      const label = document.getElementById(`zoom-label-${qId}`);
+      if (label) {
+        label.textContent = `100%`;
+      }
+    }
+
+    // Enlarged Graph Modal Controller
+    function openGraphModal(qId) {
+      const q = questionsData.find(item => item.id === qId);
+      if (!q) return;
+
+      document.getElementById('modal-title').textContent = `שאלה ${q.sourceNum} - ${q.title}`;
+      document.getElementById('modal-category-badge').textContent = q.categoryName;
+      document.getElementById('modal-graph-container').innerHTML = renderGraphSVG(q.graphType, `modal-${q.id}`);
+      
+      document.getElementById('graph-modal').classList.remove('hidden');
+      attachTooltips();
+      attachSvgCrosshairTracker();
+    }
+
+    function closeGraphModal(e) {
+      if (e && e.target && e.target.closest('#modal-graph-container')) return;
+      document.getElementById('graph-modal').classList.add('hidden');
+      document.getElementById('modal-graph-container').innerHTML = '';
+    }
+
+    // Toggle Answer Drawer
+    function toggleAnswer(qId) {
+      const el = document.getElementById(`solution-${qId}`);
+      const btn = document.getElementById(`btn-ans-${qId}`);
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+        btn.classList.remove('bg-slate-50', 'text-slate-700');
+        btn.querySelector('span').textContent = 'הסתר תשובה';
+      } else {
+        el.classList.add('hidden');
+        btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
+        btn.classList.add('bg-slate-50', 'text-slate-700');
+        btn.querySelector('span').textContent = 'הצג תשובה ופתרון';
+      }
+    }
+
+    // Navigation Between Questions
+    function navigateQuestion(delta) {
+      currentIndex += delta;
+      if (currentIndex < 0) currentIndex = questionsData.length - 1;
+      if (currentIndex >= questionsData.length) currentIndex = 0;
+      renderApp();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function jumpToQuestion(idx) {
+      currentIndex = idx;
+      renderApp();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // View Mode Toggle
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const btnSingle = document.getElementById('btn-mode-single');
+      const btnAll = document.getElementById('btn-mode-all');
+
+      if (mode === 'single') {
+        btnSingle.className = 'px-3 py-1.5 rounded-lg text-sm font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-1.5';
+        btnAll.className = 'px-3 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+      } else {
+        btnAll.className = 'px-3 py-1.5 rounded-lg text-sm font-bold transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-1.5';
+        btnSingle.className = 'px-3 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+      }
+      renderApp();
+    }
+
+    // Category Filter
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(pill => {
+        pill.classList.remove('bg-indigo-600', 'text-white', 'font-bold');
+        pill.classList.add('bg-slate-100', 'text-slate-600');
+      });
+      event.target.classList.add('bg-indigo-600', 'text-white', 'font-bold');
+      event.target.classList.remove('bg-slate-100', 'text-slate-600');
+
+      if (cat !== 'all') {
+        const firstIdx = questionsData.findIndex(q => q.category === cat);
+        if (firstIdx !== -1) {
+          currentIndex = firstIdx;
+        }
+      }
+      renderApp();
+    }
+
+    // Font size adjuster
+    function changeFontSize(dir) {
+      fontSizeDelta = Math.max(-1, Math.min(2, fontSizeDelta + dir));
+      const labels = { '-1': 'קטן', '0': 'רגיל', '1': 'גדול', '2': 'ענק' };
+      document.getElementById('font-size-label').textContent = labels[fontSizeDelta.toString()];
+      renderApp();
+    }
+
+    // Toggle Ocean Question Connecting Lines (Question 9)
+    function toggleOceanSegments() {
+      connectSegmentsOcean = !connectSegmentsOcean;
+      renderApp();
+    }
+
+    // Guidelines & Crosshair toggle button
+    function toggleCrosshair() {
+      crosshairEnabled = !crosshairEnabled;
+      const btn = document.getElementById('btn-toggle-crosshair');
+      if (crosshairEnabled) {
+        btn.classList.add('bg-indigo-600', 'text-white');
+        btn.classList.remove('bg-white', 'text-slate-700');
+      } else {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('bg-white', 'text-slate-700');
+        // Hide guides on all SVGs
+        document.querySelectorAll('.crosshair-guide-layer').forEach(layer => {
+          layer.classList.add('opacity-0');
+        });
+      }
+    }
+
+    // SVG Crosshair dynamic tracker
+    function attachSvgCrosshairTracker() {
+      document.querySelectorAll('.graph-svg-root').forEach(svg => {
+        const guideLayer = svg.querySelector('.crosshair-guide-layer');
+        if (!guideLayer) return;
+
+        const lineH = guideLayer.querySelector('.ch-line-h');
+        const lineV = guideLayer.querySelector('.ch-line-v');
+        const bubbleGroup = guideLayer.querySelector('.ch-bubble-group');
+        const bubbleBg = guideLayer.querySelector('.ch-bubble-bg');
+        const bubbleText = guideLayer.querySelector('.ch-bubble-text');
+
+        svg.addEventListener('mousemove', (e) => {
+          if (!crosshairEnabled) {
+            guideLayer.classList.add('opacity-0');
+            return;
+          }
+
+          // Convert client mouse coordinates directly into SVG viewBox coordinates
+          const pt = svg.createSVGPoint();
+          pt.x = e.clientX;
+          pt.y = e.clientY;
+          const ctm = svg.getScreenCTM();
+          if (!ctm) return;
+          const svgP = pt.matrixTransform(ctm.inverse());
+
+          // Constrain within plot zone
+          if (svgP.x < 60 || svgP.x > 440 || svgP.y < 35 || svgP.y > 330) {
+            guideLayer.classList.add('opacity-0');
+            return;
+          }
+
+          guideLayer.classList.remove('opacity-0');
+          lineH.setAttribute('x1', '60');
+          lineH.setAttribute('x2', '440');
+          lineH.setAttribute('y1', svgP.y);
+          lineH.setAttribute('y2', svgP.y);
+
+          lineV.setAttribute('y1', '35');
+          lineV.setAttribute('y2', '330');
+          lineV.setAttribute('x1', svgP.x);
+          lineV.setAttribute('x2', svgP.x);
+
+          // Update coordinate badge
+          const coordText = `X: ${Math.round(svgP.x)} | Y: ${Math.round(svgP.y)}`;
+          bubbleText.textContent = coordText;
+          const textW = Math.max(75, bubbleText.getComputedTextLength ? bubbleText.getComputedTextLength() + 14 : 75);
+          bubbleBg.setAttribute('width', textW);
+          bubbleBg.setAttribute('height', '20');
+
+          // Position bubble slightly offset from cursor
+          let bx = svgP.x + 8;
+          let by = svgP.y - 25;
+          if (bx + textW > 450) bx = svgP.x - textW - 8;
+          if (by < 40) by = svgP.y + 10;
+
+          bubbleBg.setAttribute('x', bx);
+          bubbleBg.setAttribute('y', by);
+          bubbleText.setAttribute('x', bx + textW / 2);
+          bubbleText.setAttribute('y', by + 10);
+        });
+
+        svg.addEventListener('mouseleave', () => {
+          guideLayer.classList.add('opacity-0');
+        });
+      });
+    }
+
+    // Tooltip and interactive points handler
+    function attachTooltips() {
+      document.querySelectorAll('.graph-point').forEach(pt => {
+        pt.addEventListener('mouseenter', (e) => {
+          const tipText = pt.getAttribute('data-tip');
+          if (!tipText) return;
+          showTooltip(e, tipText);
+        });
+        pt.addEventListener('mouseleave', hideTooltip);
+      });
+    }
+
+    let tooltipEl = null;
+    function showTooltip(e, text) {
+      hideTooltip();
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'fixed z-50 px-2.5 py-1 bg-slate-900/90 text-white text-xs font-bold rounded-lg pointer-events-none shadow-lg transform -translate-x-1/2 -translate-y-full mb-2';
+      tooltipEl.textContent = text;
+      document.body.appendChild(tooltipEl);
+      const rect = e.target.getBoundingClientRect();
+      tooltipEl.style.left = `${rect.left + rect.width / 2}px`;
+      tooltipEl.style.top = `${rect.top - 6}px`;
+    }
+
+    function hideTooltip() {
+      if (tooltipEl) {
+        tooltipEl.remove();
+        tooltipEl = null;
+      }
+    }
+
+    // Fullscreen toggle
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Shortcuts (Arrow keys, 'T', 'Escape')
+    window.addEventListener('keydown', (e) => {
+      if (['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) return;
+
+      if (e.key === 'Escape') {
+        closeGraphModal();
+      } else if (e.key === 'ArrowLeft') {
+        navigateQuestion(1);
+      } else if (e.key === 'ArrowRight') {
+        navigateQuestion(-1);
+      } else if (e.key.toLowerCase() === 't') {
+        const q = questionsData[currentIndex];
+        toggleAnswer(q.id);
+      }
+    });
+
+    // Boot
+    window.onload = function() {
+      populateJumpSelect();
+      renderApp();
+    };
+  </script>
+</body>
+</html>
