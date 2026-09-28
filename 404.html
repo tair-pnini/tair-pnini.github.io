@@ -1,13 +1,90 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>הדף לא נמצא</title>
-<meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="0; url=/">
-<script>location.replace('/');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>מי הזיז את הגבינה שלך? | תאיר פניני</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;600;700;800&display=swap');
+
+        body {
+            font-family: 'Assistant', sans-serif;
+        }
+
+        .blur-bg {
+            filter: blur(80px);
+            z-index: -1;
+        }
+
+        @keyframes wobble {
+            0%, 100% { transform: rotate(-8deg) translateY(0); }
+            50% { transform: rotate(8deg) translateY(-6px); }
+        }
+        .animate-wobble {
+            display: inline-block;
+            animation: wobble 3s infinite ease-in-out;
+        }
+    </style>
 </head>
-<body>
-<p>הדף לא נמצא. <a href="/">לדף הבית</a></p>
+<body class="bg-[#fafafa] min-h-screen flex items-center justify-center p-6 pt-24 md:p-12 md:pt-28 selection:bg-blue-100">
+
+    <!-- Site bar -->
+    <nav class="fixed top-0 inset-x-0 z-20 bg-white/80 backdrop-blur border-b border-slate-100">
+        <div class="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="text-xl font-black text-black tracking-tighter hover:text-blue-600 transition-colors">תאיר פניני</a>
+            <a href="/" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">לעמוד הבית ←</a>
+        </div>
+    </nav>
+
+    <!-- Background decoration -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] right-[-10%] w-96 h-96 bg-amber-50/60 rounded-full blur-bg"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-50/40 rounded-full blur-bg"></div>
+    </div>
+
+    <main class="max-w-2xl w-full relative z-10">
+        <div class="space-y-10">
+
+            <!-- Header -->
+            <header>
+                <p class="text-8xl md:text-9xl font-black text-slate-200 tracking-tighter leading-none select-none">404</p>
+                <h1 class="text-4xl md:text-5xl font-black text-black mt-4 tracking-tighter">
+                    מי הזיז את הגבינה שלך? <span class="animate-wobble">🧀</span>
+                </h1>
+                <p class="text-2xl text-slate-700 leading-relaxed font-normal italic mt-6">
+                    <span class="inline-block border-b-4 border-amber-200 pb-1">רצית להגיע למקום אחד,</span> ונחתת בכלל במקום אחר. <span class="not-italic">🪂</span>
+                </p>
+            </header>
+
+            <!-- Personal note -->
+            <section class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-1.5 h-full bg-amber-400"></div>
+                <div class="space-y-4 text-lg text-slate-600 leading-relaxed">
+                    <p>
+                        <span class="font-bold text-slate-900">אל בהלה</span> – שום דבר לא נשבר, והדף שחיפשת כנראה לא באמת נעלם מהעולם.
+                        זו פשוט אני, שהחלטתי לטרוף קצת את הקלפים, לנסות לעשות לי סדר, ובדרך יצרתי עוד טיפה בלאגן.
+                    </p>
+                    <p>
+                        אם הגעת לחפש משהו ספציפי וחשוב: דברו איתי ישירות (אם יש לכם את המספר שלי), או
+                        <a href="https://wa.me/972512468842" target="_blank" rel="noopener noreferrer" class="font-semibold text-slate-900 border-b-2 border-emerald-200 hover:border-emerald-500 transition-all">קפצו לוואטסאפ העסקי 💬</a>,
+                        ונאתר אותו יחד תוך רגע.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Back home -->
+            <div>
+                <a href="/" class="inline-flex items-center gap-3 bg-slate-900 text-white px-7 py-4 rounded-2xl font-bold text-lg hover:bg-blue-600 transition-colors shadow-sm w-full md:w-auto justify-center">
+                    לחצ/י כאן כדי לחזור למשבצת ההתחלה (עמוד הבית)
+                    <span aria-hidden="true">🏠</span>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
 </body>
 </html>
