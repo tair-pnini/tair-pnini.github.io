@@ -290,8 +290,7 @@
             max-width: 1200px;
         }
         .topbar img { display: block; height: auto; }
-        .topbar .logo-sapir { width: 190px; max-width: 30%; }
-        .topbar .logo-division { width: 330px; max-width: 34%; }
+        .topbar .logo-combined { width: 420px; max-width: 55%; }
         .top-actions {
             margin-inline-start: auto;
             display: flex;
@@ -542,15 +541,13 @@
         }
 
         @media (max-width: 1000px) {
-            .topbar .logo-sapir { width: 160px; }
-            .topbar .logo-division { width: 250px; }
+            .topbar .logo-combined { width: 340px; }
         }
 
         @media (max-width: 760px) {
             body { font-size: 17px; }
             .topbar .wrap { flex-wrap: wrap; justify-content: space-between; gap: 6px 10px; padding: 6px 12px; }
-            .topbar .logo-sapir { width: 38%; max-width: 150px; }
-            .topbar .logo-division { width: 56%; max-width: 260px; }
+            .topbar .logo-combined { width: 100%; max-width: 380px; margin: 0 auto; }
             .top-actions { width: 100%; margin: 0; justify-content: space-between; gap: 10px; }
             .contact-link { font-size: 0.85rem; white-space: normal; text-align: center; line-height: 1.2; }
             .join-btn { padding: 9px 14px; }
@@ -573,8 +570,7 @@
 
     <header class="topbar">
         <div class="wrap">
-            <img class="logo-sapir" src="assets/sapir-communities-logo.png" width="900" height="220" alt="קהילות ספיר – הבית שלי להתפתחות מקצועית, לזכרה של מתי וייס ז&quot;ל">
-            <img class="logo-division" src="assets/division-a-logo.png" width="1200" height="179" alt="האגף לתלמידים מחוננים ומצטיינים, משרד החינוך, המנהל הפדגוגי">
+            <img class="logo-combined" src="assets/logos-combined.png" width="767" height="95" alt="קהילות ספיר – הבית שלי להתפתחות מקצועית | אגף א' לתלמידים מחוננים ומצטיינים, משרד החינוך">
             <div class="top-actions">
                 <a class="contact-link" href="#contact">רוצים שנחזור אליכם?</a>
                 <a class="join-btn" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להצטרפות</a>
@@ -600,27 +596,27 @@
                 <ul class="rows">
                     <li><a class="row bg-yellow" href="#virtual" data-open="virtual">
                         <span class="row-num"><span class="visually-hidden">מספר באתר ספיר: </span>808</span>
-                        <span class="row-main"><span class="row-name">עולמות וירטואליים ו־AI</span><span class="row-meta">ד"ר אבינועם לוין ובתיה שליידר · שלישי 19:00–21:15</span></span>
+                        <span class="row-main"><span class="row-name">עולמות וירטואליים ו־AI</span><span class="row-meta">ד"ר אבינועם לוין ובתיה שליידר · שלישי <span dir="ltr">19:00–21:15</span></span></span>
                         <span class="row-more" aria-hidden="true">לפרטים ←</span>
                     </a></li>
                     <li><a class="row bg-cyan" href="#multi" data-open="multi">
                         <span class="row-num row-num-empty" aria-hidden="true">·</span>
-                        <span class="row-main"><span class="row-name">רב־תחומית</span><span class="row-meta">ענת ויינשטיין ברקוביץ' ועוזי שחר שפירא · שני 20:00–21:30</span></span>
+                        <span class="row-main"><span class="row-name">רב־תחומית</span><span class="row-meta">ענת ויינשטיין ברקוביץ' ועוזי שחר שפירא · שני <span dir="ltr">20:00–21:30</span></span></span>
                         <span class="row-more" aria-hidden="true">לפרטים ←</span>
                     </a></li>
                     <li><a class="row bg-teal" href="#arts" data-open="arts">
                         <span class="row-num"><span class="visually-hidden">מספר באתר ספיר: </span>802</span>
-                        <span class="row-main"><span class="row-name">אמנויות</span><span class="row-meta">לורה יוסף ג'האשן ותו רובין · שלישי 20:00–22:15</span></span>
+                        <span class="row-main"><span class="row-name">אמנויות</span><span class="row-meta">לורה יוסף ג'האשן ותו רובין · שלישי <span dir="ltr">20:00–22:15</span></span></span>
                         <span class="row-more" aria-hidden="true">לפרטים ←</span>
                     </a></li>
                     <li><a class="row bg-olive" href="#math" data-open="math">
                         <span class="row-num"><span class="visually-hidden">מספר באתר ספיר: </span>811</span>
-                        <span class="row-main"><span class="row-name">מתמטיקה</span><span class="row-meta">תאיר פניני ולירון מיכאלי · שני 20:30–22:00</span></span>
+                        <span class="row-main"><span class="row-name">מתמטיקה</span><span class="row-meta">תאיר פניני ולירון מיכאלי · שלישי <span dir="ltr">20:00–22:15</span></span></span>
                         <span class="row-more" aria-hidden="true">לפרטים ←</span>
                     </a></li>
                     <li><a class="row bg-blue" href="#science" data-open="science">
                         <span class="row-num"><span class="visually-hidden">מספר באתר ספיר: </span>804</span>
-                        <span class="row-main"><span class="row-name">מדעים</span><span class="row-meta">ד"ר דנה שחייני וד"ר אירית זורר · שלישי 20:00–22:15</span></span>
+                        <span class="row-main"><span class="row-name">מדעים</span><span class="row-meta">ד"ר דנה שחייני וד"ר אירית זורר · שלישי <span dir="ltr">20:00–22:15</span></span></span>
                         <span class="row-more" aria-hidden="true">לפרטים ←</span>
                     </a></li>
                     <li><a class="row bg-yellow" href="#humanities" data-open="humanities">
@@ -630,7 +626,7 @@
                     </a></li>
                     <li><a class="row bg-teal" href="#leading" data-open="leading">
                         <span class="row-num row-num-empty" aria-hidden="true">·</span>
-                        <span class="row-main"><span class="row-name">המחונן והמצטיין בכיתתו</span><span class="row-meta">שרון איכנבאום ומיכל אילוז · שני 18:30–20:00</span></span>
+                        <span class="row-main"><span class="row-name">המחונן והמצטיין בכיתתו</span><span class="row-meta">שרון איכנבאום ומיכל אילוז · שני <span dir="ltr">18:30–20:00</span></span></span>
                         <span class="row-more" aria-hidden="true">לפרטים ←</span>
                     </a></li>
                     <li><a class="row bg-olive" href="#kindergarten" data-open="kindergarten">
@@ -658,12 +654,12 @@
                     </a></li>
                     <li><a class="row bg-blue" href="#center-roles" data-open="center-roles">
                         <span class="row-num"><span class="visually-hidden">מספר באתר ספיר: </span>807</span>
-                        <span class="row-main"><span class="row-name">בעלי תפקידים במרכזי מחוננים</span><span class="row-meta">ענת ויפעת · רביעי 20:00–21:30</span></span>
+                        <span class="row-main"><span class="row-name">בעלי תפקידים במרכזי מחוננים</span><span class="row-meta">ענת ויפעת · רביעי <span dir="ltr">20:00–21:30</span></span></span>
                         <span class="row-more" aria-hidden="true">לפרטים ←</span>
                     </a></li>
                     <li><a class="row bg-yellow" href="#managers" data-open="managers">
                         <span class="row-num"><span class="visually-hidden">מספר באתר ספיר: </span>812</span>
-                        <span class="row-main"><span class="row-name">מנהלות בשנים הראשונות</span><span class="row-meta">מיה קאליר מירב · שני 19:00–21:15</span></span>
+                        <span class="row-main"><span class="row-name">מנהלות בשנים הראשונות</span><span class="row-meta">מיה קאליר מירב · שני <span dir="ltr">19:00–21:15</span></span></span>
                         <span class="row-more" aria-hidden="true">לפרטים ←</span>
                     </a></li>
                 </ul>
@@ -773,7 +769,7 @@
                     </div>
                     <p class="credit"><span>מוכר כ־60 שעות גמול השתלמות</span><br><span>באופק חדש ובעוז לתמורה</span></p>
                     <div class="footer-row">
-                        <p class="when">נפגשים בימי שני 20:30–22:00</p>
+                        <p class="when">נפגשים בימי שלישי <span dir="ltr">20:00–22:15</span></p>
                         <a class="dates" href="https://docs.google.com/document/d/1TNJojmJue2TZkRjvQAkACqLY1noLlXzqXgGnbARrq78/edit" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#house"/></svg>לתאריכים לחצו פה</a>
                     </div>
                     <a class="dialog-join" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להרשמה באתר ספיר – מספר 811</a>
@@ -802,7 +798,7 @@
                     </div>
                     <p class="credit"><span>מוכר כ־60 שעות גמול השתלמות</span><br><span>באופק חדש ובעוז לתמורה</span></p>
                     <div class="footer-row">
-                        <p class="when">נפגשים בימי שלישי 20:00–22:15</p>
+                        <p class="when">נפגשים בימי שלישי <span dir="ltr">20:00–22:15</span></p>
                         <a class="dates" href="https://drive.google.com/file/d/1i9sy-bDeve_6vTgc28oQaqFBeUOQPmqZ/view" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#house"/></svg>לתאריכים לחצו פה</a>
                     </div>
                     <a class="dialog-join" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להרשמה באתר ספיר – מספר 804</a>
@@ -861,7 +857,7 @@
                     </div>
                     <p class="credit"><span>מוכר כ־60 שעות גמול השתלמות</span><br><span>באופק חדש ובעוז לתמורה</span></p>
                     <div class="footer-row">
-                        <p class="when">נפגשים בימי שלישי 20:00–22:15</p>
+                        <p class="when">נפגשים בימי שלישי <span dir="ltr">20:00–22:15</span></p>
                         <a class="dates" href="https://drive.google.com/file/d/1iIlbkzynfV2CUd7eDBwyIq13uCE_bfQU/view" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#house"/></svg>לתאריכים לחצו פה</a>
                     </div>
                     <a class="dialog-join" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להרשמה באתר ספיר – מספר 802</a>
@@ -895,7 +891,7 @@
                     </div>
                     <p class="credit"><span>מוכר כ־30 שעות גמול השתלמות</span><br><span>באופק חדש ובעוז לתמורה</span></p>
                     <div class="footer-row">
-                        <p class="when">נפגשים בימי שני 20:00–21:30</p>
+                        <p class="when">נפגשים בימי שני <span dir="ltr">20:00–21:30</span></p>
                         <a class="dates" href="https://docs.google.com/document/d/17-oUxX9G2BVjAG_mq8Hp87zbKA5Nsl88/edit" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#house"/></svg>לתאריכים לחצו פה</a>
                     </div>
                     <a class="dialog-join" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להרשמה באתר ספיר</a>
@@ -924,7 +920,7 @@
                     </div>
                     <p class="credit"><span>מוכר כ־30 שעות גמול השתלמות</span><br><span>באופק חדש ובעוז לתמורה</span></p>
                     <div class="footer-row">
-                        <p class="when">נפגשים בימי שלישי 19:00–21:15</p>
+                        <p class="when">נפגשים בימי שלישי <span dir="ltr">19:00–21:15</span></p>
                         <a class="dates" href="https://docs.google.com/document/d/1XqZFqT7h8b2EDPd8cwkCzbPjdwcFXoDnDtXWWQ_hKSg/edit" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#house"/></svg>לתאריכים לחצו פה</a>
                     </div>
                     <a class="dialog-join" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להרשמה באתר ספיר – מספר 808</a>
@@ -960,7 +956,7 @@
                     </div>
                     <p class="credit"><span>מוכר כ־30 שעות גמול השתלמות</span><br><span>באופק חדש ובעוז לתמורה</span></p>
                     <div class="footer-row">
-                        <p class="when">נפגשים בימי שני 18:30–20:00</p>
+                        <p class="when">נפגשים בימי שני <span dir="ltr">18:30–20:00</span></p>
                         <a class="dates" href="https://drive.google.com/file/d/1Zj1kIBsCosF8weOpmo_81G4GQ7fy2Ju4/view" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#house"/></svg>לתאריכים לחצו כאן</a>
                     </div>
                     <a class="dialog-join" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להרשמה באתר ספיר</a>
@@ -1028,7 +1024,7 @@
                     </div>
                     <p class="credit"><span>מוכר כ־30 שעות גמול השתלמות</span><br><span>באופק חדש ובעוז לתמורה</span></p>
                     <div class="footer-row">
-                        <p class="when">נפגשים בימי רביעי 20:00–21:30</p>
+                        <p class="when">נפגשים בימי רביעי <span dir="ltr">20:00–21:30</span></p>
                         <a class="dates" href="https://docs.google.com/document/d/12InELVbE26iWrejS_Zqnui7DK-H9g1qt/edit" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#house"/></svg>לתאריכים לחצו פה</a>
                     </div>
                     <a class="dialog-join" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להרשמה באתר ספיר – מספר 807</a>
@@ -1086,7 +1082,7 @@
                     </div>
                     <p class="credit"><span>מוכר כ־30 שעות גמול השתלמות</span><br><span>באופק חדש ובעוז לתמורה</span></p>
                     <div class="footer-row">
-                        <p class="when">שעות פעילות: ימי שני בזום 19:00–21:15</p>
+                        <p class="when">שעות פעילות: ימי שני בזום <span dir="ltr">19:00–21:15</span></p>
                         <span class="dates pending"><svg aria-hidden="true"><use href="#house"/></svg>התאריכים יועברו בהמשך</span>
                     </div>
                     <a class="dialog-join" href="https://m3.sapir.ac.il/Portals/ex/registration/260" target="_blank" rel="noopener">להרשמה באתר ספיר – מספר 812</a>

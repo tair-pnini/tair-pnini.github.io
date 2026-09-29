@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>קהילת מורות ומורי מתמטיקה למחוננים | תשפ"ז</title>
+    <link rel="icon" href="/gifted-plc/assets/icon-math.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/gifted-plc/assets/icon-math-180.png">
+    <meta name="description" content="קהילה מקצועית לומדת של מורות ומורי מתמטיקה למחוננים ומצטיינים – תשפ&quot;ז. בהובלת תאיר פניני ולירון מיכאלי.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="he_IL">
+    <meta property="og:url" content="https://tair-pnini.github.io/gifted-plc/math/">
+    <meta property="og:title" content="קהילת מורות ומורי מתמטיקה למחוננים | תשפ&quot;ז">
+    <meta property="og:description" content="מקום לחשוב, ליצור ולגדול יחד. פרטים, לוח מפגשים והרשמה.">
+    <meta property="og:image" content="https://tair-pnini.github.io/gifted-plc/assets/share-preview-math.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <!-- Preconnect & Fast Font Loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,6 +126,355 @@
         .cta-nav-btn:hover {
             background-color: var(--primary-hover);
         }
+
+        /* --- TABS SYSTEM --- */
+        .tab-btn {
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 6px 12px;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        /* Views Configuration */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .view-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Schedule Page Styles */
+        .schedule-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .sch-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+        }
+        .sch-card strong { color: var(--primary); display: block; font-size: 1.05rem; margin-bottom: 4px; }
+        .sch-card span { font-size: 0.9rem; color: var(--text-secondary); }
+        
+        .timeline-month {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-subtle);
+        }
+        .month-header {
+            background-color: var(--accent-light);
+            padding: 12px 20px;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .event-row {
+            padding: 16px 20px;
+            border-bottom: 1px solid #F0EBE1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .event-row:last-child { border-bottom: none; }
+        .event-date { font-weight: 600; color: var(--accent-warm); font-size: 0.95rem; }
+        .event-desc { color: var(--text-primary); font-size: 1rem; font-weight: 500; }
+        .event-sub { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
+
+        .note-box {
+            background-color: #F8F9FA;
+            border-right: 4px solid var(--accent);
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* Logos */
+        .brand-img { height: 46px; width: auto; max-width: 100%; display: block; }
+        .nav-container { gap: 16px; }
+        .nav-links { flex-wrap: nowrap; }
+        .tab-btn {
+            white-space: nowrap;
+            font-size: 0.95rem;
+            padding: 7px 14px;
+            border-radius: 999px;
+            border-bottom: none;
+        }
+        .tab-btn:hover { background: var(--accent-light); }
+        .tab-btn.active {
+            background: var(--accent-light);
+            border-bottom: none;
+        }
+        .cta-nav-btn { white-space: nowrap; font-size: 0.9rem; padding: 7px 16px; }
+
+
+        /* Registration button (one only) */
+        .cta-nav-btn {
+            background-color: var(--accent-warm);
+            color: #fff !important;
+            border-radius: 999px;
+            box-shadow: 0 3px 10px rgba(200, 107, 75, 0.35);
+        }
+        .cta-nav-btn:hover { background-color: #A9553A; }
+
+        /* Quick facts strip */
+        .facts {
+            list-style: none;
+            margin: 0 0 32px;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-subtle);
+            overflow: hidden;
+        }
+        .facts li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 16px 16px;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+        .facts li + li { border-top: 1px solid var(--border-color); }
+        .facts strong {
+            display: block;
+            color: var(--primary);
+            font-size: 0.98rem;
+            margin-bottom: 2px;
+        }
+        .fact-icon {
+            flex: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--accent-light);
+            display: grid;
+            place-items: center;
+            font-size: 1.1rem;
+        }
+
+
+        @media (max-width: 640px) {
+        }
+
+
+        /* Schedule */
+        .schedule-head { margin-bottom: 14px; }
+        .schedule-head h1 { margin: 0; }
+        .schedule-sub { margin: 4px 0 0; color: var(--text-secondary); }
+        .meeting-structure {
+            margin-top: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-inline-start: 4px solid #3E6FB0;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        .meeting-structure strong { color: var(--text-primary); }
+        .meeting-structure ul { margin: 6px 0 4px; padding-inline-start: 20px; }
+        .meeting-structure li { margin-bottom: 2px; }
+        .meeting-structure b { color: var(--text-primary); font-weight: 600; }
+        .ms-note { font-size: 0.85rem; }
+        .summary {
+            list-style: none;
+            margin: 0 0 16px;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .summary li {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--c);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            text-align: center;
+        }
+        .summary b { display: block; font-size: 1.6rem; line-height: 1.1; color: var(--c); }
+        .summary span { font-size: 0.85rem; color: var(--text-secondary); }
+        .sum-zoom, .chip-zoom { --c: #3E6FB0; }
+        .sum-f2f, .chip-f2f { --c: #3F8F5A; }
+        .sum-date, .chip-date { --c: #C86B4B; }
+        .sum-async, .chip-async { --c: #7A5AA6; }
+
+        .schedule-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+        .s-btn {
+            font: inherit;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 9px 18px;
+            border-radius: 999px;
+            border: 1.5px solid var(--primary);
+            color: var(--primary);
+            background: var(--card-bg);
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .s-btn:hover { background: var(--accent-light); }
+        .s-btn-main { background: var(--primary); color: #fff; }
+        .s-btn-main:hover { background: var(--primary-hover); }
+        .success-cal { margin: 4px auto 14px; }
+
+        .meetings {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-subtle);
+            overflow: hidden;
+        }
+        .month-label {
+            background: var(--accent-light);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 5px 18px;
+        }
+        .m-row {
+            display: grid;
+            grid-template-columns: 78px 112px 1fr;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 18px;
+            border-top: 1px solid #F0EBE1;
+            font-size: 0.98rem;
+        }
+        .month-label + .m-row { border-top: 0; }
+        .m-date { font-weight: 700; color: var(--text-primary); white-space: nowrap; }
+        .chip {
+            justify-self: start;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--c);
+            background: color-mix(in srgb, var(--c) 12%, #fff);
+            border-radius: 999px;
+            padding: 2px 10px;
+            white-space: nowrap;
+        }
+        .m-title { color: var(--text-primary); }
+        .m-row.past { opacity: 0.4; }
+        .m-row.next {
+            background: #FBF3EC;
+            box-shadow: inset -4px 0 0 var(--accent-warm);
+        }
+        .m-row.next .m-title::after {
+            content: "המפגש הבא";
+            margin-inline-start: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #fff;
+            background: var(--accent-warm);
+            border-radius: 999px;
+            padding: 2px 8px;
+            vertical-align: 1px;
+            white-space: nowrap;
+            display: inline-block;
+        }
+        .m-note { font-size: 0.85rem; color: var(--text-secondary); margin: 12px 4px 0; }
+
+        /* Annual overview (Google Calendar) */
+        .year-dialog {
+            border: 0;
+            padding: 0;
+            width: min(1000px, calc(100vw - 24px));
+            max-height: calc(100dvh - 24px);
+            border-radius: var(--radius-lg);
+            background: var(--bg-color);
+            overflow: auto;
+        }
+        .year-dialog::backdrop { background: rgba(30, 40, 35, 0.6); }
+        .year-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 20px;
+        }
+        .year-head h2 { margin: 0; font-size: 1.25rem; color: #fff; }
+        .year-close {
+            font: inherit;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            cursor: pointer;
+        }
+        .year-legend {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+            margin: 0;
+            padding: 12px 20px 0;
+            font-size: 0.88rem;
+        }
+        .year-legend li { display: flex; align-items: center; gap: 6px; }
+        .lg { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+        .year-frame { padding: 12px 20px 6px; }
+        .year-frame iframe {
+            display: block;
+            width: 100%;
+            height: min(640px, calc(100dvh - 190px));
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: #fff;
+        }
+        .year-note { font-size: 0.8rem; color: var(--text-secondary); margin: 0; padding: 0 20px 16px; }
+
+        @media (max-width: 640px) {
+            .summary { grid-template-columns: repeat(2, 1fr); }
+            .m-row {
+                grid-template-columns: auto 1fr;
+                row-gap: 2px;
+                padding: 10px 14px;
+            }
+            .m-date { grid-row: 1; }
+            .chip { grid-row: 1; }
+            .m-title { grid-column: 1 / -1; font-size: 0.93rem; }
+            .year-frame { padding: 10px 10px 4px; }
+        }
+
 
         /* Main Layout Grid */
         .main-container {
@@ -576,11 +937,13 @@
         @media (min-width: 1024px) {
             .main-container {
                 max-width: 1100px;
+                padding: 40px 24px 80px;
+            }
+            .view-section.active#homeView {
                 display: grid;
                 grid-template-columns: 1fr 1fr; /* חצי-חצי בדיוק */
                 gap: 48px;
-                align-items: start; /* מונע מהטופס להימתח לאורך כל העמוד */
-                padding: 40px 24px 80px;
+                align-items: start;
             }
             
             /* הסתרת כפתורי המעבר לטופס כשהוא כבר מוצג לצידם */
@@ -592,16 +955,19 @@
 
         /* Mobile Responsive adjustments */
         @media (max-width: 640px) {
+            .nav-container { flex-direction: column; gap: 8px; }
+            .brand-logo { justify-content: center; }
+            .brand-img { height: auto; width: min(360px, 100%); }
+            .nav-links { width: 100%; justify-content: center; gap: 4px; }
+            .tab-btn { padding: 6px 12px; font-size: 0.88rem; }
+            .cta-nav-btn { font-size: 0.85rem; padding: 6px 12px; }
             .details-grid {
                 grid-template-columns: 1fr;
             }
             .nav-container {
                 padding: 10px 14px;
             }
-            .brand-logo span {
-                font-size: 0.95rem;
-            }
-            .hero-card {
+                .hero-card {
                 padding: 26px 20px;
             }
             .form-card {
@@ -628,12 +994,13 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="brand-logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
-                <div class="brand-icon">🌿</div>
-                <span>קהילת מורות ומורי מתמטיקה</span>
+            <a href="#" class="brand-logo" onclick="switchTab('home'); return false;">
+                <img class="brand-img" src="../assets/logos-combined.png" alt="קהילות ספיר – הבית שלי להתפתחות מקצועית | אגף א' לתלמידים מחוננים ומצטיינים, משרד החינוך">
             </a>
             <div class="nav-links">
-                <button class="cta-nav-btn" onclick="scrollToForm()">להרשמה ✦</button>
+                <button class="tab-btn active" id="btnHome" onclick="switchTab('home')">על הקהילה</button>
+                <button class="tab-btn" id="btnSchedule" onclick="switchTab('schedule')">לוח מפגשים</button>
+                <button class="cta-nav-btn" onclick="scrollToForm()">להרשמה</button>
             </div>
         </div>
     </nav>
@@ -641,13 +1008,11 @@
     <!-- Main Container Layout -->
     <div class="main-container">
 
-        <!-- Content Column (Right side on Desktop) -->
-        <div class="content-col">
+        <!-- HOME VIEW (Details & Form) -->
+        <div id="homeView" class="view-section active">
             
-            <div class="hero-card">
-                <div class="badge">
-                    <span>🌿 קהילת קמ"ל | הרשמה לתשפ"ז</span>
-                </div>
+            <!-- Content Column (Right side on Desktop) -->
+            <div class="content-col">
 
                 <h1>מקום לחשוב, ליצור ולגדול יחד</h1>
                 <div class="hero-subtitle">
@@ -680,29 +1045,21 @@
                         </a>
                     </div>
                 </div>
-
-                <!-- CTA Button -->
-                <div class="hero-actions">
-                    <button class="primary-btn" onclick="scrollToForm()">
-                        <span>נשמע מעניין? הירשמו ונהיה בקשר!</span>
-                        <span>↓</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Quick Details Cards -->
-            <div class="details-grid">
-                <div class="detail-card">
-                    <div class="detail-icon">📅</div>
-                    <h3>זמני המפגשים</h3>
-                    <p>ימי שלישי | החל מ-20:00<br>(בערך אחת לשבועיים בזום)</p>
-                </div>
-                <div class="detail-card">
-                    <div class="detail-icon">🎓</div>
-                    <h3>גמול השתלמות</h3>
-                    <p>מוכר ל-30 שעות באופק חדש<br>(בתהליך הרחבה ל-60 שעות)</p>
-                </div>
-            </div>
+            <!-- Quick facts -->
+            <ul class="facts">
+                <li>
+                    <span class="fact-icon" aria-hidden="true">📅</span>
+                    <span><strong>ימי שלישי בערב · מפגש מקוון</strong>בערך אחת לשבועיים: שעה וחצי בזמן אמת + הכנה ו/או סיכום</span>
+                </li>
+                <li>
+                    <span class="fact-icon" aria-hidden="true">🎓</span>
+                    <span><strong>60 שעות גמול השתלמות</strong>באופק חדש ובעוז לתמורה</span>
+                </li>
+                <li>
+                    <span class="fact-icon" aria-hidden="true">🧩</span>
+                    <span><strong>מה השנה כוללת</strong>12 מפגשים מקוונים · 2 פנים אל פנים (חנוכה וכנס סיום) · 2 דייט מתמטי · 2 יחידות א־סינכרוניות · עבודת סיכום</span>
+                </li>
+            </ul>
 
             <!-- What awaits us in community -->
             <div class="section-header">
@@ -714,7 +1071,7 @@
                     <div class="feature-num">1</div>
                     <div class="feature-content">
                         <h3>להיות יותר ביחד</h3>
-                        <p>מפגש קולגות לדרך, התייעצות פתוחה בדילמות מהכיתה וחגיגת הצלחות.</p>
+                        <p>פגישת קולגות לדרך, התייעצות פתוחה בדילמות מהכיתה, חגיגת הצלחות ובניית חברויות מקצועיות ואישיות.</p>
                     </div>
                 </div>
 
@@ -729,13 +1086,14 @@
                 <div class="feature-card">
                     <div class="feature-num">3</div>
                     <div class="feature-content">
-                        <h3>חקירת סוגיות מורכבות בהוראה</h3>
-                        <p>הוראה מודעת מגדר, מענה לתלמידי קצה, ועוד סוגיות שתרצו להעלות.</p>
+                        <h3>חקירת סוגיות בהוראה</h3>
+                        <p>לדוגמה: הוראה מודעת מגדר, מענה לתלמידי קצה בכיתה ההטרוגנית, ועוד סוגיות שתרצו להעלות.</p>
                     </div>
                 </div>
             </div>
             
-        </div>
+
+            </div> <!-- End Content Col -->
 
         <!-- Form Column (Left side on Desktop) -->
         <div class="form-col">
@@ -828,12 +1186,159 @@
                 <div class="success-icon">✓</div>
                 <h2>הטופס התקבל בהצלחה!</h2>
                 <p>אנחנו שמחות מאוד על ההתעניינות - נהיה בקשר בקרוב!</p>
+                <a class="s-btn s-btn-main success-cal" href="https://calendar.google.com/calendar/u/0?cid=MmU3NGQ5YjE5NDExYTVmZmY0ZmU1NGFkOGE2Y2Q5NjA3MTAyZGFkNWE2YTVhMmRhNDFmZGY4Njg2MzNjY2UxMkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener">📅 הוספת המפגשים ליומן גוגל</a>
                 <button class="primary-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">חזרה לראש העמוד</button>
             </div>
             
         </div> <!-- End Form Col -->
+        </div> <!-- End Home View -->
+
+        <!-- SCHEDULE VIEW -->
+        <div id="scheduleView" class="view-section">
+            <div class="schedule-head">
+                <h1>לוח המפגשים – תשפ"ז</h1>
+                <div class="meeting-structure">
+                    <strong>כל מפגש מקוון = 3 שעות אקדמיות</strong> (ביומן: <span dir="ltr">20:00–22:15</span>)
+                    <ul>
+                        <li><b>שעה וחצי בזמן אמת</b> – המפגש עצמו, בימי שלישי בערב (2 שעות אקדמיות)</li>
+                        <li><b>שעה אקדמית של הכנה ו/או סיכום</b> – קריאה, חידה, רפלקציה…</li>
+                    </ul>
+                    <span class="ms-note">השעה המדויקת של המפגש בזמן אמת תפורסם בהמשך.</span>
+                </div>
+            </div>
+
+            <ul class="summary">
+                <li class="sum-zoom"><b>12</b><span>מפגשים מקוונים</span></li>
+                <li class="sum-f2f"><b>2</b><span>פנים אל פנים</span></li>
+                <li class="sum-date"><b>2</b><span>דייט מתמטי</span></li>
+                <li class="sum-async"><b>2</b><span>יחידות א־סינכרוניות</span></li>
+            </ul>
+
+            <div class="schedule-actions">
+                <a class="s-btn s-btn-main" href="https://calendar.google.com/calendar/u/0?cid=MmU3NGQ5YjE5NDExYTVmZmY0ZmU1NGFkOGE2Y2Q5NjA3MTAyZGFkNWE2YTVhMmRhNDFmZGY4Njg2MzNjY2UxMkBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" target="_blank" rel="noopener">📅 הוספה ליומן גוגל</a>
+                <button type="button" class="s-btn" id="openYear">🗓️ פריסה שנתית</button>
+            </div>
+
+            <ul class="meetings">
+                <li class="month-label" aria-hidden="true">אוקטובר</li>
+                <li class="m-row" data-date="2026-10-20">
+                    <span class="m-date">ג' 20/10</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 1 · פתיחת שנת הפעילות בקהילה</span>
+                </li>
+                <li class="month-label" aria-hidden="true">נובמבר</li>
+                <li class="m-row" data-date="2026-11-10">
+                    <span class="m-date">ג' 10/11</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 2</span>
+                </li>
+                <li class="m-row" data-date="2026-11-24">
+                    <span class="m-date">ג' 24/11</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 3</span>
+                </li>
+                <li class="month-label" aria-hidden="true">דצמבר</li>
+                <li class="m-row" data-date="2026-12-08">
+                    <span class="m-date">ג' 8/12</span>
+                    <span class="chip chip-f2f">פנים אל פנים</span>
+                    <span class="m-title">מפגש חנוכה (נר חמישי) · <span dir="ltr">10:00–15:00</span></span>
+                </li>
+                <li class="m-row" data-date="2026-12-22">
+                    <span class="m-date">ג' 22/12</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 4</span>
+                </li>
+                <li class="m-row" data-date="2026-12-29">
+                    <span class="m-date">ג' 29/12</span>
+                    <span class="chip chip-date">דייט מתמטי</span>
+                    <span class="m-title">מפגש בצמדים · מועד גמיש</span>
+                </li>
+                <li class="month-label" aria-hidden="true">ינואר</li>
+                <li class="m-row" data-date="2027-01-05">
+                    <span class="m-date">ג' 5/1</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 5 · במקום 01/12</span>
+                </li>
+                <li class="m-row" data-date="2027-01-26">
+                    <span class="m-date">ג' 26/1</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 6</span>
+                </li>
+                <li class="month-label" aria-hidden="true">פברואר</li>
+                <li class="m-row" data-date="2027-02-02">
+                    <span class="m-date">ג' 2/2</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 7</span>
+                </li>
+                <li class="m-row" data-date="2027-02-23">
+                    <span class="m-date">ג' 23/2</span>
+                    <span class="chip chip-async">א־סינכרוני</span>
+                    <span class="m-title">יחידה עצמאית · מועד גמיש</span>
+                </li>
+                <li class="month-label" aria-hidden="true">מרץ</li>
+                <li class="m-row" data-date="2027-03-02">
+                    <span class="m-date">ג' 2/3</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 8</span>
+                </li>
+                <li class="m-row" data-date="2027-03-16">
+                    <span class="m-date">ג' 16/3</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 9</span>
+                </li>
+                <li class="m-row" data-date="2027-03-30">
+                    <span class="m-date">ג' 30/3</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 10</span>
+                </li>
+                <li class="month-label" aria-hidden="true">אפריל</li>
+                <li class="m-row" data-date="2027-04-13">
+                    <span class="m-date">ג' 13/4</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 11</span>
+                </li>
+                <li class="month-label" aria-hidden="true">מאי</li>
+                <li class="m-row" data-date="2027-05-04">
+                    <span class="m-date">ג' 4/5</span>
+                    <span class="chip chip-date">דייט מתמטי</span>
+                    <span class="m-title">מפגש בצמדים · מועד גמיש</span>
+                </li>
+                <li class="m-row" data-date="2027-05-18">
+                    <span class="m-date">ג' 18/5</span>
+                    <span class="chip chip-async">א־סינכרוני</span>
+                    <span class="m-title">יחידה עצמאית · מועד גמיש</span>
+                </li>
+                <li class="month-label" aria-hidden="true">יוני</li>
+                <li class="m-row" data-date="2027-06-01">
+                    <span class="m-date">ג' 1/6</span>
+                    <span class="chip chip-zoom">מקוון</span>
+                    <span class="m-title">מפגש 12 · מפגש מסכם</span>
+                </li>
+                <li class="m-row" data-date="2027-06-29">
+                    <span class="m-date">ג' 29/6</span>
+                    <span class="chip chip-f2f">פנים אל פנים</span>
+                    <span class="m-title">כנס סיום שנה · יום מרוכז</span>
+                </li>
+            </ul>
+            <p class="m-note">את הדייט המתמטי והיחידות הא־סינכרוניות אפשר לקיים בזמן ובמקום הנוחים לכם, בהתאם להנחיות שיינתנו לקראת כל אחד מהם.</p>
+
+        </div> <!-- End Schedule View -->
 
     </div>
+
+    <dialog class="year-dialog" id="yearDialog" aria-labelledby="yearTitle">
+        <div class="year-head">
+            <h2 id="yearTitle">פריסה שנתית – תשפ"ז</h2>
+            <button type="button" class="year-close" id="closeYear" aria-label="סגירה">✕</button>
+        </div>
+        <ul class="year-legend">
+            <li><span class="lg" style="background:#344E41"></span>מפגשי הקהילה</li>
+            <li><span class="lg" style="background:#E8A07E"></span>חופשות משרד החינוך</li>
+            <li><span class="lg" style="background:#D4A373"></span>חגים בישראל</li>
+        </ul>
+        <div class="year-frame"><iframe data-src="https://calendar.google.com/calendar/embed?ctz=Asia%2FJerusalem&hl=iw&mode=MONTH&showTitle=0&showPrint=0&showTabs=1&showCalendars=0&showTz=0&wkst=1&dates=20261001%2F20261031&src=2e74d9b19411a5fff4fe54ad8a6cd9607102dad5a6a5a2da41fdf868633cce12%40group.calendar.google.com&color=%23344E41&src=r8ad8c30bk2mis9jr05f5qudv4%40group.calendar.google.com&color=%23E8A07E&src=iw.jewish%23holiday%40group.v.calendar.google.com&color=%23D4A373" title="פריסה שנתית ביומן גוגל"></iframe></div>
+        <p class="year-note">נפתח בחודש הפתיחה. מדפדפים בין החודשים בחצים, ואפשר לעבור לתצוגת "סדר יום" (Agenda) בלשונית למעלה.</p>
+    </dialog>
 
     <!-- Footer -->
     <footer>
@@ -844,16 +1349,78 @@
         // Google Sheets Apps Script Integration
         const GOOGLE_SHEETS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPOfPSucQ3p-Nb5J6K4ra-MxWv8JumNOjfV0TrpkNI-AK9COWuX2wHvwHvAZI5vJ30/exec"; 
 
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            const homeView = document.getElementById('homeView');
+            const scheduleView = document.getElementById('scheduleView');
+            const btnHome = document.getElementById('btnHome');
+            const btnSchedule = document.getElementById('btnSchedule');
+
+            if (tabId === 'schedule') {
+                homeView.classList.remove('active');
+                scheduleView.classList.add('active');
+                btnHome.classList.remove('active');
+                btnSchedule.classList.add('active');
+            } else {
+                scheduleView.classList.remove('active');
+                homeView.classList.add('active');
+                btnSchedule.classList.remove('active');
+                btnHome.classList.add('active');
+            }
+            
+            window.scrollTo({top: 0, behavior: 'instant'});
+            history.replaceState(null, '', tabId === 'schedule' ? '#schedule' : location.pathname + location.search);
+        }
+
+        // Meetings list: dim past meetings, highlight the next one
+        (function () {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let next = null;
+            document.querySelectorAll('.m-row[data-date]').forEach(function (row) {
+                const d = new Date(row.dataset.date + 'T00:00:00');
+                if (d < today) row.classList.add('past');
+                else if (!next) next = row;
+            });
+            if (next) next.classList.add('next');
+        })();
+
+
+
+        // Annual overview: our calendar + Ministry of Education vacations + Israeli holidays (Google Calendar)
+        (function () {
+            const dlg = document.getElementById('yearDialog');
+            const frame = dlg.querySelector('iframe');
+            document.getElementById('openYear').addEventListener('click', function () {
+                if (!frame.src) frame.src = frame.dataset.src;
+                dlg.showModal();
+            });
+            document.getElementById('closeYear').addEventListener('click', function () { dlg.close(); });
+            dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+        })();
+
+        // Open the schedule tab directly from /gifted-plc/math/#schedule
+        if (location.hash === '#schedule') switchTab('schedule');
+
+
+
         // Smooth scroll to form for mobile devices
         function scrollToForm() {
-            const formContainer = document.getElementById('formContainer');
-            const navHeight = document.querySelector('.navbar').offsetHeight;
-            const topPosition = formContainer.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+            // Ensure we are on the Home tab before scrolling to form
+            if (!document.getElementById('homeView').classList.contains('active')) {
+                switchTab('home');
+            }
             
-            window.scrollTo({
-                top: topPosition,
-                behavior: 'smooth'
-            });
+            setTimeout(() => {
+                const formContainer = document.getElementById('formContainer');
+                const navHeight = document.querySelector('.navbar').offsetHeight;
+                const topPosition = formContainer.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+                
+                window.scrollTo({
+                    top: topPosition,
+                    behavior: 'smooth'
+                });
+            }, 50); // slight delay to allow layout recalculation if tab switched
         }
 
         // Form Submit Handler
