@@ -306,6 +306,17 @@
         .meeting-structure li { margin-bottom: 2px; }
         .meeting-structure b { color: var(--text-primary); font-weight: 600; }
         .ms-note { font-size: 0.85rem; }
+        .ms-time {
+            margin: 0 0 8px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #3E6FB0;
+        }
+        .m-time {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
         .summary {
             list-style: none;
             margin: 0 0 16px;
@@ -955,24 +966,27 @@
 
         /* Mobile Responsive adjustments */
         @media (max-width: 640px) {
+            html { font-size: 112.5%; }
+            .main-container { padding: 20px 12px 48px; gap: 18px; }
             .nav-container { flex-direction: column; gap: 8px; }
             .brand-logo { justify-content: center; }
             .brand-img { height: auto; width: min(360px, 100%); }
             .nav-links { width: 100%; justify-content: center; gap: 4px; }
-            .tab-btn { padding: 6px 12px; font-size: 0.88rem; }
-            .cta-nav-btn { font-size: 0.85rem; padding: 6px 12px; }
+            .tab-btn { padding: 7px 14px; font-size: 0.92rem; }
+            .cta-nav-btn { font-size: 0.9rem; padding: 7px 16px; }
             .details-grid {
                 grid-template-columns: 1fr;
             }
             .nav-container {
                 padding: 10px 14px;
             }
-                .hero-card {
-                padding: 26px 20px;
+            .hero-card {
+                padding: 22px 16px;
             }
             .form-card {
-                padding: 22px 18px;
+                padding: 22px 16px;
             }
+            .feature-content p, .facts li { font-size: 0.95rem; }
             h1 {
                 font-size: 1.6rem;
             }
@@ -1049,7 +1063,7 @@
             <ul class="facts">
                 <li>
                     <span class="fact-icon" aria-hidden="true">📅</span>
-                    <span><strong>ימי שלישי בערב · מפגש מקוון</strong>בערך אחת לשבועיים: שעה וחצי בזמן אמת + הכנה ו/או סיכום</span>
+                    <span><strong>ימי שלישי, <span dir="ltr">20:00–22:15</span></strong>מפגש מקוון, בערך אחת לשבועיים: שעה וחצי בזמן אמת + הכנה ו/או סיכום</span>
                 </li>
                 <li>
                     <span class="fact-icon" aria-hidden="true">🎓</span>
@@ -1198,7 +1212,8 @@
             <div class="schedule-head">
                 <h1>לוח המפגשים – תשפ"ז</h1>
                 <div class="meeting-structure">
-                    <strong>כל מפגש מקוון = 3 שעות אקדמיות</strong> (ביומן: <span dir="ltr">20:00–22:15</span>)
+                    <p class="ms-time">🕗 המפגשים המקוונים: ימי שלישי, <span dir="ltr">20:00–22:15</span></p>
+                    <strong>כל מפגש מקוון = 3 שעות אקדמיות</strong>
                     <ul>
                         <li><b>שעה וחצי בזמן אמת</b> – המפגש עצמו, בימי שלישי בערב (2 שעות אקדמיות)</li>
                         <li><b>שעה אקדמית של הכנה ו/או סיכום</b> – קריאה, חידה, רפלקציה…</li>
@@ -1224,18 +1239,18 @@
                 <li class="m-row" data-date="2026-10-20">
                     <span class="m-date">ג' 20/10</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 1 · פתיחת שנת הפעילות בקהילה</span>
+                    <span class="m-title">מפגש מקוון 1 · פתיחת שנת הפעילות בקהילה<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="month-label" aria-hidden="true">נובמבר</li>
                 <li class="m-row" data-date="2026-11-10">
                     <span class="m-date">ג' 10/11</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 2</span>
+                    <span class="m-title">מפגש מקוון 2<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="m-row" data-date="2026-11-24">
                     <span class="m-date">ג' 24/11</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 3</span>
+                    <span class="m-title">מפגש מקוון 3<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="month-label" aria-hidden="true">דצמבר</li>
                 <li class="m-row" data-date="2026-12-08">
@@ -1246,7 +1261,7 @@
                 <li class="m-row" data-date="2026-12-22">
                     <span class="m-date">ג' 22/12</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 4</span>
+                    <span class="m-title">מפגש מקוון 4<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="m-row" data-date="2026-12-29">
                     <span class="m-date">ג' 29/12</span>
@@ -1257,18 +1272,18 @@
                 <li class="m-row" data-date="2027-01-05">
                     <span class="m-date">ג' 5/1</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 5 · במקום 01/12</span>
+                    <span class="m-title">מפגש מקוון 5 · במקום 01/12<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="m-row" data-date="2027-01-26">
                     <span class="m-date">ג' 26/1</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 6</span>
+                    <span class="m-title">מפגש מקוון 6<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="month-label" aria-hidden="true">פברואר</li>
                 <li class="m-row" data-date="2027-02-02">
                     <span class="m-date">ג' 2/2</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 7</span>
+                    <span class="m-title">מפגש מקוון 7<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="m-row" data-date="2027-02-23">
                     <span class="m-date">ג' 23/2</span>
@@ -1279,23 +1294,23 @@
                 <li class="m-row" data-date="2027-03-02">
                     <span class="m-date">ג' 2/3</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 8</span>
+                    <span class="m-title">מפגש מקוון 8<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="m-row" data-date="2027-03-16">
                     <span class="m-date">ג' 16/3</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 9</span>
+                    <span class="m-title">מפגש מקוון 9<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="m-row" data-date="2027-03-30">
                     <span class="m-date">ג' 30/3</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 10</span>
+                    <span class="m-title">מפגש מקוון 10<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="month-label" aria-hidden="true">אפריל</li>
                 <li class="m-row" data-date="2027-04-13">
                     <span class="m-date">ג' 13/4</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 11</span>
+                    <span class="m-title">מפגש מקוון 11<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="month-label" aria-hidden="true">מאי</li>
                 <li class="m-row" data-date="2027-05-04">
@@ -1312,7 +1327,7 @@
                 <li class="m-row" data-date="2027-06-01">
                     <span class="m-date">ג' 1/6</span>
                     <span class="chip chip-zoom">מקוון</span>
-                    <span class="m-title">מפגש 12 · מפגש מסכם</span>
+                    <span class="m-title">מפגש מקוון 12 · מסכם<span class="m-time"><span dir="ltr">20:00–22:15</span></span></span>
                 </li>
                 <li class="m-row" data-date="2027-06-29">
                     <span class="m-date">ג' 29/6</span>
