@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
     <title>מי הזיז את הגבינה שלך? | תאיר פניני</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <!-- Shared site bars (<site-header>, <site-footer>) -->
+    <script src="/assets/site.js"></script>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -29,15 +32,9 @@
         }
     </style>
 </head>
-<body class="bg-[#fafafa] min-h-screen flex items-center justify-center p-6 pt-24 md:p-12 md:pt-28 selection:bg-blue-100">
+<body class="bg-[#fafafa] min-h-screen flex flex-col selection:bg-blue-100">
 
-    <!-- Site bar -->
-    <nav class="fixed top-0 inset-x-0 z-20 bg-white/80 backdrop-blur border-b border-slate-100">
-        <div class="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="/" class="text-xl font-black text-black tracking-tighter hover:text-blue-600 transition-colors">תאיר פניני</a>
-            <a href="/" class="text-sm text-slate-500 hover:text-slate-900 transition-colors">לעמוד הבית ←</a>
-        </div>
-    </nav>
+    <site-header style="--tp-max:42rem"></site-header>
 
     <!-- Background decoration -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
@@ -45,6 +42,7 @@
         <div class="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-50/40 rounded-full blur-bg"></div>
     </div>
 
+    <div class="flex-1 flex items-center justify-center p-6 md:p-12">
     <main class="max-w-2xl w-full relative z-10">
         <div class="space-y-10">
 
@@ -85,6 +83,9 @@
 
         </div>
     </main>
+    </div>
+
+    <site-footer style="--tp-max:42rem"></site-footer>
 
 </body>
 </html>

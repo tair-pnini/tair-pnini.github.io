@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>תאיר פניני</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <!-- Shared site bars (<site-header>, <site-footer>) -->
+    <script src="/assets/site.js"></script>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -29,7 +32,9 @@
         }
     </style>
 </head>
-<body class="bg-[#fafafa] min-h-screen flex items-center justify-center p-6 md:p-12 selection:bg-blue-100">
+<body class="bg-[#fafafa] min-h-screen flex flex-col selection:bg-blue-100">
+
+    <site-header home style="--tp-max:42rem"></site-header>
 
     <!-- Background decoration -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
@@ -37,6 +42,7 @@
         <div class="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-rose-50/20 rounded-full blur-bg"></div>
     </div>
 
+    <div class="flex-1 flex items-center justify-center p-6 md:p-12">
     <main class="max-w-2xl w-full relative z-10">
         <div class="space-y-12">
             
@@ -151,20 +157,16 @@
                     </div>
 
                 </div>
-
-                <p class="mt-16 text-slate-400 text-xs text-center font-light">
-                    © <span id="year"></span> תאיר פניני | נבנה בחברות עם Gemini
-                </p>
             </footer>
         </div>
     </main>
+    </div>
+
+    <site-footer home style="--tp-max:42rem"></site-footer>
 
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
-        
-        // Set current year
-        document.getElementById('year').textContent = new Date().getFullYear();
     </script>
 </body>
 </html>

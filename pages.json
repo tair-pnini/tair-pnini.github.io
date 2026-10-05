@@ -1,0 +1,26 @@
+{
+  "about": "רישום הדפים באתר והתגיות שלהם. לשימוש פנימי (תצוגות וקטלוגים בעתיד), לא מוצג בדפים. ערך ריק = עוד לא הוחלט.",
+  "vocab": {
+    "subjects": ["מתמטיקה", "מחוננים", "משחקי קופסה", "תכנות", "AI · כלי AI", "AI · יצירת משחקים", "חידות"],
+    "grades": ["ג'–ו'", "ז'–ט'", "י'", "י\"א", "י\"ב", "מורים", "כל הגילים"],
+    "types": ["מצגת להקרנה", "שיעור אינטראקטיבי", "תרגול", "כלי / סימולציה", "דף עבודה", "מדריך", "דף להדפסה", "תוצרי תלמידים"]
+  },
+  "pages": [
+    { "path": "math/log.html",                "title": "משולש החזקה",               "subjects": ["מתמטיקה"], "topic": "לוגריתמים",     "grades": [],                "type": "" },
+    { "path": "math/percent.html",            "title": "אחוזים כפרופורציה",          "subjects": ["מתמטיקה"], "topic": "אחוזים",        "grades": [],                "type": "מצגת להקרנה" },
+    { "path": "math/y11/gd-01.html",          "title": "גדילה ודעיכה",               "subjects": ["מתמטיקה"], "topic": "גדילה ודעיכה",  "grades": ["י\"א"], "units": 3, "type": "שיעור אינטראקטיבי" },
+    { "path": "math/y11/gd-02.html",          "title": "תרגול גדילה ודעיכה להקרנה",  "subjects": ["מתמטיקה"], "topic": "גדילה ודעיכה",  "grades": ["י\"א"],          "type": "תרגול" },
+    { "path": "math/y10/graph-01.html",       "title": "מאגר שאלות וגרפים",          "subjects": ["מתמטיקה"], "topic": "גרפים",         "grades": ["י'"],            "type": "" },
+    { "path": "math/deriv-builder.html",      "title": "בונה הנגזרות",               "subjects": ["מתמטיקה"], "topic": "נגזרות",        "grades": [],                "type": "כלי / סימולציה" },
+    { "path": "math/geometric-sequence.html", "title": "אתגר הסדרות",                "subjects": ["מתמטיקה"], "topic": "סדרות",         "grades": [],                "type": "" },
+    { "path": "riddles/frogs.html",           "title": "סימולטור קפיצות צפרדעים",    "subjects": ["חידות"],   "topic": "",              "grades": [],                "type": "כלי / סימולציה" },
+    { "path": "gifted/ai/AI.html",            "title": "בלשי המילים",                "subjects": ["מחוננים"], "topic": "",              "grades": [],                "type": "דף עבודה" },
+    { "path": "gifted/ai/python.html",        "title": "צוללים למידע (פייתון)",      "subjects": ["מחוננים", "תכנות"], "topic": "פייתון", "grades": [],          "type": "" },
+    { "path": "gifted/ai/create-site.html",   "title": "הקמת אתר משחקים ב-GitHub",   "subjects": ["מחוננים"], "topic": "",              "grades": [],                "type": "מדריך" },
+    { "path": "gifted/ai/play-ai-2026/",      "title": "משחקי AI – תוצרי תלמידים",   "subjects": ["מחוננים", "AI · יצירת משחקים"], "topic": "", "grades": [],  "type": "תוצרי תלמידים" },
+    { "path": "gifted/oranim/how-to-moodle.html",     "title": "מדריך מודל וזום",    "subjects": ["מחוננים"], "topic": "",              "grades": [],                "type": "מדריך" },
+    { "path": "gifted/oranim/oranim-home-study.html", "title": "מדריך למידה מהבית", "subjects": ["מחוננים"], "topic": "",              "grades": [],                "type": "מדריך" },
+    { "path": "games/GC-2026-coup.html",      "title": "Coup – דף עזר",              "subjects": ["משחקי קופסה"], "topic": "",          "grades": [],                "type": "דף להדפסה" },
+    { "path": "join.html",                    "title": "משחקי קופסה שתאיר אוהבת",    "subjects": ["משחקי קופסה"], "topic": "",          "grades": [],                "type": "" }
+  ]
+}

@@ -1,2 +1,8 @@
 # Source files (PDF, video, original logos) - kept locally, not published
 gifted-plc/_source/
+
+# Local design-choice pages - for viewing on this computer only
+_local/
+
+# Brand spec from Gemini - local reference only
+gemini-brand-spec-for-ai.md
