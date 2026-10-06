@@ -35,17 +35,30 @@
         /* כמו באתר הקהילות: טקסט גדול (html 120%), שוליים צרים, כרטיסים בלי ריפוד עבה */
         @media (max-width: 640px) {
             html { font-size: 120%; }
-            .page-wrap { padding: 24px 16px 40px !important; align-items: flex-start !important; }
-            .page-wrap .space-y-12 > * + * { margin-top: 2.25rem !important; }
-            .hero-name { font-size: 3.1rem !important; line-height: 1.05 !important; margin-bottom: 1rem !important; }
-            .intro { font-size: 1.05rem !important; font-weight: 400 !important; color: #475569 !important; }
+            /* צמוד לסרגל העליון, שוליים 16px */
+            .page-wrap { padding: 12px 16px 32px !important; align-items: flex-start !important; }
+            .page-wrap .space-y-12 > * + * { margin-top: 2rem !important; }
+            .hero-name { font-size: 2.8rem !important; line-height: 1.1 !important; margin-bottom: .5rem !important; }
+            .intro { font-size: 1rem !important; font-weight: 400 !important; color: #475569 !important; margin-top: .75rem !important; }
+            .acts-list > * + * { margin-top: 1rem !important; }
             .acts-list > li { gap: 12px !important; }
-            .acts-list > li > span { font-size: 1.05rem !important; text-wrap: pretty; }
-            .note-card { padding: 20px 18px !important; border-radius: 20px !important; }
-            .note-card .flex { gap: 12px !important; }
-            .contact-grid { gap: 28px !important; }
-            .email { font-size: 1.25rem !important; }
-            .support-text { font-size: 0.95rem !important; }
+            .acts-list > li > span { font-size: 1rem !important; text-wrap: pretty; }
+
+            /* שתי התיבות (בנימה אישית, שי קטן של תודה) באותו עיצוב: לבנות, ברוחב מלא, הטקסט על כל הרוחב */
+            .note-card, .support-card {
+                padding: 18px 18px !important; border-radius: 18px !important;
+                background: #fff !important; border: 1px solid #E2E8F0 !important; box-shadow: none !important;
+            }
+            .note-card { padding-right: 24px !important; }
+            .note-icon { display: none !important; }
+            .note-card h3, .support-card .support-title { font-size: 1.1rem !important; margin-bottom: .5rem !important; }
+            .note-card p, .support-text { font-size: 1rem !important; line-height: 1.6 !important; }
+            .note-card p span { margin-top: .75rem !important; }
+
+            main footer { padding-top: 1.5rem !important; }
+            .contact-grid { gap: 1.5rem !important; }
+            .contact-grid h3 { font-size: 1.2rem !important; }
+            .email { font-size: 1.15rem !important; }
             .support-btn { font-size: 1rem !important; padding-top: 12px !important; padding-bottom: 12px !important; }
         }
     </style>
@@ -127,7 +140,7 @@
             <section class="note-card bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-1.5 h-full bg-blue-500"></div>
                 <div class="flex items-start gap-5 text-right">
-                    <div class="p-2 bg-rose-50 rounded-full text-rose-400 shrink-0">
+                    <div class="note-icon p-2 bg-rose-50 rounded-full text-rose-400 shrink-0">
                         <i data-lucide="heart" class="w-5 h-5 fill-current opacity-40"></i>
                     </div>
                     <div class="space-y-2">
@@ -160,8 +173,8 @@
                     </div>
 
                     <!-- Support Section -->
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-slate-900 shadow-sm transition-all hover:bg-white hover:shadow-md group">
-                        <div class="flex items-center gap-2 font-bold mb-3 text-slate-800">
+                    <div class="support-card bg-slate-50 p-6 rounded-2xl border border-slate-200 text-slate-900 shadow-sm transition-all hover:bg-white hover:shadow-md group">
+                        <div class="support-title flex items-center gap-2 font-bold mb-3 text-slate-800">
                             <i data-lucide="gift" class="text-rose-400 w-5 h-5 animate-pulse"></i>
                             <span>שי קטן של תודה</span>
                         </div>
