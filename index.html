@@ -30,6 +30,24 @@
         .animate-bounce-subtle {
             animation: bounce-subtle 2s infinite ease-in-out;
         }
+
+        /* ---------- Phone layout ---------- */
+        /* כמו באתר הקהילות: טקסט גדול (html 120%), שוליים צרים, כרטיסים בלי ריפוד עבה */
+        @media (max-width: 640px) {
+            html { font-size: 120%; }
+            .page-wrap { padding: 24px 16px 40px !important; align-items: flex-start !important; }
+            .page-wrap .space-y-12 > * + * { margin-top: 2.25rem !important; }
+            .hero-name { font-size: 3.1rem !important; line-height: 1.05 !important; margin-bottom: 1rem !important; }
+            .intro { font-size: 1.05rem !important; font-weight: 400 !important; color: #475569 !important; }
+            .acts-list > li { gap: 12px !important; }
+            .acts-list > li > span { font-size: 1.05rem !important; text-wrap: pretty; }
+            .note-card { padding: 20px 18px !important; border-radius: 20px !important; }
+            .note-card .flex { gap: 12px !important; }
+            .contact-grid { gap: 28px !important; }
+            .email { font-size: 1.25rem !important; }
+            .support-text { font-size: 0.95rem !important; }
+            .support-btn { font-size: 1rem !important; padding-top: 12px !important; padding-bottom: 12px !important; }
+        }
     </style>
 </head>
 <body class="bg-[#fafafa] min-h-screen flex flex-col selection:bg-blue-100">
@@ -42,19 +60,19 @@
         <div class="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-rose-50/20 rounded-full blur-bg"></div>
     </div>
 
-    <div class="flex-1 flex items-center justify-center p-6 md:p-12">
+    <div class="page-wrap flex-1 flex items-center justify-center p-6 md:p-12">
     <main class="max-w-2xl w-full relative z-10">
         <div class="space-y-12">
             
             <!-- Header -->
             <header>
-                <h1 class="text-6xl font-black text-black mb-6 tracking-tighter">
+                <h1 class="hero-name text-6xl font-black text-black mb-6 tracking-tighter">
                     תאיר פניני
                 </h1>
-                <p class="text-2xl text-slate-700 leading-relaxed font-normal italic">
-                    <span class="inline-block border-b-4 border-blue-200 pb-1">ברוכותים הבאותים</span> לפינה הקטנה שלי ברשת.
+                <p class="text-2xl text-slate-700 leading-relaxed font-normal text-balance">
+                    <span class="underline decoration-4 decoration-blue-200 underline-offset-8 [text-decoration-skip-ink:none]">ברוכותים הבאותים</span> לפינה הקטנה שלי ברשת.
                 </p>
-                <p class="text-lg text-slate-500 mt-4 font-light">
+                <p class="intro text-lg text-slate-500 mt-4 font-light">
                     המקום הזה נוצר כדי שיהיה לי לאן להעלות אתרים שאני בונה עם חברי הטוב <span class="font-semibold text-slate-700">Gemini</span>.
                 </p>
             </header>
@@ -65,7 +83,7 @@
                     <i data-lucide="sparkles" class="text-blue-400 w-6 h-6"></i>
                     מה קורה אצלי בתשפ"ו:
                 </h2>
-                <ul class="space-y-5">
+                <ul class="acts-list space-y-5">
                     <li class="flex items-start gap-4 text-slate-700 group">
                         <div class="mt-1 p-1 rounded-lg bg-white shadow-sm border border-slate-100 group-hover:scale-110 transition-transform text-blue-500">
                             <i data-lucide="users" class="w-5 h-5"></i>
@@ -106,7 +124,7 @@
             </section>
 
             <!-- ADHD Personal Note -->
-            <section class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+            <section class="note-card bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-1.5 h-full bg-blue-500"></div>
                 <div class="flex items-start gap-5 text-right">
                     <div class="p-2 bg-rose-50 rounded-full text-rose-400 shrink-0">
@@ -114,9 +132,9 @@
                     </div>
                     <div class="space-y-2">
                         <h3 class="font-bold text-slate-900 text-lg">בנימה אישית:</h3>
-                        <p class="text-slate-600 leading-relaxed text-lg italic">
+                        <p class="text-slate-600 leading-relaxed text-lg">
                             אני חיה ויוצרת עם הפרעת קשב וריכוז – היא מנוע אדיר ליצירתיות, אבל לעיתים גורמת לכך שלא אענה להודעות גם כשהתכוונתי מאוד לעשות זאת. 
-                            <span class="font-semibold block mt-3 text-slate-900 not-italic">אם לא חזרתי אליכם, זה ממש לא אישי, מוזמנות/ים לשלוח תזכורת.</span>
+                            <span class="font-semibold block mt-3 text-slate-900">אם לא חזרתי אליכם, זה ממש לא אישי, מוזמנות/ים לשלוח תזכורת.</span>
                         </p>
                     </div>
                 </div>
@@ -124,7 +142,7 @@
 
             <!-- Contact & Support -->
             <footer class="pt-8 border-t border-slate-200">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+                <div class="contact-grid grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
                     
                     <!-- Contact Info -->
                     <div class="space-y-4">
@@ -135,7 +153,7 @@
                         <p class="text-slate-500 text-base leading-snug">זמינה לשיתופי פעולה, שאלות או סתם שיחה.</p>
                         <div class="flex items-center gap-3 text-slate-800 group pt-2">
                             <i data-lucide="mail" class="text-blue-400 group-hover:scale-110 transition-transform w-5 h-5"></i>
-                            <a href="mailto:tair.pnini@gmail.com" class="text-2xl font-medium border-b-2 border-slate-100 hover:border-blue-500 transition-all tracking-tight break-all md:break-normal">
+                            <a href="mailto:tair.pnini@gmail.com" class="email text-2xl font-medium border-b-2 border-slate-100 hover:border-blue-500 transition-all tracking-tight break-all md:break-normal">
                                 tair.pnini@gmail.com
                             </a>
                         </div>
@@ -147,10 +165,10 @@
                             <i data-lucide="gift" class="text-rose-400 w-5 h-5 animate-pulse"></i>
                             <span>שי קטן של תודה</span>
                         </div>
-                        <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                        <p class="support-text text-sm text-slate-600 leading-relaxed mb-4">
                             נהניתם ממשהו שעשיתי? תמיכה סמלית (או משהו טעים) היא דרך נפלאה לעזור לי להמשיך ליצור. זה תמיד משמח, וממש לא מחייב.
                         </p>
-                        <a href="https://links.payboxapp.com/dZ5410C6mZb" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-600 transition-colors shadow-sm w-full justify-center">
+                        <a href="https://links.payboxapp.com/dZ5410C6mZb" target="_blank" rel="noopener noreferrer" class="support-btn inline-flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-600 transition-colors shadow-sm w-full justify-center">
                             להוקרה סמלית דרך Paybox
                             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                         </a>

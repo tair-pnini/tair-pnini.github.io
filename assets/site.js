@@ -97,12 +97,13 @@
       '</div></div>';
   });
 
-  define('site-footer', function () {
+  // בדף הבית יש כרטיס Paybox משלו, אז שם לא מציגים את שורת התודה
+  define('site-footer', function (isHome) {
     return '<style>' + BASE_CSS + FOOTER_CSS + '</style>' +
       '<footer><div class="in">' +
       '<a class="sign" href="/">' + LOGO + '<span>' + NAME + '</span></a>' +
       '<p class="note">' + FOOTER_NOTE + '</p>' +
-      '<a class="thanks" href="' + PAYBOX + '" target="_blank" rel="noopener noreferrer">' + COFFEE_ICON + FOOTER_THANKS + '</a>' +
+      (isHome ? '' : '<a class="thanks" href="' + PAYBOX + '" target="_blank" rel="noopener noreferrer">' + COFFEE_ICON + FOOTER_THANKS + '</a>') +
       '</div></footer>';
   });
 
