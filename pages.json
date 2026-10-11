@@ -20,6 +20,8 @@
     { "path": "gifted/ai/play-ai-2026/",      "title": "משחקי AI – תוצרי תלמידים",   "subjects": ["מחוננים", "AI · יצירת משחקים"], "topic": "", "grades": [],  "type": "תוצרי תלמידים" },
     { "path": "gifted/oranim/how-to-moodle.html",     "title": "מדריך מודל וזום",    "subjects": ["מחוננים"], "topic": "",              "grades": [],                "type": "מדריך" },
     { "path": "gifted/oranim/oranim-home-study.html", "title": "מדריך למידה מהבית", "subjects": ["מחוננים"], "topic": "",              "grades": [],                "type": "מדריך" },
+    { "path": "gifted/oranim/classroom-meet.html",    "title": "מתנסים ב-Classroom וב-Meet", "subjects": ["מחוננים"], "topic": "", "grades": ["מורים"],           "type": "מצגת להקרנה" },
+    { "path": "gifted/oranim/classroom-guide.html",   "title": "מדריך הקמת Classroom ו-Meet", "subjects": ["מחוננים"], "topic": "", "grades": ["מורים"],          "type": "מדריך" },
     { "path": "games/GC-2026-coup.html",      "title": "Coup – דף עזר",              "subjects": ["משחקי קופסה"], "topic": "",          "grades": [],                "type": "דף להדפסה" },
     { "path": "join.html",                    "title": "משחקי קופסה שתאיר אוהבת",    "subjects": ["משחקי קופסה"], "topic": "",          "grades": [],                "type": "" }
   ]

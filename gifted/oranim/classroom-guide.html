@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מדריך הקמת Classroom ו-Meet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Rubik:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f3ee;
+      --card: #ffffff;
+      --ink: #1d2740;
+      --muted: #5b6478;
+      --line: #e3dfd5;
+      --accent: #2f5bd3;
+      --green: #1e8e4f;
+      --soft-green: #e4f4ea;
+      --soft-amber: #fdf1dc;
+      --soft-rose: #fbe6ea;
+    }
+    * { box-sizing: border-box; }
+    html { font-size: 112.5%; }
+    body {
+      margin: 0;
+      font-family: 'Assistant', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    h1, h2 { font-family: 'Rubik', sans-serif; line-height: 1.2; margin: 0; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    header { margin-bottom: 2rem; }
+    header .tag {
+      display: inline-block;
+      font-weight: 800;
+      padding: .3em .9em;
+      border-radius: 999px;
+      background: #e8eefc;
+      color: var(--accent);
+      margin-bottom: .8rem;
+    }
+    header h1 { font-size: 2.4rem; font-weight: 800; }
+    header p { font-size: 1.25rem; color: var(--muted); margin: .6rem 0 0; }
+
+    /* Table of contents */
+    .toc { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.4rem; }
+    .toc a {
+      text-decoration: none;
+      color: var(--ink);
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      padding: .3em .9em;
+      font-weight: 700;
+    }
+    .toc a:hover { border-color: var(--accent); }
+
+    .note {
+      font-size: 1.15rem;
+      padding: 1rem 1.2rem;
+      border-radius: 16px;
+      border: 2px solid;
+      margin: 1rem 0;
+    }
+    .note.amber { background: var(--soft-amber); border-color: #f3d7a6; }
+    .note.rose { background: var(--soft-rose); border-color: #f2c4cd; }
+    .note.green { background: var(--soft-green); border-color: #bfe3cc; }
+
+    .step {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 1.6rem 1.6rem 1.8rem;
+      margin-top: 1.4rem;
+      scroll-margin-top: 1rem;
+    }
+    .step-head { display: flex; align-items: center; gap: .8rem; margin-bottom: .8rem; }
+    .num {
+      flex-shrink: 0;
+      width: 2.4rem; height: 2.4rem;
+      border-radius: 50%;
+      background: var(--ink);
+      color: #fff;
+      font: 700 1.2rem 'Rubik', sans-serif;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step h2 { font-size: 1.6rem; }
+    .step p, .step li { font-size: 1.2rem; }
+    .step ol, .step ul { padding-inline-start: 1.4rem; margin: .4rem 0; }
+    .step li { margin-bottom: .35rem; }
+
+    .shot {
+      display: block;
+      width: 100%;
+      margin-top: 1rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 30px -16px rgb(29 39 64 / .35);
+    }
+    .shot.small { max-width: 340px; margin-inline: auto; }
+
+    .code {
+      direction: ltr;
+      display: inline-block;
+      font: 700 2rem 'Rubik', sans-serif;
+      letter-spacing: .08em;
+      color: var(--green);
+      border: 3px dashed #9fd3b4;
+      border-radius: 16px;
+      padding: .1em .6em;
+      background: #fff;
+    }
+
+    .check { list-style: none; padding: 0 !important; }
+    .check li::before { content: "☐  "; color: var(--green); font-weight: 800; }
+
+    /* Phone layout */
+    @media (max-width: 640px) {
+      html { font-size: 110%; }
+      .wrap { padding: 1.5rem 16px 3rem; }
+      header h1 { font-size: 1.9rem; }
+      .step { padding: 1.2rem 1rem 1.4rem; border-radius: 18px; }
+      .step h2 { font-size: 1.35rem; }
+      .step p, .step li, .note { font-size: 1.05rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="tag">מדריך · צוות המחוננים אורנים</span>
+    <h1>מקימים כיתה ב-Classroom<br>ונפגשים ב-Meet</h1>
+    <p>עובדים בשלשות. כל אחת ואחד מקימים כיתה משלהם, ומצטרפים כתלמידים לכיתות של שני האחרים.</p>
+    <nav class="toc">
+      <a href="#account">חשבון</a>
+      <a href="#open">כניסה ל-Classroom</a>
+      <a href="#create">יצירת כיתה</a>
+      <a href="#meet">Meet וקוד כיתה</a>
+      <a href="#join">הצטרפות</a>
+      <a href="#together">נפגשים</a>
+      <a href="#upload">העלאת תוצר</a>
+    </nav>
+  </header>
+
+  <section class="step" id="account">
+    <div class="step-head"><span class="num">0</span><h2>באיזה חשבון עובדים?</h2></div>
+    <p>במרחב "מ.מ מחוננים אורנים" אין Classroom. צריך Classroom של <strong>חינוך</strong>, ולכן:</p>
+    <ul>
+      <li><strong>יש לך בית ספר נוסף</strong> בבית הספר הווירטואלי? עובדים דרכו.</li>
+      <li><strong>אין?</strong> לטובת ההתנסות לוקחים חשבון של מורה מבית ספר אחר.</li>
+    </ul>
+    <div class="note amber">⚠️ בתוך הקבוצה – <strong>כל אחת ואחד בחשבון אחר</strong>. אי אפשר להיות מורה ותלמיד באותו חשבון.</div>
+  </section>
+
+  <section class="step" id="open">
+    <div class="step-head"><span class="num">1</span><h2>נכנסים ל-Classroom</h2></div>
+    <ol>
+      <li>בבית הספר הווירטואלי, למעלה בצד שמאל, בוחרים את <strong>בית הספר האחר</strong> (לא "מ.מ מחוננים אורנים").</li>
+    </ol>
+    <img class="shot" src="img/vs-school-select.png" alt="בחירת בית ספר מהרשימה בבית הספר הווירטואלי">
+    <ol start="2">
+      <li>ב"כלים שיתופיים" לוחצים על <strong>Classroom</strong> (הסמל הירוק).</li>
+    </ol>
+    <img class="shot small" src="img/vs-tools-classroom.png" alt="כלים שיתופיים – סמל Classroom">
+  </section>
+
+  <section class="step" id="create">
+    <div class="step-head"><span class="num">2</span><h2>יוצרים כיתה</h2></div>
+    <ol>
+      <li>לוחצים על <strong>+</strong> למעלה ← <strong>יצירת כיתה</strong>.</li>
+      <li>נותנים לכיתה שם (למשל "התנסות Meet – הקבוצה של נועה") ולוחצים <strong>יצירה</strong>.</li>
+    </ol>
+    <img class="shot" src="img/classroom-create-join.png" alt="תפריט הפלוס ב-Classroom: הצטרפות לכיתה / יצירת כיתה">
+  </section>
+
+  <section class="step" id="meet">
+    <div class="step-head"><span class="num">3</span><h2>יוצרים קישור Meet ומזמינים</h2></div>
+    <p>בתוך הכיתה, בלשונית <strong>עדכונים</strong>:</p>
+    <ol>
+      <li>בכרטיס <strong>Meet</strong> לוחצים <strong>יצירת קישור</strong>. זה הקישור הקבוע של הכיתה.</li>
+      <li>בכרטיס <strong>קוד כיתה</strong> מעתיקים את הקוד ושולחים אותו לשני האחרים בקבוצה.</li>
+      <li>אפשר גם להזמין במייל: לשונית <strong>אנשים</strong> ← הזמנת תלמידים.</li>
+    </ol>
+    <img class="shot" src="img/classroom-meet-code.png" alt="דף הכיתה: כרטיס Meet עם יצירת קישור, וכרטיס קוד כיתה">
+  </section>
+
+  <section class="step" id="join">
+    <div class="step-head"><span class="num">4</span><h2>מצטרפים לכיתות של האחרים</h2></div>
+    <ol>
+      <li>במסך הראשי של Classroom: <strong>+</strong> ← <strong>הצטרפות לכיתה</strong>.</li>
+      <li>מקלידים את הקוד שקיבלתם ולוחצים <strong>הצטרפות</strong>.</li>
+      <li>חוזרים על זה עם הקוד השני.</li>
+    </ol>
+    <div class="note green">🎯 בסוף השלב: כל אחת ואחד מורים בכיתה אחת עם 2 תלמידים, ותלמידים ב-2 כיתות אחרות.</div>
+  </section>
+
+  <section class="step" id="together">
+    <div class="step-head"><span class="num">5</span><h2>נפגשים ב-Meet</h2></div>
+    <p>בוחרים כיתה של אחת או אחד מכם, ושלושתכם לוחצים על קישור ה-Meet שלה.</p>
+    <p><strong>רשימת בדיקה למרוץ:</strong></p>
+    <ul class="check">
+      <li>לכל אחת ואחד יש כיתה משלו</li>
+      <li>כל אחת ואחד תלמידים בשתי הכיתות האחרות</li>
+      <li>בכל כיתה נוצר קישור Meet</li>
+      <li>שלושתכם באותו Meet</li>
+    </ul>
+    <div class="note green">🎉 הצלחתם? מרימים יד וקוראים: "אנחנו ב-Meet!"</div>
+  </section>
+
+  <section class="step" id="upload">
+    <div class="step-head"><span class="num">6</span><h2>בסוף: מעלים את התוצר</h2></div>
+    <ol>
+      <li><strong>+</strong> ← <strong>הצטרפות לכיתה</strong> עם הקוד של הכיתה "מורות ומורי אורנים":</li>
+    </ol>
+    <p style="text-align:center"><span class="code">o3j4aax4</span></p>
+    <ol start="2">
+      <li>מעלים את התוצר של הקבוצה.</li>
+      <li>כותבים בפוסט את <strong>שמות חברות וחברי הקבוצה</strong> (החשבון לא תמיד שלכם).</li>
+    </ol>
+  </section>
+
+</div>
+</body>
+</html>

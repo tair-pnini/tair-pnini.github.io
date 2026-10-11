@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom ו-Meet – מפגש התנסות</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Rubik:wght@500;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f3ee;
+      --card: #ffffff;
+      --ink: #1d2740;
+      --muted: #5b6478;
+      --line: #e3dfd5;
+      --accent: #2f5bd3;
+      --green: #1e8e4f;
+      --amber: #c77700;
+      --rose: #c2334d;
+      --violet: #6a44c9;
+      --soft-blue: #e8eefc;
+      --soft-green: #e4f4ea;
+      --soft-amber: #fdf1dc;
+      --soft-rose: #fbe6ea;
+      --soft-violet: #efe9fb;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: 'Assistant', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    h1, h2, h3 { font-family: 'Rubik', sans-serif; margin: 0; line-height: 1.15; }
+
+    /* ---------- Slides ---------- */
+    main { flex: 1; position: relative; overflow: hidden; }
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 5vw, 5rem);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: clamp(1rem, 3vh, 2rem);
+      overflow-y: auto;
+    }
+    .slide.active { display: flex; }
+
+    .tag {
+      align-self: flex-start;
+      font-weight: 800;
+      font-size: clamp(1rem, 1.5vw, 1.35rem);
+      padding: .35em .9em;
+      border-radius: 999px;
+      background: var(--soft-blue);
+      color: var(--accent);
+    }
+    .tag.green { background: var(--soft-green); color: var(--green); }
+    .tag.amber { background: var(--soft-amber); color: var(--amber); }
+    .tag.violet { background: var(--soft-violet); color: var(--violet); }
+    .tag.rose { background: var(--soft-rose); color: var(--rose); }
+
+    .slide h2 { font-size: clamp(2.2rem, 4.6vw, 4.2rem); font-weight: 800; }
+    .lead { font-size: clamp(1.4rem, 2.4vw, 2.1rem); color: var(--muted); margin: 0; line-height: 1.4; }
+
+    .cols { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+
+    .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: clamp(.7rem, 2vh, 1.2rem); }
+    .steps li {
+      font-size: clamp(1.35rem, 2.3vw, 2rem);
+      line-height: 1.35;
+      display: flex;
+      gap: .6em;
+      align-items: flex-start;
+    }
+    .steps .n {
+      flex-shrink: 0;
+      width: 1.7em; height: 1.7em;
+      border-radius: 50%;
+      background: var(--ink);
+      color: #fff;
+      font-family: 'Rubik', sans-serif;
+      font-size: .8em;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: .1em;
+    }
+    .steps .ok { flex-shrink: 0; color: var(--green); font-weight: 800; }
+
+    .shot {
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 40px -18px rgb(29 39 64 / .35);
+      background: #fff;
+    }
+    .shot.small { max-width: 340px; justify-self: center; }
+
+    .note {
+      font-size: clamp(1.15rem, 1.8vw, 1.6rem);
+      padding: .8em 1.1em;
+      border-radius: 16px;
+      background: var(--card);
+      border: 2px solid var(--line);
+      line-height: 1.4;
+    }
+    .note.rose { background: var(--soft-rose); border-color: #f2c4cd; }
+    .note.amber { background: var(--soft-amber); border-color: #f3d7a6; }
+    .note.green { background: var(--soft-green); border-color: #bfe3cc; }
+
+    /* Opening */
+    .hero h1 { font-size: clamp(2.8rem, 6.5vw, 5.8rem); font-weight: 800; }
+    .hero h1 span { color: var(--accent); }
+    .agenda { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .agenda div {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 20px;
+      padding: 1.1rem 1.2rem;
+      font-size: clamp(1.25rem, 2vw, 1.75rem);
+      font-weight: 700;
+    }
+    .agenda div small { display: block; font-size: .7em; font-weight: 600; color: var(--muted); margin-top: .2em; }
+    .agenda .e { font-size: 1.6em; display: block; margin-bottom: .2em; }
+
+    /* Guide link + QR */
+    .qr-box {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 24px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+    }
+    .qr-box #qr img, .qr-box #qr canvas { width: clamp(150px, 20vw, 240px) !important; height: auto !important; }
+    .qr-box .lbl { font-size: clamp(1.3rem, 2vw, 1.8rem); font-weight: 800; }
+    .qr-box a { font-size: clamp(1rem, 1.3vw, 1.2rem); color: var(--accent); direction: ltr; word-break: break-all; }
+
+    /* Topic cards */
+    .topics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .topic {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-top: 8px solid var(--c);
+      border-radius: 20px;
+      padding: 1.2rem;
+    }
+    .topic .e { font-size: clamp(2rem, 3vw, 2.8rem); }
+    .topic h3 { font-size: clamp(1.4rem, 2.2vw, 2rem); margin: .3em 0; }
+    .topic p { margin: 0; font-size: clamp(1.05rem, 1.5vw, 1.35rem); color: var(--muted); line-height: 1.4; }
+
+    .q4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .q4 div {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      padding: 1rem 1.2rem;
+      font-size: clamp(1.3rem, 2.1vw, 1.85rem);
+      font-weight: 700;
+    }
+
+    /* Timer */
+    .timer {
+      background: var(--ink);
+      color: #fff;
+      border-radius: 24px;
+      padding: 1.2rem 1.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .timer .label { font-size: clamp(1.15rem, 1.7vw, 1.5rem); color: #c9d1e6; font-weight: 600; }
+    .timer .time {
+      font-family: 'Rubik', sans-serif;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 700;
+      color: #7fe3c4;
+      direction: ltr;
+    }
+    .timer .time.ending { color: #ff8fa3; }
+    .timer .btns { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .timer button {
+      font: 700 clamp(1rem, 1.4vw, 1.25rem) 'Assistant', sans-serif;
+      border: 0;
+      border-radius: 14px;
+      padding: .6em 1.1em;
+      cursor: pointer;
+      background: #34405e;
+      color: #fff;
+    }
+    .timer button.go { background: var(--green); }
+    .timer button.go.running { background: var(--amber); }
+
+    /* Class code */
+    .code {
+      direction: ltr;
+      font-family: 'Rubik', sans-serif;
+      font-size: clamp(3.2rem, 8vw, 7rem);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--green);
+      background: var(--card);
+      border: 3px dashed #9fd3b4;
+      border-radius: 24px;
+      padding: .15em .6em;
+      text-align: center;
+    }
+
+    /* ---------- Bottom bar ---------- */
+    footer {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .7rem 1.5rem;
+      background: var(--card);
+      border-top: 1px solid var(--line);
+    }
+    .progress { flex: 1; max-width: 340px; height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+    .progress div { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+    .counter { font-weight: 700; color: var(--muted); font-size: 1.05rem; min-width: 4em; text-align: center; }
+    .nav { display: flex; gap: .5rem; }
+    .nav button {
+      font: 700 1.1rem 'Assistant', sans-serif;
+      border-radius: 12px;
+      padding: .5em 1.2em;
+      cursor: pointer;
+      border: 2px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+    }
+    .nav button.next { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .nav button:disabled { opacity: .35; cursor: default; }
+
+    /* Expert task: everything on one slide, so tighter spacing */
+    .expert { gap: clamp(.7rem, 2vh, 1.2rem); }
+    .expert h2 { font-size: clamp(2rem, 3.8vw, 3.4rem); }
+    .expert .topic { display: flex; align-items: center; gap: .5em; padding: .7rem 1rem; border-top-width: 6px; }
+    .expert .topic .e { font-size: clamp(1.6rem, 2.4vw, 2.2rem); }
+    .expert .topic h3 { margin: 0; font-size: clamp(1.25rem, 1.9vw, 1.7rem); }
+    .panels { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1rem; }
+    .panel {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: 20px;
+      padding: 1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .panel h3 { font-size: clamp(1.3rem, 2vw, 1.8rem); }
+    .panel p, .panel li { margin: 0; font-size: clamp(1.15rem, 1.7vw, 1.5rem); line-height: 1.35; }
+    .panel ul { margin: 0; padding-inline-start: 1.3em; }
+    .panel .code { font-size: clamp(2.4rem, 4.5vw, 4rem); align-self: center; }
+    .expert .timer { padding: .6rem 1.5rem; }
+    .expert .timer .time { font-size: clamp(2.4rem, 4.5vw, 4rem); }
+
+    @media (max-width: 1000px) {
+      .panels { grid-template-columns: 1fr; }
+      .cols { grid-template-columns: 1fr; }
+      .agenda, .topics { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ---------- Phone layout: all slides as one scrolling page ---------- */
+    @media (max-width: 640px) {
+      html { font-size: 110%; }
+      body { overflow: auto; display: block; height: auto; }
+      main { overflow: visible; }
+      .slide {
+        position: static;
+        display: flex;
+        padding: 2rem 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      .slide h2 { font-size: 1.9rem; }
+      .hero h1 { font-size: 2.4rem; }
+      .lead { font-size: 1.2rem; }
+      .steps li { font-size: 1.15rem; }
+      .note { font-size: 1.05rem; }
+      .agenda, .topics, .q4 { grid-template-columns: 1fr; }
+      .code { font-size: 2.6rem; }
+      footer { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<main>
+
+  <!-- 1 · Opening -->
+  <section class="slide hero">
+    <span class="tag">מפגש התנסות · צוות המחוננים אורנים</span>
+    <h1>מתנסים ב-<span>Classroom</span> וב-<span>Meet</span></h1>
+    <p class="lead">היום לא מקשיבים – עושים. בשלשות, בידיים, עד שזה עובד.</p>
+    <div class="agenda">
+      <div><span class="e">🏫</span>כניסה<small>בית הספר הווירטואלי</small></div>
+      <div><span class="e">🛠️</span>הקמה<small>כיתה, הזמנות ו-Meet</small></div>
+      <div><span class="e">🔍</span>חקר עצמאי<small>נושא מומחיות לכל קבוצה</small></div>
+      <div><span class="e">📤</span>תוצר<small>מעלים לקלאסרום שלי</small></div>
+    </div>
+  </section>
+
+  <!-- 2 · Virtual school -->
+  <section class="slide">
+    <span class="tag">משימה 1 · כניסה</span>
+    <div class="cols">
+      <div style="display:flex;flex-direction:column;gap:1.5rem">
+        <h2>בית הספר הווירטואלי:<br>כולנו יכולים! 💪</h2>
+        <ul class="steps">
+          <li><span class="n">1</span><span>נכנסים לבית הספר הווירטואלי</span></li>
+          <li><span class="n">2</span><span>בוחרים למעלה <strong>"מ.מ מחוננים אורנים"</strong></span></li>
+          <li><span class="n">3</span><span>מוודאים שכולן וכולם בפנים</span></li>
+        </ul>
+        <div class="note rose">🚧 לא מצליחים להיכנס? מעדכנים את <strong>גל</strong> מיד.</div>
+      </div>
+      <img class="shot" src="img/vs-school-select.png" alt="בחירת בית ספר בבית הספר הווירטואלי">
+    </div>
+  </section>
+
+  <!-- 3 · Classroom access -->
+  <section class="slide">
+    <span class="tag green">משימה 2 · Classroom</span>
+    <div class="cols">
+      <div style="display:flex;flex-direction:column;gap:1.5rem">
+        <h2>מגיעים ל-Classroom</h2>
+        <p class="lead">רמז: במרחב המחוננים אין Classroom.<br>יש לכם בית ספר נוסף? חפשו שם. אין? לוקחים לטובת ההתנסות חשבון של מורה מבית ספר אחר.</p>
+        <div class="note amber">⚠️ חייב להיות Classroom של חינוך. ובתוך הקבוצה – <strong>כל אחת ואחד בחשבון אחר</strong>.</div>
+      </div>
+      <img class="shot small" src="img/vs-tools-classroom.png" alt="כלים שיתופיים – Classroom">
+    </div>
+  </section>
+
+  <!-- 4 · Build race -->
+  <section class="slide">
+    <span class="tag rose">משימה 3 · מרוץ בשלשות 🏁</span>
+    <div class="cols">
+      <div style="display:flex;flex-direction:column;gap:1.2rem">
+        <h2>מי ראשונים ב-Meet?</h2>
+        <p class="lead">הקבוצה הראשונה שעומדת בכל התנאים – מנצחת.</p>
+        <ul class="steps">
+          <li><span class="ok">✓</span><span>לכל אחת ואחד יש כיתה משלו</span></li>
+          <li><span class="ok">✓</span><span>כל אחת ואחד תלמידים בשתי הכיתות האחרות</span></li>
+          <li><span class="ok">✓</span><span>בכל כיתה נוצר קישור Meet</span></li>
+          <li><span class="ok">✓</span><span><strong>שלושתכם נפגשים באחד הקישורים</strong></span></li>
+        </ul>
+        <div class="note green">🎉 הצלחתם? מרימים יד וקוראים: "אנחנו ב-Meet!"</div>
+      </div>
+      <div class="qr-box">
+        <div class="lbl">📱 המדריך למרוץ</div>
+        <div id="qr"></div>
+        <a id="guideLink" href="classroom-guide.html" target="_blank">classroom-guide.html</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Explore Meet -->
+  <section class="slide">
+    <span class="tag violet">חלק עצמאי · חקר</span>
+    <h2>10 דקות בתוך ה-Meet:<br>לוחצים על הכל</h2>
+    <div class="q4">
+      <div>🛡️ בקרות מארח</div>
+      <div>📊 פעילויות: סקרים, חדרים, Q&amp;A</div>
+      <div>🖥️ שיתוף מסך</div>
+      <div>📐 תצוגות ואפקטים</div>
+    </div>
+    <div class="timer" data-minutes="10">
+      <span class="label">⏱️ זמן חקר</span>
+      <span class="time">10:00</span>
+      <span class="btns">
+        <button class="go">▶ התחלה</button>
+        <button class="reset">איפוס</button>
+        <button class="plus">+1 דקה</button>
+      </span>
+    </div>
+  </section>
+
+  <!-- 7 · Expert task: topic, product, upload -->
+  <section class="slide expert">
+    <span class="tag violet">חלק עצמאי · משימת מומחיות</span>
+    <h2>נושא לכל קבוצה ← תוצר למורים</h2>
+    <div class="topics">
+      <div class="topic" style="--c: var(--accent)"><span class="e">🖥️</span><h3>שיתוף מסך ושמע</h3></div>
+      <div class="topic" style="--c: var(--rose)"><span class="e">🛡️</span><h3>ניהול והפרעות</h3></div>
+      <div class="topic" style="--c: var(--violet)"><span class="e">🚪</span><h3>חלוקה לחדרים</h3></div>
+      <div class="topic" style="--c: var(--amber)"><span class="e">🙋</span><h3>הפעלת תלמידים</h3></div>
+    </div>
+    <div class="panels">
+      <div class="panel">
+        <h3>📦 התוצר</h3>
+        <p>מצגת, אינפוגרפיקה, הסבר עם צילומי מסך – איך שבא לכם. עונה על:</p>
+        <ul>
+          <li>איך עושים את זה?</li>
+          <li>למה זה טוב לשיעור?</li>
+          <li>מה כדאי לדעת?</li>
+          <li>מה עלול להשתבש – ואיך נחלצים?</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>📤 מעלים לכיתה "מורות ומורי אורנים"</h3>
+        <div class="code">o3j4aax4</div>
+        <p>כותבים בפוסט את <strong>שמות חברות וחברי הקבוצה</strong> (החשבון לא תמיד שלכם).</p>
+      </div>
+    </div>
+    <div class="timer" data-minutes="15">
+      <span class="label">⏱️ זמן עבודה</span>
+      <span class="time">15:00</span>
+      <span class="btns">
+        <button class="go">▶ התחלה</button>
+        <button class="reset">איפוס</button>
+        <button class="plus">+1 דקה</button>
+      </span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="progress"><div id="progressBar"></div></div>
+  <span class="counter" id="counter">1 / 9</span>
+  <div class="nav">
+    <button id="btnPrev" onclick="go(-1)">→ הקודם</button>
+    <button id="btnNext" class="next" onclick="go(1)">הבא ←</button>
+    <button onclick="toggleFullScreen()" title="מסך מלא">⛶</button>
+  </div>
+</footer>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function show() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    document.getElementById('progressBar').style.width = ((current + 1) / slides.length * 100) + '%';
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + slides.length;
+    document.getElementById('btnPrev').disabled = current === 0;
+    document.getElementById('btnNext').disabled = current === slides.length - 1;
+  }
+
+  function go(dir) {
+    const target = current + dir;
+    if (target >= 0 && target < slides.length) {
+      current = target;
+      show();
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === ' ' || e.key === 'PageDown') {
+      // Keep space from also pressing the last clicked button (e.g. a timer)
+      e.preventDefault();
+      go(1);
+    } else if (e.key === 'ArrowRight' || e.key === 'PageUp') {
+      go(-1);
+    }
+  });
+
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // QR code to the guide page (absolute URL, so it works when scanned)
+  const guideUrl = new URL('classroom-guide.html', location.href).href;
+  document.getElementById('guideLink').textContent = guideUrl.replace(/^https?:\/\//, '');
+  if (window.QRCode) {
+    new QRCode(document.getElementById('qr'), { text: guideUrl, width: 240, height: 240, colorDark: '#1d2740' });
+  }
+
+  // Countdown timers (one per .timer block, length from data-minutes)
+  document.querySelectorAll('.timer').forEach((box) => {
+    const total = Number(box.dataset.minutes) * 60;
+    let remaining = total;
+    let interval = null;
+    const time = box.querySelector('.time');
+    const goBtn = box.querySelector('.go');
+
+    function render() {
+      const m = Math.floor(remaining / 60);
+      const s = remaining % 60;
+      time.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+      time.classList.toggle('ending', remaining <= 60);
+    }
+
+    function stop(label) {
+      clearInterval(interval);
+      interval = null;
+      goBtn.textContent = label;
+      goBtn.classList.remove('running');
+    }
+
+    goBtn.onclick = () => {
+      if (interval) {
+        stop('▶ המשך');
+        return;
+      }
+      if (remaining <= 0) remaining = total;
+      goBtn.textContent = '⏸ השהיה';
+      goBtn.classList.add('running');
+      interval = setInterval(() => {
+        remaining--;
+        render();
+        if (remaining <= 0) {
+          stop('🔔 הזמן נגמר');
+          playBeep();
+        }
+      }, 1000);
+    };
+    box.querySelector('.reset').onclick = () => { stop('▶ התחלה'); remaining = total; render(); };
+    box.querySelector('.plus').onclick = () => { remaining += 60; render(); };
+  });
+
+  // Short chime, no sound file needed
+  function playBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.6);
+    } catch (e) {
+      // Audio not allowed or not supported
+    }
+  }
+
+  show();
+</script>
+</body>
+</html>
