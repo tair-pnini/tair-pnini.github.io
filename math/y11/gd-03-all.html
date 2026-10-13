@@ -9,6 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&amp;family=Heebo:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Shared site bars (<site-header>, <site-footer>) -->
+  <script src="/assets/site.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -31,10 +34,15 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 16px 60px;
+      padding: 0 16px;
     }
 
-    .wrap { width: 100%; max-width: 1100px; }
+    /* הסרגלים המשותפים של האתר: ברוחב מלא, הסרגל התחתון על רקע בהיר */
+    site-header, site-footer { align-self: stretch; margin: 0 -16px; }
+    site-footer { background: #ffffff; }
+
+    .wrap { width: 100%; max-width: 1100px; padding: 20px 0 40px; }
+    .step, #after-steps, #submit-card { scroll-margin-top: 80px; }
     .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
 
     .c-qty { color: var(--c-qty); }
@@ -274,7 +282,7 @@
     /* ---------- סרגל הנתונים בצד (Sticky Sidebar) ---------- */
     .sidebar {
       position: sticky;
-      top: 20px;
+      top: 84px; /* מתחת לסרגל העליון הדביק */
       background: rgba(15, 23, 42, 0.9);
       border: 2px solid rgba(56, 189, 248, 0.4);
       border-radius: 18px;
@@ -353,7 +361,7 @@
     /* ---------- Phone layout ---------- */
     @media (max-width: 640px) {
       html { font-size: 110%; }
-      body { padding: 14px 16px 40px; }
+      .wrap { padding: 14px 0 32px; }
       .card { padding: 20px 14px; }
       .sidebar { padding: 16px 12px; }
       .stem { font-size: 20px; }
@@ -366,6 +374,7 @@
   </style>
 </head>
 <body>
+<site-header style="--tp-max:1100px"></site-header>
 <div class="wrap">
   <nav class="qnav" id="qnav"></nav>
 
@@ -397,6 +406,7 @@
     <p class="fb" id="submit-msg"></p>
   </section>
 </div>
+<site-footer style="--tp-max:1100px"></site-footer>
 
 <script>
   // כתובת ה-Apps Script שמקבל את ההגשות. ריק = השליחה עוד לא מחוברת.
