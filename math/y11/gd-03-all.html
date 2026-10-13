@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>גדילה ודעיכה: תרגול מונחה</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&amp;family=Heebo:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* פלטה מצומצמת ונעימה - 3 משפחות מושגיות בלבד */
+      --c-qty: #38bdf8;   /* משפחת הכמויות: A0, A1, At (תכלת) */
+      --c-time: #fbbf24;  /* משפחת הזמן: t, יחידות זמן (ענבר חם) */
+      --c-rate: #4ade80;  /* משפחת השינוי: q, p% (ירוק מנטה) */
+      --c-err: #f9a8b8;
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-subtle: rgba(255, 255, 255, 0.12);
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: 'Assistant', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 60px;
+    }
+
+    .wrap { width: 100%; max-width: 1100px; }
+    .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+    .c-qty { color: var(--c-qty); }
+    .c-time { color: var(--c-time); }
+    .c-rate { color: var(--c-rate); }
+
+    /* שבר מסודר מונה מעל מכנה */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1.15;
+      margin: 0 4px;
+    }
+    .frac > span { padding: 0 5px; }
+    .frac > span + span { border-top: 2px solid currentColor; }
+
+    /* ---------- ניווט בין השאלות ---------- */
+    .qnav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .qnav .title { font-family: 'Heebo', sans-serif; font-size: 20px; font-weight: 700; margin-left: 10px; }
+    .qnav button {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.18);
+      color: #cbd5e1;
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .qnav button.cur { border-color: var(--c-qty); color: #ffffff; }
+    .qnav button.done { background: rgba(74, 222, 128, 0.18); border-color: rgba(74, 222, 128, 0.6); color: #ffffff; }
+
+    /* ---------- פריסה דו-טורית ---------- */
+    .layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      grid-template-areas: "q side" "steps side";
+      gap: 0 24px;
+      align-items: start;
+    }
+    .area-q { grid-area: q; }
+    .area-steps { grid-area: steps; }
+    .sidebar { grid-area: side; }
+
+    /* ---------- כרטיס שאלה ושלבים ---------- */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .q-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--c-qty);
+      font-family: 'Heebo', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .stem {
+      font-size: 22px;
+      line-height: 1.8;
+      color: #f8fafc;
+      margin-bottom: 12px;
+    }
+    .subq-box {
+      background: rgba(0,0,0,0.25);
+      border-right: 4px solid var(--c-qty);
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 8px 0;
+      font-size: 19px;
+      line-height: 1.6;
+    }
+
+    /* ---------- שלבי הפיגום (Scaffolding) ---------- */
+    .step-head {
+      font-family: 'Heebo', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .step-head .n {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--c-qty);
+      color: #000;
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .step.done .step-head .n { background: var(--c-rate); }
+    .step.done { border-color: rgba(74, 222, 128, 0.4); }
+    .step-body { font-size: 19px; line-height: 1.8; color: #cbd5e1; }
+    .step-body p { margin-bottom: 6px; }
+    .step-body .hint {
+      background: rgba(251, 191, 36, 0.08);
+      border-right: 3px solid var(--c-time);
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 17px;
+      line-height: 1.6;
+      margin: 10px 0;
+      color: #fde68a;
+    }
+
+    /* קלט מעוצב */
+    input.box, select.box {
+      height: 46px;
+      min-width: 0;
+      width: 110px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Heebo', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      direction: ltr;
+      outline: none;
+      padding: 0 8px;
+      transition: all 0.2s;
+      vertical-align: middle;
+    }
+    input.box:focus, select.box:focus { border-color: var(--c-qty); background: rgba(0, 0, 0, 0.6); }
+    input.box.narrow { width: 75px; }
+    input.box.wide { width: 130px; }
+    select.box { width: auto; direction: rtl; font-family: 'Assistant', sans-serif; font-size: 17px; }
+    select.box option { background: #1e293b; color: #fff; }
+
+    /* A עם אינדקס ריק שהתלמיד ממלא */
+    .avar {
+      display: inline-flex;
+      align-items: flex-start;
+      font-family: 'Heebo', sans-serif;
+      font-weight: 800;
+      font-size: 1.15em;
+      line-height: 1;
+      direction: ltr;
+      padding-bottom: 16px;
+    }
+    .avar input.idx {
+      width: 38px;
+      height: 26px;
+      font-size: 14px;
+      padding: 0 1px;
+      margin-top: 0.55em;
+      margin-left: 1px;
+      margin-bottom: -16px;
+      border: 2px dashed rgba(251, 191, 36, 0.6);
+      border-radius: 6px;
+      color: var(--c-time);
+    }
+    .frac .avar { padding-bottom: 14px; }
+    input.box.expo {
+      width: 60px;
+      height: 34px;
+      font-size: 16px;
+      vertical-align: super;
+      margin-left: -4px;
+      border-color: rgba(251, 191, 36, 0.45);
+      color: var(--c-time);
+    }
+
+    .eq-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 14px 0;
+      font-family: 'Heebo', sans-serif;
+      font-size: 21px;
+      direction: ltr;
+      justify-content: flex-end;
+    }
+
+    .btn-step {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+    .btn-step:hover { background: #38bdf8; color: #000; }
+    .btn-step.go { background: var(--c-rate); color: #000; }
+    .step.done .btn-step, .step.done .btn-link { display: none; }
+    .btn-link { background: none; border: none; color: #94a3b8; text-decoration: underline; font-family: inherit; font-size: 17px; cursor: pointer; margin: 10px 8px 0; }
+
+    .choice { display: inline-flex; gap: 10px; flex-wrap: wrap; vertical-align: middle; }
+    .choice button {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.2);
+      color: #ffffff;
+      border-radius: 30px;
+      padding: 4px 18px;
+      font-family: 'Assistant', sans-serif;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .choice button.on { border-color: var(--c-rate); background: rgba(74, 222, 128, 0.15); }
+
+    .fb { font-size: 17px; margin-top: 8px; font-weight: 600; line-height: 1.5; }
+    .fb:empty { display: none; }
+    .fb.err { color: var(--c-err); }
+    .fb.ok { color: var(--c-rate); }
+
+    /* ---------- סרגל הנתונים בצד (Sticky Sidebar) ---------- */
+    .sidebar {
+      position: sticky;
+      top: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid rgba(56, 189, 248, 0.4);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .sidebar-head {
+      font-family: 'Heebo', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .side-group { margin-bottom: 16px; }
+    .side-group-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .side-item {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .side-item .label { font-size: 16px; font-weight: 600; display: flex; flex-direction: column; }
+    .side-item .label small { font-size: 13px; color: #94a3b8; font-weight: 400; }
+    .side-val {
+      font-family: 'Heebo', sans-serif;
+      font-size: 19px;
+      font-weight: 800;
+      direction: ltr;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .empty { color: #475569; }
+    .sidebar input.box { height: 40px; font-size: 18px; }
+    .sidebar input.box.narrow { width: 80px; }
+    .sidebar select.box { height: 40px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; }
+    .field label { font-size: 20px; }
+    .field input {
+      height: 50px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #ffffff;
+      font-family: 'Assistant', sans-serif;
+      font-size: 21px;
+      padding: 0 14px;
+      outline: none;
+    }
+    .field input:focus { border-color: var(--c-qty); }
+    .summary { list-style: none; margin: 10px 0; font-size: 18px; }
+    .summary li { padding: 6px 0; border-bottom: 1px solid var(--border-subtle); }
+
+    .reset { text-align: center; }
+
+    .hidden { display: none !important; }
+
+    /* מובייל ורספונסיביות: ארגז הנתונים בין השאלה לשלבים */
+    @media (max-width: 860px) {
+      .layout-grid { grid-template-columns: 1fr; grid-template-areas: "q" "side" "steps"; }
+      .sidebar { position: static; margin-bottom: 20px; }
+    }
+
+    /* ---------- Phone layout ---------- */
+    @media (max-width: 640px) {
+      html { font-size: 110%; }
+      body { padding: 14px 16px 40px; }
+      .card { padding: 20px 14px; }
+      .sidebar { padding: 16px 12px; }
+      .stem { font-size: 20px; }
+      .subq-box { font-size: 18px; }
+      .step-body { font-size: 18px; }
+      .eq-row { font-size: 19px; gap: 6px; }
+      input.box { width: 90px; font-size: 18px; }
+      input.box.narrow { width: 64px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="qnav" id="qnav"></nav>
+
+  <div class="layout-grid">
+    <section class="card area-q" id="q-card"></section>
+    <main class="area-steps">
+      <div id="steps"></div>
+      <div id="after-steps"></div>
+      <p class="reset"><button class="btn-link" onclick="resetAll()">להתחיל מחדש (מוחק את כל התשובות בדפדפן הזה)</button></p>
+    </main>
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <i class="fa-solid fa-box-archive c-qty"></i>
+        <span>ארגז הנתונים שלי</span>
+      </div>
+      <div id="box"></div>
+    </aside>
+  </div>
+
+  <!-- הגשה: השם רק כאן -->
+  <section class="card hidden" id="submit-card">
+    <div class="step-head"><i class="fa-solid fa-paper-plane c-qty"></i><span>הגשה</span></div>
+    <ul class="summary" id="summary"></ul>
+    <div class="field">
+      <label for="student-name">שם מלא</label>
+      <input id="student-name" autocomplete="name">
+    </div>
+    <button class="btn-step" onclick="submitAll()">הגשה <i class="fa-solid fa-paper-plane"></i></button>
+    <p class="fb" id="submit-msg"></p>
+  </section>
+</div>
+
+<script>
+  // כתובת ה-Apps Script שמקבל את ההגשות. ריק = השליחה עוד לא מחוברת.
+  const SUBMIT_URL = '';
+  const STORAGE_KEY = 'gd-03-all';
+
+  // ---------- השאלות ----------
+  // rate: מה נתון על קצב השינוי. q = "פי…", p = אחוז (sign: + גדילה, − דעיכה), find = מוצאים משתי כמויות.
+  // rows: שורות הכמויות בארגז. idx = t הנכון. val = הכמות (null = מבוקשת בסעיף part).
+  // parts: הסעיפים. formula = כותבים נוסחה, פותרים ועונים. percent = מוצאים q ואז p.
+  const QUESTIONS = [
+    {
+      id: 'A1', nav: 'שאלה 1', badge: "חלק א' · שאלה 1: חיידקים בתרבית",
+      stem: 'מספר החיידקים בתרבית גדל פי 2 בכל שעה בהשוואה לשעה שקדמה לה. בתחילת הניסוי היו 150 חיידקים.',
+      subs: { 'א': 'חשבו את מספר החיידקים אחרי 11 שעות מתחילת הניסוי.', 'ב': 'חשבו את מספר החיידקים אחרי 12 שעות מתחילת הניסוי.' },
+      unit: { n: 1, u: 'שעות' },
+      rate: { kind: 'q', q: 2 },
+      rows: [
+        { label: 'בתחילת הניסוי', idx: 0, val: 150 },
+        { label: 'אחרי 11 שעות', small: "המבוקש בסעיף א'", idx: 11, part: 'א' },
+        { label: 'אחרי 12 שעות', small: "המבוקש בסעיף ב'", idx: 12, part: 'ב' }
+      ],
+      parts: [
+        { part: 'א', type: 'formula', title: 'כמה חיידקים יהיו אחרי 11 שעות?', row: 1, A0: 150, q: 2, t: 11, round: 0, what: 'חיידקים',
+          answer: ['אחרי 11 שעות יהיו בתרבית', 'חיידקים.'] },
+        { part: 'ב', type: 'formula', title: 'כמה חיידקים יהיו אחרי 12 שעות?', row: 2, A0: 150, q: 2, t: 12, round: 0, what: 'חיידקים',
+          answer: ['אחרי 12 שעות יהיו בתרבית', 'חיידקים.'] }
+      ]
+    },
+    {
+      id: 'A3', nav: 'שאלה 3', badge: "חלק א' · שאלה 3: דגים בבריכה",
+      stem: 'כמות הדגים בבריכה גדלה כל חודש ב-6%. היום יש בבריכה 12 טונות דגים.',
+      subs: { 'א': 'מה תהיה כמות הדגים בבריכה בעוד 7 חודשים?', 'ב': 'מה תהיה כמות הדגים בבריכה בעוד שנה?' },
+      unit: { n: 1, u: 'חודשים' },
+      rate: { kind: 'p', p: 6, sign: '+' },
+      rows: [
+        { label: 'היום', idx: 0, val: 12 },
+        { label: 'בעוד 7 חודשים', small: "המבוקש בסעיף א'", idx: 7, part: 'א' },
+        { label: 'בעוד שנה', small: "המבוקש בסעיף ב'", idx: 12, part: 'ב' }
+      ],
+      parts: [
+        { part: 'א', type: 'formula', title: 'כמה דגים יהיו בעוד 7 חודשים?', row: 1, A0: 12, q: 1.06, t: 7, round: 2, what: 'טונות',
+          answer: ['בעוד 7 חודשים יהיו בבריכה בערך', 'טונות דגים.'] },
+        { part: 'ב', type: 'formula', title: 'כמה דגים יהיו בעוד שנה?', row: 2, A0: 12, q: 1.06, t: 12, round: 2, what: 'טונות',
+          answer: ['בעוד שנה יהיו בבריכה בערך', 'טונות דגים.'] }
+      ]
+    },
+    {
+      id: 'A4', nav: 'שאלה 4', badge: "חלק א' · שאלה 4: שמורת הפילים",
+      stem: 'מספר הפילים בשמורת טבע קטן בצורה מעריכית.<br><strong>כיום</strong> יש בשמורה <strong>400</strong> פילים.<br><strong>בעוד 3 חודשים</strong> יהיו בשמורה <strong>380</strong> פילים.',
+      subs: { 'א': 'מצאו בכמה אחוזים קטן מספר הפילים בשמורה כל 3 חודשים.', 'ב': 'כמה פילים יהיו בשמורה בעוד שלוש וחצי שנים?' },
+      unit: { n: 3, u: 'חודשים' },
+      // חודש אחד (או רבע שנה) נכון מתמטית, אבל ביקשנו 3 חודשים
+      unitAlt: [{ n: 1, u: 'חודשים' }, { n: 0.25, u: 'שנים' }],
+      unitAltMsg: "גם זה נכון מתמטית, אבל קל יותר לעבוד עם יחידה של 3 חודשים: בפרק הזמן הזה מדדו את השינוי, ועליו שואלים בסעיף א'. בחרו 3 חודשים.",
+      hints: [
+        '<strong>כלל זהב:</strong> נקבע כיחידת זמן אחת (t = 1) את התקופה שבה מדדו את השינוי!',
+        "הדרכה לסעיף ב': חשבו תחילה את מספר החודשים שיש בשלוש וחצי שנים. את התוצאה שקיבלתם חלקו ב-3 וכך תמצאו את מספר יחידות הזמן."
+      ],
+      rate: { kind: 'find', from: [1, 0], sign: '−' },
+      rows: [
+        { label: 'כיום', idx: 0, val: 400 },
+        { label: 'בעוד 3 חודשים', idx: 1, val: 380 },
+        { label: 'בעוד 3.5 שנים', small: "המבוקש בסעיף ב'", idx: 14, part: 'ב' }
+      ],
+      parts: [
+        { part: 'א', type: 'percent', praise: ['מספר הפילים קטן ב-', 'כל 3 חודשים.'] },
+        { part: 'ב', type: 'formula', title: 'כמה פילים יהיו בעוד 3.5 שנים?', row: 2, A0: 400, q: 0.95, t: 14, round: 0, what: 'פילים',
+          answer: ['בעוד שלוש וחצי שנים יהיו בשמורה בערך', 'פילים.'] }
+      ]
+    },
+    {
+      id: 'B1', nav: "חלק ב' · 1", badge: "חלק ב' · שאלה 1: אריות בשמורה",
+      stem: 'בשמורת טבע יש היום 200 אריות. מספר האריות גדל כל שנה ב-10%.',
+      subs: { 'א': 'כמה אריות היו בשמורה לפני 8 שנים?', 'ב': 'כמה אריות יהיו בשמורה בעוד 8 שנים?' },
+      unit: { n: 1, u: 'שנים' },
+      hints: ['בשאלות על העבר: <strong>היום הוא A<sub>0</sub></strong>, וזמן שעבר הוא t שלילי. למשל "לפני שנתיים": t = −2.'],
+      rate: { kind: 'p', p: 10, sign: '+' },
+      rows: [
+        { label: 'היום', idx: 0, val: 200 },
+        { label: 'לפני 8 שנים', small: "המבוקש בסעיף א'", idx: -8, part: 'א' },
+        { label: 'בעוד 8 שנים', small: "המבוקש בסעיף ב'", idx: 8, part: 'ב' }
+      ],
+      parts: [
+        { part: 'א', type: 'formula', title: 'כמה אריות היו לפני 8 שנים?', row: 1, A0: 200, q: 1.1, t: -8, round: 0, what: 'אריות',
+          answer: ['לפני 8 שנים היו בשמורה בערך', 'אריות.'] },
+        { part: 'ב', type: 'formula', title: 'כמה אריות יהיו בעוד 8 שנים?', row: 2, A0: 200, q: 1.1, t: 8, round: 0, what: 'אריות',
+          answer: ['בעוד 8 שנים יהיו בשמורה בערך', 'אריות.'] }
+      ]
+    }
+  ];
+
+  let state = { name: '', cur: 0, q: {} };
+
+  // ---------- עזרים ----------
+
+  // מחזיר מספר, או null אם הכתיבה לא תקינה.
+  function parseCell(raw) {
+    let s = String(raw || '').trim().replace(/%/g, '').replace(/[×·]/g, '*').replace(/÷/g, '/').replace(/[−–]/g, '-');
+    // פסיק בין אלפים (499,400) נמחק; פסיק אחר נחשב נקודה עשרונית
+    s = s.replace(/,(?=\d{3}(\D|$))/g, '').replace(/,/g, '.');
+    if (!s || !/^[0-9.+\-*/() ]+$/.test(s)) return null;
+    try {
+      const v = Function('"use strict"; return (' + s + ')')();
+      return Number.isFinite(v) ? v : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  const Q = () => QUESTIONS[state.cur];
+  const qs = () => state.q[Q().id] || (state.q[Q().id] = { v: {}, done: {}, tries: {} });
+  const val = k => (qs().v[k] || '').trim();
+  const num = k => parseCell(val(k));
+
+  function near(k, want, tol) {
+    const v = num(k);
+    return typeof v === 'number' && Math.abs(v - want) <= Math.abs(want) * (tol === undefined ? 0.005 : tol) + 1e-9;
+  }
+
+  // תוצאה של סעיף, ועד כמה אפשר לטעות בעיגול
+  function partResult(p) { return p.A0 * Math.pow(p.q, p.t); }
+  function nearResult(k, p) {
+    const v = num(k), r = partResult(p);
+    const tol = Math.max(0.6 * Math.pow(10, -p.round), Math.abs(r) * 0.002);
+    return typeof v === 'number' && Math.abs(v - r) <= tol;
+  }
+
+  const inp = (key, cls, mode) =>
+    '<input class="box ' + (cls || '') + '" data-v="' + key + '" inputmode="' + (mode || 'decimal') + '" autocomplete="off">';
+  const avar = key => '<span class="avar c-qty">A' + inp(key, 'idx', 'text') + '</span>';
+  const frac = (top, bottom) => '<span class="frac"><span>' + top + '</span><span>' + bottom + '</span></span>';
+
+  // ---------- השלבים של כל שאלה ----------
+
+  function stepsFor(q) {
+    const steps = [];
+
+    // שלב: יחידת הזמן וארגז הנתונים (אין "ממשיכים בכל זאת")
+    const boxKeys = ['unitN', 'unitU'];
+    q.rows.forEach((r, i) => { boxKeys.push('i' + i); if (r.val !== undefined) boxKeys.push('v' + i); });
+    if (q.rate.kind === 'q') boxKeys.push('rateQ');
+    if (q.rate.kind === 'p') boxKeys.push('rateP');
+    steps.push({
+      id: 'data', noSkip: true, keys: boxKeys,
+      title: 'מגדירים את יחידת הזמן וממלאים את ארגז הנתונים',
+      button: 'בדיקת הנתונים',
+      html: '<p>מלאו בארגז הנתונים את יחידת הזמן, את הכמויות' +
+        (q.rate.kind === 'find' ? '' : ' ואת קצב השינוי') +
+        '. ליד כל A כתבו כמה יחידות זמן עברו (t).</p>' +
+        (q.hints || []).map(h => '<div class="hint">' + h + '</div>').join(''),
+      check() {
+        const n = num('unitN'), u = qs().v.unitU;
+        if (!(n === q.unit.n && u === q.unit.u)) {
+          if ((q.unitAlt || []).some(a => a.n === n && a.u === u)) return q.unitAltMsg;
+          return 'כמעט. כל כמה זמן אנחנו יודעים מה קורה לכמות? זו יחידת הזמן.';
+        }
+        for (let i = 0; i < q.rows.length; i++) {
+          const r = q.rows[i];
+          if (r.val !== undefined && !near('v' + i, r.val)) return 'כמעט. בדקו את הכמות בשורה "' + r.label + '".';
+          if (!near('i' + i, r.idx, 0)) return 'כמעט. בדקו כמה יחידות זמן (t) עברו בשורה "' + r.label + '".';
+        }
+        if (q.rate.kind === 'q' && !near('rateQ', q.rate.q)) return 'כמעט. פי כמה משתנה הכמות בכל יחידת זמן?';
+        if (q.rate.kind === 'p' && !near('rateP', q.rate.p)) return 'כמעט. בכמה אחוזים משתנה הכמות בכל יחידת זמן?';
+        return '';
+      },
+      praise: 'נכון! הנתונים בארגז.'
+    });
+
+    // שלב: מ-p ל-q (כשהאחוז נתון)
+    if (q.rate.kind === 'p') {
+      const s = q.rate.sign, want = (100 + (s === '+' ? 1 : -1) * q.rate.p) / 100;
+      steps.push({
+        id: 'qFromP', keys: ['pp', 'p100', 'q'],
+        title: 'מאחוז p למקדם q',
+        button: 'אישור מקדם q',
+        html: '<p>הנוסחה מדף הנוסחאות:</p>' +
+          '<div class="eq-row"><span class="c-rate">q</span> = ' + frac('100 ± <span class="c-rate">p</span>', '100') + '</div>' +
+          '<p>הציבו את ה-p מארגז הנתונים, והקלידו לפניו סימן: + או −</p>' +
+          '<div class="eq-row"><span class="c-rate">q</span> = ' +
+          frac('100 ' + inp('pp', 'narrow c-rate', 'text'), '100') + ' = ' +
+          frac(inp('p100', 'narrow'), '100') + ' = ' + inp('q', 'narrow c-rate') + '</div>',
+        check() {
+          const signed = (s === '+' ? 1 : -1) * q.rate.p;
+          if (!/^[+\-−–]/.test(val('pp'))) return 'כמעט. כתבו את p עם סימן לפניו: + או −.';
+          if (!near('pp', signed)) {
+            return near('pp', -signed) ? 'כמעט. הכמות גדלה או קטנה? בדקו את הסימן.'
+              : 'כמעט. איזה p כתבתם בארגז הנתונים?';
+          }
+          if (!near('p100', want * 100)) return 'כמעט. חשבו את המונה: 100 ועוד (או פחות) p.';
+          return near('q', want) ? '' : 'כמעט. חלקו ב-100.';
+        },
+        praise: 'נכון! q נכנס לארגז.'
+      });
+    }
+
+    q.parts.forEach(p => {
+      if (p.type === 'percent') {
+        // שלב: פי כמה השתנתה הכמות (q משתי כמויות)
+        const [later, earlier] = q.rate.from;
+        const rL = q.rows[later], rE = q.rows[earlier];
+        const qWant = rL.val / rE.val;
+        steps.push({
+          id: 'ratio', keys: ['qi1', 'qi0', 'qv1', 'qv0', 'q'],
+          title: 'פי כמה השתנתה הכמות? (חילוץ q)',
+          button: 'אישור מקדם q',
+          html: '<p>כדי לדעת פי כמה משתנה כמות מפרק זמן אחד לזה שבא אחריו, מחלקים:</p>' +
+            '<div class="hint">פי כמה השתנה = ' + frac('הכמות אחרי (המאוחרת)', 'הכמות לפני (המוקדמת)') + '</div>' +
+            '<p>השלימו מארגז הנתונים:</p>' +
+            '<div class="eq-row"><span class="c-rate">q</span> = ' + frac(avar('qi1'), avar('qi0')) + ' = ' +
+            frac(inp('qv1', 'narrow c-qty'), inp('qv0', 'narrow c-qty')) + ' = ' + inp('q', 'narrow') + '</div>',
+          check() {
+            if (!near('qi1', rL.idx, 0) || !near('qi0', rE.idx, 0)) return 'כמעט. איזו כמות מאוחרת ואיזו מוקדמת? בדקו את האינדקסים בארגז הנתונים.';
+            if (!near('qv1', rL.val) || !near('qv0', rE.val)) return 'כמעט. מה הכמויות של A האלה בארגז הנתונים?';
+            return near('q', qWant) ? '' : 'כמעט. חלקו במחשבון את המונה במכנה.';
+          },
+          praise: 'נכון! q נכנס לארגז.'
+        });
+
+        // שלב: מ-q לאחוז p
+        const s = q.rate.sign;
+        const pWant = Math.abs(qWant - 1) * 100;
+        steps.push({
+          id: 'pFromQ', keys: ['q3', 'x100', 'p'],
+          title: 'סעיף ' + p.part + "': תרגום לאחוז (חילוץ p)",
+          button: 'סיום סעיף ' + p.part + "'",
+          html: '<p>הנוסחה מדף הנוסחאות:</p>' +
+            '<div class="eq-row"><span class="c-rate">q</span> = ' + frac('100 ± <span class="c-rate">p</span>', '100') + '</div>' +
+            '<p>הציבו את ה-q שמצאתם:</p>' +
+            '<div class="eq-row">' + inp('q3', 'narrow c-rate') + ' = ' + frac('100 ' + s + ' <span class="c-rate">p</span>', '100') + '</div>' +
+            '<p>כופלים את שני האגפים ב-100:</p>' +
+            '<div class="eq-row">' + inp('x100', 'narrow') + ' = 100 ' + s + ' <span class="c-rate">p</span></div>' +
+            '<div class="eq-row"><span class="c-rate">p</span> = ' + inp('p', 'narrow') + ' %</div>',
+          check() {
+            if (!near('q3', qWant)) return 'כמעט. איזה q מצאתם בשלב הקודם?';
+            if (!near('x100', qWant * 100)) return 'כמעט. כמה זה ' + qWant + ' כפול 100?';
+            return near('p', pWant, 0.01) ? '' : 'כמעט. 100 ' + s + ' כמה שווה ל-' + +(qWant * 100).toFixed(4) + '?';
+          },
+          praise: 'נכון! ' + p.praise[0] + +pWant.toFixed(4) + '% ' + p.praise[1]
+        });
+      }
+
+      if (p.type === 'formula') {
+        const k = 'f' + p.part + '_';
+        const r = partResult(p);
+        const rounded = +r.toFixed(p.round);
+        steps.push({
+          id: 'f' + p.part, keys: ['idx', 'A0', 'q', 't', 'calc', 'ans'].map(x => k + x),
+          title: 'סעיף ' + p.part + "': " + p.title,
+          button: 'סיום סעיף ' + p.part + "'",
+          html: '<p>נציב את הנתונים מתוך ארגז הנתונים בנוסחה הראשית:</p>' +
+            '<div class="hint"><span class="ltr"><span class="c-qty">A<sub>t</sub></span> = <span class="c-qty">A<sub>0</sub></span> · <span class="c-rate">q</span><sup class="c-time">t</sup></span></div>' +
+            '<p>כתבו את הנוסחה:</p>' +
+            '<div class="eq-row">' + avar(k + 'idx') + ' = ' + inp(k + 'A0', 'narrow c-qty') + ' · <span>' +
+            inp(k + 'q', 'narrow c-rate') + inp(k + 't', 'expo', 'text') + '</span></div>' +
+            '<p>' + (p.round === 0 ? 'חשבו במחשבון ועגלו למספר שלם של ' + p.what + ':' : 'חשבו במחשבון ועגלו לשתי ספרות אחרי הנקודה:') + '</p>' +
+            '<div class="eq-row"><span class="c-qty">A<sub class="c-time" data-echo="' + k + 'idx"></sub></span> ≈ ' + inp(k + 'calc', 'wide') + '</div>' +
+            '<p>תשובה: ' + p.answer[0] + ' ' + inp(k + 'ans', 'wide') + ' ' + p.answer[1] + '</p>',
+          check() {
+            if (!near(k + 'idx', p.t, 0)) return 'כמעט. איזה A מחפשים בסעיף ' + p.part + "'? בדקו בארגז הנתונים.";
+            if (!near(k + 'A0', p.A0)) return 'כמעט. מה הכמות ההתחלתית?';
+            if (!near(k + 'q', p.q)) return 'כמעט. מה ה-q?';
+            if (!near(k + 't', p.t, 0)) return 'כמעט. כמה יחידות זמן (t) בסעיף ' + p.part + "'?";
+            if (!nearResult(k + 'calc', p)) return 'הנוסחה נכונה! בדקו שוב את החישוב במחשבון.';
+            if (!nearResult(k + 'ans', p)) return 'כמעט. כתבו בתשובה את המספר שיצא לכם.';
+            return '';
+          },
+          praise: 'כל הכבוד! ' + p.answer[0] + ' ' + rounded.toLocaleString('he-IL') + ' ' + p.answer[1]
+        });
+      }
+    });
+
+    steps.forEach((s, i) => { s.n = i + 1; });
+    return steps;
+  }
+
+  let STEPS = [];
+  const stepEl = id => document.querySelector('.step[data-step="' + id + '"]');
+
+  // ---------- בניית השקופית של השאלה ----------
+
+  function buildSlide() {
+    const q = Q();
+    STEPS = stepsFor(q);
+
+    document.getElementById('q-card').innerHTML =
+      '<span class="q-badge">' + q.badge + '</span>' +
+      '<p class="stem">' + q.stem + '</p>' +
+      Object.keys(q.subs).map(l => '<div class="subq-box"><strong>' + l + '.</strong> ' + q.subs[l] + '</div>').join('');
+
+    document.getElementById('steps').innerHTML = STEPS.map(s =>
+      '<section class="card step" data-step="' + s.id + '">' +
+      '<div class="step-head"><span class="n">' + s.n + '</span><span>' + s.title + '</span></div>' +
+      '<div class="step-body">' + s.html + '</div>' +
+      '<button class="btn-step" onclick="checkStep(\'' + s.id + '\')">' + s.button + ' <i class="fa-solid fa-check"></i></button>' +
+      (s.noSkip ? '' : '<button class="btn-link hidden" onclick="skipStep(\'' + s.id + '\')">ממשיכים בכל זאת</button>') +
+      '<p class="fb"></p></section>').join('');
+
+    buildBox(q);
+
+    // ערכים שמורים ושמירה בכל הקלדה
+    document.querySelectorAll('[data-v]').forEach(el => {
+      el.value = qs().v[el.dataset.v] || '';
+      const save = () => {
+        qs().v[el.dataset.v] = el.value;
+        reopenFrom(el.dataset.v);
+        persist();
+        render();
+      };
+      el.addEventListener('input', save);
+      el.addEventListener('change', save);
+      el.addEventListener('keydown', e => {
+        const step = el.closest('.step');
+        if (e.key === 'Enter' && step) checkStep(step.dataset.step);
+      });
+    });
+
+    STEPS.forEach(s => {
+      const d = qs().done[s.id];
+      if (d === 'ok') feedback(s.id, s.praise, true);
+      else if (d === 'skip') feedback(s.id, 'ממשיכים. אפשר לשאול את המורה על השלב הזה.', false);
+    });
+    render();
+  }
+
+  function buildBox(q) {
+    const item = (label, small, valHtml, fam) =>
+      '<div class="side-item"><div class="label">' + label + (small ? '<small>' + small + '</small>' : '') +
+      '</div><div class="side-val c-' + fam + '">' + valHtml + '</div></div>';
+    const group = (title, icon, fam, items) =>
+      '<div class="side-group"><div class="side-group-title c-' + fam + '"><i class="' + icon + '"></i> ' + title + '</div>' + items + '</div>';
+
+    const unitSelect = '<select class="box" data-v="unitU"><option value="">יחידה…</option>' +
+      ['שעות', 'ימים', 'חודשים', 'שנים'].map(u => '<option>' + u + '</option>').join('') + '</select>';
+
+    let html = group('יחידת הזמן', 'fa-regular fa-clock', 'time',
+      item('יחידת זמן אחת (t = 1)', 'פרק הזמן לכל שינוי', inp('unitN', 'narrow') + unitSelect, 'time'));
+
+    html += group('כמויות (A)', 'fa-solid fa-calculator', 'qty', q.rows.map((r, i) => {
+      const right = r.val !== undefined ? inp('v' + i, 'narrow')
+        : '<span class="empty" data-answer="' + r.part + '">?</span>';
+      return item(r.label, r.small, avar('i' + i) + ' = ' + right, 'qty');
+    }).join(''));
+
+    let rate = '';
+    if (q.rate.kind === 'q') {
+      rate = item('המקדם q', 'פי כמה בכל יחידת זמן', inp('rateQ', 'narrow'), 'rate');
+    } else if (q.rate.kind === 'p') {
+      rate = item('האחוז p', q.rate.sign === '+' ? 'אחוז הגדילה' : 'אחוז הדעיכה', inp('rateP', 'narrow') + ' %', 'rate') +
+        item('המקדם q', 'פי כמה (מחשבים בשלב 2)', '<span class="empty" data-echo-box="q">—</span>', 'rate');
+    } else {
+      rate = item('המקדם q', 'פי כמה השתנה', '<span class="empty" data-echo-box="q">—</span>', 'rate') +
+        item('האחוז p', q.rate.sign === '+' ? 'אחוז הגדילה' : 'אחוז הדעיכה', '<span class="empty" data-echo-box="p">—</span>', 'rate');
+    }
+    html += group('קצב השינוי (ליחידת זמן)', 'fa-solid fa-chart-line', 'rate', rate);
+
+    document.getElementById('box').innerHTML = html;
+  }
+
+  // ---------- תצוגה ----------
+
+  function render() {
+    const st = qs();
+    STEPS.forEach((s, i) => {
+      const el = stepEl(s.id);
+      el.classList.toggle('hidden', i > 0 && !st.done[STEPS[i - 1].id]);
+      el.classList.toggle('done', !!st.done[s.id]);
+    });
+
+    // ערכים שחושבו בשלבים מופיעים בארגז
+    document.querySelectorAll('[data-echo]').forEach(el => { el.textContent = val(el.dataset.echo); });
+    document.querySelectorAll('[data-echo-box]').forEach(el => {
+      const k = el.dataset.echoBox, v = val(k);
+      el.textContent = v ? v + (k === 'p' ? '%' : '') : '—';
+      el.className = v ? '' : 'empty';
+    });
+    document.querySelectorAll('[data-answer]').forEach(el => {
+      const v = val('f' + el.dataset.answer + '_calc');
+      el.textContent = v || '?';
+      el.className = v ? '' : 'empty';
+    });
+
+    // אחרי השלב האחרון: לשאלה הבאה או להגשה
+    const allDone = STEPS.every(s => st.done[s.id]);
+    const last = state.cur === QUESTIONS.length - 1;
+    document.getElementById('after-steps').innerHTML = allDone
+      ? '<button class="btn-step go" onclick="' + (last ? 'showSubmit()' : 'goTo(' + (state.cur + 1) + ')') + '">' +
+        (last ? 'סיום והגשה' : 'לשאלה הבאה') + ' <i class="fa-solid fa-arrow-left"></i></button>'
+      : '';
+
+    renderNav();
+  }
+
+  function questionDone(q) {
+    const st = state.q[q.id];
+    return !!st && stepsFor(q).every(s => st.done[s.id]);
+  }
+
+  function renderNav() {
+    document.getElementById('qnav').innerHTML =
+      '<span class="title">גדילה ודעיכה</span>' +
+      QUESTIONS.map((q, i) =>
+        '<button class="' + (i === state.cur ? 'cur ' : '') + (questionDone(q) ? 'done' : '') + '" onclick="goTo(' + i + ')">' +
+        q.nav + '</button>').join('') +
+      '<button onclick="showSubmit()"><i class="fa-solid fa-paper-plane"></i> הגשה</button>';
+  }
+
+  function goTo(i) {
+    state.cur = i;
+    persist();
+    document.getElementById('submit-card').classList.add('hidden');
+    buildSlide();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function feedback(id, text, good) {
+    const fb = stepEl(id).querySelector('.fb');
+    fb.textContent = text;
+    fb.className = 'fb ' + (good ? 'ok' : 'err');
+  }
+
+  // שינוי בשלב שכבר אושר מבטל את האישור שלו ושל כל מה שאחריו
+  function reopenFrom(key) {
+    const st = qs();
+    const i = STEPS.findIndex(s => s.keys.includes(key));
+    if (i === -1) return;
+    STEPS.slice(i).forEach(s => {
+      if (!st.done[s.id]) return;
+      delete st.done[s.id];
+      stepEl(s.id).querySelector('.fb').textContent = '';
+    });
+  }
+
+  // ---------- בדיקות ----------
+
+  function checkStep(id) {
+    const st = qs();
+    if (st.done[id]) return;
+    const s = STEPS.find(x => x.id === id);
+    st.tries[id] = (st.tries[id] || 0) + 1;
+    const problem = s.check();
+    if (problem) {
+      feedback(id, problem, false);
+      const skipBtn = stepEl(id).querySelector('.btn-link');
+      if (skipBtn) skipBtn.classList.remove('hidden');
+    } else {
+      st.done[id] = 'ok';
+      feedback(id, s.praise, true);
+      scrollToNext(id);
+    }
+    persist();
+    render();
+  }
+
+  function skipStep(id) {
+    qs().done[id] = 'skip';
+    feedback(id, 'ממשיכים. אפשר לשאול את המורה על השלב הזה.', false);
+    persist();
+    render();
+    scrollToNext(id);
+  }
+
+  function scrollToNext(id) {
+    const i = STEPS.findIndex(s => s.id === id);
+    const nextEl = i < STEPS.length - 1 ? stepEl(STEPS[i + 1].id) : document.getElementById('after-steps');
+    setTimeout(() => nextEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
+
+  // ---------- שמירה בדפדפן ----------
+
+  function load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved && saved.q) state = Object.assign(state, saved);
+    } catch (e) {}
+    if (!(state.cur >= 0 && state.cur < QUESTIONS.length)) state.cur = 0;
+    document.getElementById('student-name').value = state.name || '';
+  }
+
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function resetAll() {
+    if (!confirm('למחוק את כל התשובות בכל השאלות ולהתחיל מחדש?')) return;
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    location.reload();
+  }
+
+  document.getElementById('student-name').addEventListener('input', e => {
+    state.name = e.target.value; persist();
+  });
+
+  // ---------- הגשה ----------
+
+  function showSubmit() {
+    document.getElementById('summary').innerHTML = QUESTIONS.map(q =>
+      '<li>' + (questionDone(q) ? '<i class="fa-solid fa-check c-rate"></i> ' : '<i class="fa-regular fa-circle empty"></i> ') +
+      q.badge + '</li>').join('');
+    const card = document.getElementById('submit-card');
+    card.classList.remove('hidden');
+    card.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function submitAll() {
+    const msg = document.getElementById('submit-msg');
+    state.name = document.getElementById('student-name').value.trim();
+    persist();
+    if (!state.name) {
+      msg.className = 'fb err';
+      msg.textContent = 'כתבו את השם שלכם כדי שהמורה תדע של מי ההגשה.';
+      return;
+    }
+    const missing = QUESTIONS.filter(q => !questionDone(q)).length;
+    if (missing && !confirm('יש ' + missing + ' שאלות שלא סיימתם. להגיש בכל זאת?')) return;
+    if (!SUBMIT_URL) {
+      msg.className = 'fb err';
+      msg.textContent = 'השליחה למורה עוד לא מחוברת. התשובות שמורות בדפדפן הזה.';
+      return;
+    }
+    const payload = { name: state.name, page: STORAGE_KEY, answers: state.q };
+    msg.className = 'fb';
+    msg.textContent = 'שולחים...';
+    fetch(SUBMIT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+      .then(() => { msg.className = 'fb ok'; msg.textContent = 'ההגשה נשלחה למורה. כל הכבוד!'; })
+      .catch(() => { msg.className = 'fb err'; msg.textContent = 'השליחה נכשלה. בדקו את החיבור לאינטרנט ונסו שוב.'; });
+  }
+
+  load();
+  buildSlide();
+</script>
+</body>
+</html>

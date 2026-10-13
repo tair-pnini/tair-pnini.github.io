@@ -10,6 +10,7 @@
     { "path": "math/percent.html",            "title": "אחוזים כפרופורציה",          "subjects": ["מתמטיקה"], "topic": "אחוזים",        "grades": [],                "type": "מצגת להקרנה" },
     { "path": "math/y11/gd-01.html",          "title": "גדילה ודעיכה",               "subjects": ["מתמטיקה"], "topic": "גדילה ודעיכה",  "grades": ["י\"א"], "units": 3, "type": "שיעור אינטראקטיבי" },
     { "path": "math/y11/gd-02.html",          "title": "תרגול גדילה ודעיכה להקרנה",  "subjects": ["מתמטיקה"], "topic": "גדילה ודעיכה",  "grades": ["י\"א"],          "type": "תרגול" },
+    { "path": "math/y11/gd-03-all.html",      "title": "גדילה ודעיכה: תרגול מונחה",  "subjects": ["מתמטיקה"], "topic": "גדילה ודעיכה",  "grades": ["י\"א"], "units": 3, "type": "תרגול" },
     { "path": "math/y10/graph-01.html",       "title": "מאגר שאלות וגרפים",          "subjects": ["מתמטיקה"], "topic": "גרפים",         "grades": ["י'"],            "type": "" },
     { "path": "math/deriv-builder.html",      "title": "בונה הנגזרות",               "subjects": ["מתמטיקה"], "topic": "נגזרות",        "grades": [],                "type": "כלי / סימולציה" },
     { "path": "math/geometric-sequence.html", "title": "אתגר הסדרות",                "subjects": ["מתמטיקה"], "topic": "סדרות",         "grades": [],                "type": "" },
