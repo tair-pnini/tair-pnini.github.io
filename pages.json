@@ -15,6 +15,7 @@
     { "path": "math/deriv-builder.html",      "title": "בונה הנגזרות",               "subjects": ["מתמטיקה"], "topic": "נגזרות",        "grades": [],                "type": "כלי / סימולציה" },
     { "path": "math/geometric-sequence.html", "title": "אתגר הסדרות",                "subjects": ["מתמטיקה"], "topic": "סדרות",         "grades": [],                "type": "" },
     { "path": "riddles/frogs.html",           "title": "סימולטור קפיצות צפרדעים",    "subjects": ["חידות"],   "topic": "",              "grades": [],                "type": "כלי / סימולציה" },
+    { "path": "riddles/kitten.html",          "title": "החתלתול בחמישה חדרים",       "subjects": ["חידות"],   "topic": "",              "grades": ["כל הגילים"],     "type": "" },
     { "path": "gifted/ai/AI.html",            "title": "בלשי המילים",                "subjects": ["מחוננים"], "topic": "",              "grades": [],                "type": "דף עבודה" },
     { "path": "gifted/ai/python.html",        "title": "צוללים למידע (פייתון)",      "subjects": ["מחוננים", "תכנות"], "topic": "פייתון", "grades": [],          "type": "" },
     { "path": "gifted/ai/create-site.html",   "title": "הקמת אתר משחקים ב-GitHub",   "subjects": ["מחוננים"], "topic": "",              "grades": [],                "type": "מדריך" },

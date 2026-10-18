@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>החתלתול בחמישה חדרים</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<!-- Shared site bars (<site-header>, <site-footer>) -->
+<script src="/assets/site.js"></script>
+<style>
+:root{--bg:#fdf3e3;--ink:#4a3320;--wall:#f6d9a8;--accent:#c0612b;--win:#bfe3f5;--x:#d23b3b;--card:#fffaf2;--edge:#e8cfa6}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);
+ font-family:"Assistant","Segoe UI",Arial,sans-serif;padding-bottom:env(safe-area-inset-bottom,0px)}
+site-footer{background:#fff}
+#app{width:100%;max-width:760px;margin:0 auto;padding:20px 16px 8px;text-align:center}
+.top{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+h1{margin:0;font-size:1.6rem;font-weight:700}
+#help{padding:4px 14px;font-size:.95rem;margin:0}
+
+/* הבמה: הבית, ההודעה והכפתורים. בלילה רק היא מחשיכה */
+#stage{background:var(--card);border:2px solid var(--edge);border-radius:20px;padding:14px 12px 16px;
+ box-shadow:0 6px 18px rgba(138,90,43,.12);transition:background .3s,color .3s,border-color .3s}
+#stage.night{--ink:#f2ecd8;--wall:#3a4170;--win:#ffd86b;--card:#1d2340;--edge:#2c3463;color:var(--ink)}
+#day{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;padding:4px 18px;font-size:1.35rem;font-weight:700;transition:background .3s}
+.night #day{background:#3a4170}
+#moon{display:none}
+.night #moon{display:inline}
+#msg{min-height:2.6em;font-size:1.15rem;margin:10px 0 4px;line-height:1.3}
+#house{direction:ltr;display:flex;align-items:flex-end;justify-content:center;max-width:100%;padding:6px 0 0;border-bottom:6px solid #8a5a2b;border-radius:0 0 4px 4px}
+.room{flex:0 0 auto;width:min(13.5vw,112px);position:relative;direction:rtl}
+.room.click{cursor:pointer}
+.room.click:hover svg{transform:translateY(-4px)}
+.room svg{width:100%;display:block;transition:transform .15s}
+.num{display:inline-block;font-weight:700;font-size:.9rem;margin:4px 0 6px;padding:0 8px;border-radius:999px;background:var(--wall)}
+.win{flex:0 0 auto;width:min(3.5vw,26px);height:min(3.5vw,26px);margin-bottom:72px;background:var(--win);border:3px solid #8a5a2b;border-radius:4px;transition:all .3s}
+.night .win{box-shadow:0 0 14px 4px #ffd86b}
+#actions{min-height:8px}
+button{font:inherit;font-size:1.05rem;font-weight:600;background:var(--accent);color:#fff;border:0;border-radius:24px;padding:10px 24px;margin:10px 6px 0;cursor:pointer;transition:transform .1s}
+button:active{transform:scale(.97)}
+button.sec{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+
+/* יומן הבחירות */
+#hist{max-width:380px;margin:16px auto 0;text-align:right;background:var(--card);border:2px solid var(--edge);border-radius:20px;padding:12px 16px 14px;box-shadow:0 6px 18px rgba(138,90,43,.12)}
+#hist h2{font-size:1.15rem;margin:0 0 2px}
+.legend{font-size:.9rem;opacity:.85;margin-bottom:8px}
+.hrow{display:flex;align-items:center;gap:8px;margin:4px 0}
+.hrow .dn{width:58px;font-weight:700;flex:0 0 auto}
+.hrow .cells{display:flex;flex-direction:row;direction:ltr}
+.cell{width:46px;height:46px;border:2px solid var(--ink);margin:0;margin-inline-start:-2px;border-radius:0;position:relative;background:var(--wall);padding:0;cursor:pointer}
+.cells .cell:first-child{border-radius:8px 0 0 8px;margin-inline-start:0}
+.cells .cell:last-child{border-radius:0 8px 8px 0}
+.cell:hover{filter:brightness(.95)}
+.cell svg{position:absolute;width:22px;height:22px}
+.cell .c{top:2px;right:2px}.cell .d{bottom:2px;left:2px}
+.cell .xm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--x);font-size:30px;font-weight:700;line-height:1;pointer-events:none}
+.hn{width:46px;margin-inline-start:-2px;text-align:center;font-size:.8rem;opacity:.7}
+.hn:first-child{margin-inline-start:0}
+.hrow.fin{color:var(--accent)}
+.hrow.cur .dn{color:var(--accent)}
+.end .cell{cursor:default}
+.end .cell:hover{filter:none}
+#best{font-size:.95rem;opacity:.85;min-height:1.2em;margin-top:10px}
+.credit{font-size:.9rem;opacity:.75;margin:14px 0 20px}
+.credit a{color:inherit}
+
+dialog{max-width:440px;width:calc(100% - 32px);background:var(--bg);color:var(--ink);border:3px solid #8a5a2b;border-radius:16px;padding:18px 22px;text-align:right;line-height:1.5;font-family:inherit;font-size:1.02rem}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h2{margin:0 0 8px;text-align:center}
+dialog button{display:block;margin:12px auto 0}
+
+/* Phone layout */
+@media(max-width:640px){
+ html{font-size:110%}
+ #app{padding:14px 16px 4px}
+ h1{font-size:1.35rem}
+ #stage{padding:12px 6px 14px}
+ .room{width:14.5vw}
+ .num{font-size:.8rem;padding:0 6px}
+ .win{width:3.2vw;height:3.2vw;margin-bottom:48px;border-width:2px}
+ #hist{max-width:none;padding:12px 10px 14px}
+ .hrow .dn{width:50px}
+ .cell,.hn{width:min(13vw,52px)}
+ .cell{height:min(13vw,52px)}
+}
+</style>
+</head>
+<body>
+<site-header style="--tp-max:760px"></site-header>
+<svg width="0" height="0" style="position:absolute">
+<symbol id="cat" viewBox="0 0 40 40"><polygon points="6,16 8,3 17,10" fill="#e8913a"/><polygon points="34,16 32,3 23,10" fill="#e8913a"/><ellipse cx="20" cy="23" rx="15" ry="13" fill="#f2a64d"/><circle cx="14.5" cy="21" r="2.2" fill="#222"/><circle cx="25.5" cy="21" r="2.2" fill="#222"/><polygon points="18,26 22,26 20,28.5" fill="#d9626b"/><path d="M20 28.5 q-3 3 -6 1 M20 28.5 q3 3 6 1" stroke="#222" stroke-width="1" fill="none"/><path d="M3 24h8M3 28l8-2M37 24h-8M37 28l-8-2" stroke="#fff" stroke-width=".8"/></symbol>
+<symbol id="door" viewBox="0 0 40 40"><rect x="9" y="3" width="22" height="34" rx="2" fill="#9b5f2c" stroke="#5a3515" stroke-width="2"/><circle cx="27" cy="21" r="2.2" fill="#f5d36b"/></symbol>
+</svg>
+<main id="app">
+  <div class="top">
+    <h1>🐱 החתלתול בחמישה חדרים</h1>
+    <button class="sec" id="help">❓ הוראות</button>
+  </div>
+  <section id="stage">
+    <div><span id="day"></span> <span id="moon">🌙</span></div>
+    <div id="msg"></div>
+    <div id="house"></div>
+    <div id="actions"></div>
+  </section>
+  <section id="hist">
+    <h2>יומן בחירות</h2>
+    <div class="legend" id="legend"></div>
+    <div id="hbody"></div>
+  </section>
+  <div id="best"></div>
+  <p class="credit">בהשראת <a href="https://thehiddenkitten.netlify.app/" target="_blank" rel="noopener">לירון מיכאלי</a></p>
+</main>
+<site-footer style="--tp-max:760px"></site-footer>
+<dialog id="dlg">
+  <h2>🐱 החתלתול בחמישה חדרים</h2>
+  <p>חתלתול קטנטן מתחבא באחד מחמישה חדרים שמחוברים ביניהם בחלונות קטנים, ואתם צריכים למצוא אותו!</p>
+  <p><b>בכל בוקר</b> אתם פותחים דלת אחת. אם החתלתול שם, ניצחתם. 🎉</p>
+  <p><b>בכל ערב</b> החתלתול מטייל לחדר שנמצא ממש לידו, ימינה או שמאלה, חדר אחד בלבד. הוא לא נשאר במקום, ואי אפשר לדעת לאן הלך. 🌙</p>
+  <p><b>האתגר:</b> למצוא אותו בכמה שפחות ימים!</p>
+  <p><b>רמז קטן:</b> החתלתול לא יתגלה במזל. אם תחשבו על כל המקומות האפשריים שבהם הוא יכול להיות, תוכלו לתכנן סדר בדיקות שיתפוס אותו בוודאות! 🧠</p>
+  <p>ב"יומן הבחירות" רואים מה כבר בדקתם. לחיצה על משבצת ביומן מסמנת בה ❌ – איפה החתלתול לא יכול להיות באותו יום. לחיצה נוספת מוחקת.</p>
+  <button id="close">הבנתי, מתחילים!</button>
+</dialog>
+<script>
+const N=5;
+const adj=i=>[i-1,i+1].filter(x=>x>=0&&x<N);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+let S,d,checks,A,marks,phase,openRoom,path,won;
+const $=id=>document.getElementById(id);
+
+function getBest(){try{return +localStorage.getItem('kitten-best')||0}catch(e){return 0}}
+function setBest(v){try{localStorage.setItem('kitten-best',v)}catch(e){}}
+
+function start(){S=[...Array(N).keys()];d=0;checks=[];A=[];marks=[];phase='morning';openRoom=null;path=null;won=false;render();}
+
+// The adversary: S = every room the cat could be in, given all checks so far.
+// The cat is only "found" when the opened room is the ONLY possibility left.
+function pick(k){
+  if(phase!=='morning')return;
+  openRoom=k;checks[d]=k;
+  if(S.length===1&&S[0]===k){A[d]=[k];finish(true);return;}
+  A[d]=S.filter(x=>x!==k);
+  phase='opened';render();
+  setTimeout(night,450);
+}
+function night(){
+  phase='night';render();
+  setTimeout(()=>{
+    S=[...new Set(A[d].flatMap(adj))].sort();
+    d++;phase='morning';openRoom=null;render();
+  },550);
+}
+// Giving up in the morning: the cat is somewhere in S today.
+function giveUp(){
+  if(phase!=='morning')return;
+  A[d]=S;finish(false);
+}
+// Build one legal cat path consistent with every check, backwards from the last day.
+function finish(w){
+  won=w;path=[];
+  path[d]=rnd(A[d]);
+  for(let i=d-1;i>=0;i--)path[i]=rnd(A[i].filter(x=>Math.abs(x-path[i+1])===1));
+  if(w){const b=getBest();if(!b||d+1<b)setBest(d+1);}
+  phase='end';render();
+}
+
+function roomSvg(i){
+  const open=(openRoom===i&&phase!=='morning'&&phase!=='night')||(phase==='end'&&!won&&path[d]===i);
+  const cat=phase==='end'&&path[d]===i;
+  let s=`<svg viewBox="0 0 100 140">`+'<rect x="2" y="10" width="96" height="128" rx="6" fill="var(--wall)" stroke="#8a5a2b" stroke-width="3"/>';
+  if(open){
+    s+='<rect x="25" y="30" width="50" height="100" fill="#2b2230"/>';
+    if(cat)s+='<use href="#cat" x="30" y="88" width="40" height="40"/>';
+    else s+='<text x="50" y="86" text-anchor="middle" font-size="12" fill="#9a8fa6">ריק</text>';
+    s+='<polygon points="25,30 6,40 6,122 25,130" fill="#9b5f2c" stroke="#5a3515" stroke-width="2"/>';
+  }else{
+    s+='<rect x="25" y="30" width="50" height="100" rx="3" fill="#9b5f2c" stroke="#5a3515" stroke-width="3"/><rect x="33" y="40" width="34" height="34" rx="2" fill="none" stroke="#7a4a20" stroke-width="2"/><circle cx="66" cy="86" r="4" fill="#f5d36b"/>';
+  }
+  return s+'</svg>';
+}
+
+function render(){
+  $('stage').className=phase==='night'?'night':'';
+  $('app').className=phase==='end'?'end':'';
+  $('day').textContent='יום '+(d+1);
+  const clickable=phase==='morning';
+  let h='';
+  for(let i=0;i<N;i++){
+    h+=`<div class="room ${clickable?'click':''}" data-i="${i}">${roomSvg(i)}<div class="num">חדר ${i+1}</div></div>`;
+    if(i<N-1)h+='<div class="win"></div>';
+  }
+  $('house').innerHTML=h;
+  document.querySelectorAll('.room').forEach(r=>r.onclick=()=>pick(+r.dataset.i));
+
+  let msg='',act='';
+  if(phase==='morning'){
+    msg=d===0?'בוקר טוב! החתלתול מתחבא באחד החדרים. לחצו על דלת כדי לפתוח אותה.':'בוקר חדש. איזו דלת תפתחו היום?';
+    if(d>0)act='<button class="sec" id="giveup">ויתרתי, איפה הוא? 🏳️</button>';
+  }
+  else if(phase==='opened')msg='אין כאן חתול...';
+  else if(phase==='night')msg='החתלתול עובר לחדר סמוך... 🐾';
+  else if(phase==='end'){
+    // With 5 rooms the cat can always be caught by day 6 (2N-4), never sooner.
+    msg=won?(d+1<=2*N-4?`🏆 מצאתם את החתלתול ביום ${d+1}! מושלם!`:`🎉 מצאתם את החתלתול ביום ${d+1}! אפשר למצוא אותו בפחות ימים – תצליחו?`):'הנה איפה שהחתלתול היה 😺 רוצים לנסות שוב?';
+    act=`<button id="again">משחק חדש</button>`;
+  }
+  $('msg').textContent=msg;
+  $('actions').innerHTML=act;
+  if($('again'))$('again').onclick=start;
+  if($('giveup'))$('giveup').onclick=giveUp;
+  const b=getBest();
+  $('best').textContent=b?`🏅 השיא שלכם: ${b} ימים`:'';
+  renderHist();
+}
+
+function renderHist(){
+  const end=phase==='end';
+  $('legend').innerHTML=`🚪 = חדר שנבדק &nbsp; ❌ = סימון שלכם${end?' &nbsp; 🐱 = איפה היה החתלתול':''}`;
+  let h='<div class="hrow hd"><span class="dn"></span><div class="cells">'+[...Array(N).keys()].map(n=>`<div class="hn">${n+1}</div>`).join('')+'</div></div>';
+  for(let i=0;i<=d;i++){
+    let cells='';
+    for(let r=0;r<N;r++){
+      const x=marks[i]&&marks[i].has(r);
+      cells+=`<button class="cell" data-day="${i}" data-r="${r}" aria-label="יום ${i+1}, חדר ${r+1}${x?', מסומן':''}">`+
+        `${end&&path[i]===r?'<svg class="c"><use href="#cat"/></svg>':''}${checks[i]===r?'<svg class="d"><use href="#door"/></svg>':''}${x?'<span class="xm">✕</span>':''}</button>`;
+    }
+    h+=`<div class="hrow ${won&&end&&i===d?'fin':''} ${!end&&i===d?'cur':''}"><span class="dn">יום ${i+1}</span><div class="cells">${cells}</div></div>`;
+  }
+  $('hbody').innerHTML=h;
+  document.querySelectorAll('.cell').forEach(c=>c.onclick=()=>toggleMark(+c.dataset.day,+c.dataset.r));
+}
+function toggleMark(i,r){
+  if(phase==='end')return;
+  marks[i]=marks[i]||new Set();
+  marks[i].has(r)?marks[i].delete(r):marks[i].add(r);
+  renderHist();
+}
+$('help').onclick=()=>$('dlg').showModal();
+$('close').onclick=()=>$('dlg').close();
+start();
+</script>
+</body>
+</html>
