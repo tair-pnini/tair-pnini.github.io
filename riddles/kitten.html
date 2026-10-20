@@ -32,7 +32,9 @@ h1{margin:0;font-size:1.6rem;font-weight:700}
 #moon{display:none}
 .night #moon{display:inline}
 #msg{min-height:2.6em;font-size:1.15rem;margin:10px 0 4px;line-height:1.3}
-/* גודל החדרים ומשבצות היומן לפי מספר הדלתות: --k = רוחב הבית ביחידות של חדר, --n = מספר הדלתות */display:flex;align-items:flex-end;justify-content:center;max-width:100%;padding:6px 0 0;border-bottom:6px solid #8a5a2b;border-radius:0 0 4px 4px}
+/* גודל החדרים ומשבצות היומן לפי מספר הדלתות: --k = רוחב הבית ביחידות של חדר, --n = מספר הדלתות */
+#app{--rw:min(112px,calc(min(690px,84vw) / var(--k)));--cw:min(46px,calc((min(100vw,760px) - 150px) / var(--n)))}
+#house{direction:ltr;display:flex;align-items:flex-end;justify-content:center;max-width:100%;padding:6px 0 0;border-bottom:6px solid #8a5a2b;border-radius:0 0 4px 4px}
 .room{flex:0 0 auto;width:var(--rw);position:relative;direction:rtl}
 .room.click{cursor:pointer}
 .room.click:hover svg{transform:translateY(-4px)}
