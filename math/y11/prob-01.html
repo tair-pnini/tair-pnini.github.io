@@ -30,6 +30,9 @@
     .ex-card { border-radius: 0.5em; padding: 0.6em 1em; }
     .two > div.ex-card { border-left: none; padding-left: 1em; }
     ol.heb { list-style-type: hebrew; }
+    .nosach { border: 1.5px dashed #9ca3af; border-radius: 0.4em; padding: 0.3em 0.9em; margin-top: 0.4em; font-size: 0.72em; font-family: "Times New Roman", serif; }
+    .nosach-title { font-family: system-ui, "Segoe UI", Arial, sans-serif; font-weight: 700; color: var(--muted); }
+    .nosach-row { display: flex; justify-content: space-between; gap: 1em; }
     ul ul { list-style: none; padding-right: 1em; }
     .ex-card.c-or { background: var(--or-light); }
     .ex-card.c-and { background: var(--and-light); }
@@ -132,8 +135,8 @@
       <div style="text-align:center"><span class="only">רק כשהמאורעות זרים!</span></div>
       <div class="sheet">(זרים = לא יכולים לקרות יחד) · הנוסחה <b>לא</b> מופיעה בדף הנוסחאות – צריך לזכור</div>
     </div>
-    <p class="f" dir="ltr" style="font-size:1.2em; margin-top:0.6em">
-      P(<bdi dir="ltr">2 <bdi>או</bdi> 5</bdi>) = P(2) + P(5) = <span class="frac"><span>1</span><span>6</span></span> + <span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>2</span><span>6</span></span> = <span class="frac"><span>1</span><span>3</span></span>
+    <p style="font-size:1.15em; margin-top:0.5em; text-align:center"><b>בדוגמה:</b> &nbsp;
+      <span class="math">P(2) + P(5) = <span class="frac"><span>1</span><span>6</span></span> + <span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>2</span><span>6</span></span> = <span class="frac"><span>1</span><span>3</span></span></span>
     </p>
   </section>
 
@@ -160,14 +163,18 @@
   <section class="slide">
     <h2>עקרון הכפל ✖️</h2>
     <div class="rule r-and">
-      <p>ההסתברות ששני מאורעות <b>בלתי תלויים</b> יקרו ביחד שווה <b>למכפלת</b> ההסתברויות של כל אחד מהם.</p>
       <div class="f">P(A∩B) = P(A) · P(B)</div>
       <div style="text-align:center"><span class="only">רק כשהמאורעות בלתי תלויים!</span></div>
-      <div class="sheet">(בלתי תלויים = תוצאה אחת לא משפיעה על השנייה) · מופיע בדף הנוסחאות</div>
+      <div class="sheet">(בלתי תלויים = תוצאה אחת לא משפיעה על השנייה)</div>
     </div>
-    <p class="f" dir="ltr" style="font-size:1.2em; margin-top:0.6em">
-      P(<bdi dir="ltr">2 <bdi>וגם</bdi> 5</bdi>) = <span class="frac"><span>1</span><span>6</span></span> · <span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>1</span><span>36</span></span>
+    <p style="font-size:1.15em; margin-top:0.4em; text-align:center"><b>בדוגמה:</b> &nbsp;
+      <span class="math"><span class="frac"><span>1</span><span>6</span></span> · <span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>1</span><span>36</span></span></span>
     </p>
+    <div class="nosach">
+      <div class="nosach-title">📄 כך זה מופיע בדף הנוסחאות:</div>
+      <div class="nosach-row"><span>הסתברות של A <u>וגם</u> B כאשר A ו־B הם מאורעות בלתי תלויים:</span><span class="math">P(A ∩ B) = P(A) · P(B)</span></div>
+      <div class="nosach-row"><span>הסתברות המאורע המשלים ל־A:</span><span class="math">P(A̅) = 1 − P(A)</span></div>
+    </div>
   </section>
 
   <section class="slide">
