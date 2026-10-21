@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>הסתברות – "או" ו"וגם"</title>
+  <style>
+    :root {
+      --text: #111827;
+      --muted: #4b5563;
+      --line: #d1d5db;
+      --box: #f3f4f6;
+      --accent: #b91c1c;
+      --or: #c2410c;
+      --or-light: #fff7ed;
+      --and: #0f766e;
+      --and-light: #f0fdfa;
+      --brand: #1e40af;
+    }
+    .slide { border-top: 0.6vh solid var(--brand); }
+    .slide h2 { color: var(--brand); }
+    .w-or { color: var(--or); font-weight: 800; }
+    .w-and { color: var(--and); font-weight: 800; }
+    .rule.r-or { background: var(--or-light); border-color: #fdba74; border-right: 6px solid var(--or); }
+    .rule.r-and { background: var(--and-light); border-color: #5eead4; border-right: 6px solid var(--and); }
+    .title-slide { background: linear-gradient(135deg, #eff6ff 0%, #ffffff 55%, #fff7ed 100%); align-items: center; text-align: center; }
+    .title-slide h1 { color: var(--brand); font-size: 3em; }
+    .dice { font-size: 2.6em; letter-spacing: 0.3em; margin-bottom: 0.2em; }
+    .ex-card { border-radius: 0.5em; padding: 0.6em 1em; }
+    .two > div.ex-card { border-left: none; padding-left: 1em; }
+    ol.heb { list-style-type: hebrew; }
+    ul ul { list-style: none; padding-right: 1em; }
+    .ex-card.c-or { background: var(--or-light); }
+    .ex-card.c-and { background: var(--and-light); }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      background: #e5e7eb; color: var(--text);
+      margin: 0; overflow: hidden;
+    }
+
+    /* שקף 16:9 שממלא את המסך */
+    .deck { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .slide {
+      display: none;
+      width: min(100vw, 177.78vh); height: min(56.25vw, 100vh);
+      background: #ffffff; padding: 4.5% 6%;
+      font-size: min(2.6vw, 4.6vh); line-height: 1.6;
+      flex-direction: column; justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      position: relative;
+    }
+    .slide.active { display: flex; }
+    .slide h1 { font-size: 2.4em; margin: 0 0 0.2em; }
+    .slide h2 { font-size: 1.5em; margin: 0 0 0.6em; border-bottom: 2px solid var(--line); padding-bottom: 0.2em; }
+    .slide p { margin: 0 0 0.5em; }
+    .sub { color: var(--muted); font-size: 1.1em; }
+
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5em; }
+    .two > div:first-child { border-left: 2px dashed var(--line); padding-left: 2em; }
+    u { text-underline-offset: 0.2em; }
+
+    .rule {
+      background: var(--box); border: 1px solid var(--line); border-radius: 0.5em;
+      padding: 0.6em 1em; margin: 0.4em 0;
+    }
+    .rule-title { font-weight: 800; }
+    .f { direction: ltr; text-align: center; font-size: 1.5em; font-weight: 700; margin: 0.2em 0; }
+    .only {
+      display: inline-block; border: 3px solid var(--accent); color: var(--accent);
+      border-radius: 0.4em; padding: 0.1em 0.6em; font-weight: 800; font-size: 1.15em;
+    }
+    .sheet { color: var(--muted); font-size: 0.85em; text-align: center; margin-top: 0.3em; }
+    .math { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+    .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.85em; line-height: 1.15; margin: 0 0.1em; }
+    .frac > span:first-child { border-bottom: 2px solid currentColor; padding: 0 0.15em; }
+
+    table { border-collapse: collapse; margin: 0.3em 0; }
+    td, th { border: 1px solid var(--line); padding: 0.1em 1em; text-align: center; }
+    th { background: var(--box); font-weight: 600; }
+    .grid6 { direction: ltr; font-size: 0.72em; margin: 0 auto; }
+    .grid6 td, .grid6 th { padding: 0.05em 0.6em; }
+    .grid6 td.hit { background: #d1d5db; font-weight: 800; }
+
+    ul, ol { margin: 0.2em 0; padding-right: 1.4em; }
+    li { margin-bottom: 0.35em; }
+
+    .counter { position: absolute; bottom: 2%; left: 3%; color: #9ca3af; font-size: 0.6em; }
+    .hint { position: fixed; bottom: 6px; right: 10px; color: #9ca3af; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="deck">
+
+  <section class="slide title-slide">
+    <div class="dice">🎲 🎯</div>
+    <h1>הסתברות</h1>
+    <p class="sub" style="font-size:1.4em">"<span class="w-or">או</span>" ו"<span class="w-and">וגם</span>" – חיבור וכפל הסתברויות</p>
+  </section>
+
+  <section class="slide">
+    <div class="two">
+      <div class="ex-card c-or">
+        <p><b><u>דוגמה א'</u></b> 🎲</p>
+        <p>מטילים קובייה.</p>
+        <p>מהי ההסתברות שיתקבל המספר 2 <u class="w-or">או</u> המספר 5?</p>
+      </div>
+      <div class="ex-card c-and">
+        <p><b><u>דוגמה ב'</u></b> 🎲🎲</p>
+        <p>מטילים קובייה פעמיים.</p>
+        <p>מהי ההסתברות שבהטלה הראשונה יתקבל המספר 2 <u class="w-and">וגם</u> בהטלה השנייה יתקבל המספר 5?</p>
+      </div>
+    </div>
+    <p style="margin-top:1.2em; font-weight:800; font-size:1.2em">מה ההבדל בין הדוגמאות?</p>
+  </section>
+
+  <section class="slide">
+    <h2>דוגמה א' – "<span class="w-or">או</span>"</h2>
+    <p>המאורע הוא "קבלת המספר 2 או המספר 5" – זהו <b><u>איחוד</u></b> של שני מאורעות:</p>
+    <p style="text-align:center">"קבלת המספר 2" <span class="w-or">או</span> "קבלת המספר 5"</p>
+    <p>המילה "<b>או</b>" מסייעת לקבוע שמדובר <b>באיחוד מאורעות</b> – מתקיים המאורע האחד <b>או</b> המאורע השני.</p>
+    <p>ההסתברות היא <b><u>סכום</u></b> ההסתברויות (חיבור) של שני המאורעות.</p>
+  </section>
+
+  <section class="slide">
+    <h2>עקרון החיבור ➕</h2>
+    <div class="rule r-or">
+      <p>כאשר מאורע מורכב משתי תוצאות אפשריות <b>זרות</b>, מחשבים את ההסתברות של כל אחת מהתוצאות <b>ומחברים</b>.</p>
+      <div class="f">P(A∪B) = P(A) + P(B)</div>
+      <div style="text-align:center"><span class="only">רק כשהמאורעות זרים!</span></div>
+      <div class="sheet">(זרים = לא יכולים לקרות יחד) · הנוסחה <b>לא</b> מופיעה בדף הנוסחאות – צריך לזכור</div>
+    </div>
+    <p class="f" dir="ltr" style="font-size:1.2em; margin-top:0.6em">
+      P(<bdi dir="ltr">2 <bdi>או</bdi> 5</bdi>) = P(2) + P(5) = <span class="frac"><span>1</span><span>6</span></span> + <span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>2</span><span>6</span></span> = <span class="frac"><span>1</span><span>3</span></span>
+    </p>
+  </section>
+
+  <section class="slide">
+    <h2>למה רק כשהמאורעות זרים?</h2>
+    <p>מטילים קובייה. מהי ההסתברות לקבל מספר <b>זוגי</b> או מספר <b>גדול מ-3</b>?</p>
+    <ul>
+      <li>זוגי: 2, 4, 6 &nbsp;&nbsp; גדול מ-3: 4, 5, 6</li>
+      <li>אם נחבר: <span class="math"><span class="frac"><span>3</span><span>6</span></span> + <span class="frac"><span>3</span><span>6</span></span> = 1</span> &nbsp; ✗ &nbsp; (לא ייתכן – לא בטוח שזה יקרה!)</li>
+      <li>באמת: 2, 4, 5, 6 &nbsp;→&nbsp; <span class="math"><span class="frac"><span>4</span><span>6</span></span></span></li>
+    </ul>
+    <p style="margin-top:0.6em">4 ו-6 נספרו <b>פעמיים</b> – כי המאורעות <b>לא זרים</b>.</p>
+  </section>
+
+  <section class="slide">
+    <h2>דוגמה ב' – "<span class="w-and">וגם</span>"</h2>
+    <p>המאורע הוא "בפעם הראשונה 2 וגם בפעם השנייה 5" – זהו <b><u>חיתוך</u></b> של שני מאורעות:</p>
+    <p style="text-align:center">"קבלת 2 בהטלה הראשונה" <span class="w-and">וגם</span> "קבלת 5 בהטלה השנייה"</p>
+    <p>המילה "<b>וגם</b>" מסייעת לקבוע שמדובר <b>בחיתוך מאורעות</b> – שני המאורעות חייבים להתממש.</p>
+    <p>הסיכוי ששני מאורעות יקרו <b>מקטין</b> את הסיכוי שכל אחד יקרה בנפרד.<br>
+      ההסתברות היא <b><u>מכפלת</u></b> ההסתברויות של שני המאורעות.</p>
+  </section>
+
+  <section class="slide">
+    <h2>עקרון הכפל ✖️</h2>
+    <div class="rule r-and">
+      <p>ההסתברות ששני מאורעות <b>בלתי תלויים</b> יקרו ביחד שווה <b>למכפלת</b> ההסתברויות של כל אחד מהם.</p>
+      <div class="f">P(A∩B) = P(A) · P(B)</div>
+      <div style="text-align:center"><span class="only">רק כשהמאורעות בלתי תלויים!</span></div>
+      <div class="sheet">(בלתי תלויים = תוצאה אחת לא משפיעה על השנייה) · מופיע בדף הנוסחאות</div>
+    </div>
+    <p class="f" dir="ltr" style="font-size:1.2em; margin-top:0.6em">
+      P(<bdi dir="ltr">2 <bdi>וגם</bdi> 5</bdi>) = <span class="frac"><span>1</span><span>6</span></span> · <span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>1</span><span>36</span></span>
+    </p>
+  </section>
+
+  <section class="slide">
+    <h2>בדיקה – לפי מרחב המדגם</h2>
+    <table class="grid6">
+      <tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
+      <tr><th>1</th><td>(1,1)</td><td>(1,2)</td><td>(1,3)</td><td>(1,4)</td><td>(1,5)</td><td>(1,6)</td></tr>
+      <tr><th>2</th><td>(2,1)</td><td>(2,2)</td><td>(2,3)</td><td>(2,4)</td><td class="hit">(2,5)</td><td>(2,6)</td></tr>
+      <tr><th>3</th><td>(3,1)</td><td>(3,2)</td><td>(3,3)</td><td>(3,4)</td><td>(3,5)</td><td>(3,6)</td></tr>
+      <tr><th>4</th><td>(4,1)</td><td>(4,2)</td><td>(4,3)</td><td>(4,4)</td><td>(4,5)</td><td>(4,6)</td></tr>
+      <tr><th>5</th><td>(5,1)</td><td>(5,2)</td><td>(5,3)</td><td>(5,4)</td><td>(5,5)</td><td>(5,6)</td></tr>
+      <tr><th>6</th><td>(6,1)</td><td>(6,2)</td><td>(6,3)</td><td>(6,4)</td><td>(6,5)</td><td>(6,6)</td></tr>
+    </table>
+    <p style="margin-top:0.4em">36 זוגות סדורים, לכולם אותה הסתברות. הזוג (2,5) הוא 1 מתוך 36 → <span class="math"><span class="frac"><span>1</span><span>36</span></span></span></p>
+    <p>תוצאת ההטלה האחת <b>אינה תלויה</b> בתוצאת ההטלה האחרת – המאורעות <b><u>בלתי תלויים</u></b>.</p>
+  </section>
+
+  <section class="slide">
+    <h2>לסיכום</h2>
+    <ul>
+      <li>"לתרגם" את המאורע למשפט בעברית, עם המילים "<b>או</b>" / "<b>וגם</b>".</li>
+      <li>"<span class="w-or">או</span>" ← <b>איחוד</b> ← <b>חיבור</b> הסתברויות &nbsp;<span class="only" style="font-size:0.8em">רק זרים</span></li>
+      <li>"<span class="w-and">וגם</span>" ← <b>חיתוך</b> ← <b>כפל</b> הסתברויות &nbsp;<span class="only" style="font-size:0.8em">רק בלתי תלויים</span></li>
+      <li>הסתברות היא תמיד בין 0 ל-1.
+        <ul>
+          <li>✔ בכפל – התוצאה קטנה מכל אחת מההסתברויות שהוכפלו.</li>
+          <li>✔ בחיבור – לא תיתכן תוצאה גדולה מ-1.</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <h2>דוגמה ג' – קַשָּׁת 🏹</h2>
+    <p>קַשָּׁת יורה פעמיים לעבר מטרה. ההסתברות שיפגע בפעם הראשונה היא 0.7, וההסתברות שיפגע בפעם השנייה היא 0.8.
+      בהנחה שהמאורעות בלתי תלויים, מצאו את ההסתברות:</p>
+    <div style="display:flex; gap:2em; align-items:flex-start">
+      <ol class="heb" style="flex:1.8">
+        <li>שיפגע בפעם הראשונה <b>וגם</b> בפעם השנייה.</li>
+        <li>שיפגע <b>בדיוק</b> פעם אחת.</li>
+        <li>שיפגע <b>לפחות</b> פעם אחת.</li>
+        <li>שיפגע <b>לכל היותר</b> פעם אחת.</li>
+      </ol>
+      <table>
+        <tr><th></th><th>יפגע</th><th>יחטיא</th><th>סך הכול</th></tr>
+        <tr><th>ראשונה</th><td>0.7</td><td></td><td>1</td></tr>
+        <tr><th>שנייה</th><td>0.8</td><td></td><td>1</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="slide">
+    <h2>תרגול</h2>
+    <ol>
+      <li>מטילים קובייה פעם אחת. מה ההסתברות לקבל 1 או 6?</li>
+      <li>מטילים מטבע וקובייה. מה ההסתברות לקבל "עץ" וגם 6?</li>
+      <li>מטילים מטבע פעמיים. מה ההסתברות לקבל "פלי" בשתי הפעמים?</li>
+      <li>🏀 שחקן כדורסל קולע זריקת עונשין בהסתברות 0.6. הוא זורק פעמיים.<br>
+        מה ההסתברות שיקלע: &nbsp; א. בשתי הזריקות? &nbsp;&nbsp; ב. באף זריקה? &nbsp;&nbsp; ג. לפחות פעם אחת?</li>
+    </ol>
+  </section>
+
+</div>
+<div class="hint">חצים / לחיצה – מעבר · F – מסך מלא</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = 0;
+  slides.forEach((s, k) => {
+    const c = document.createElement('div');
+    c.className = 'counter';
+    c.textContent = (k + 1) + ' / ' + slides.length;
+    s.appendChild(c);
+  });
+  function show(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle('active', k === cur));
+    history.replaceState(null, '', '#' + (cur + 1));
+  }
+  document.addEventListener('keydown', e => {
+    if (['ArrowLeft', 'PageDown', ' ', 'Enter'].includes(e.key)) show(cur + 1);
+    if (['ArrowRight', 'PageUp', 'Backspace'].includes(e.key)) show(cur - 1);
+    if (e.key === 'f' || e.key === 'F' || e.key === 'כ') {
+      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+    }
+  });
+  // לחיצה בצד שמאל = הבא, בצד ימין = הקודם
+  document.addEventListener('click', e => show(e.clientX < window.innerWidth / 2 ? cur + 1 : cur - 1));
+  show((parseInt(location.hash.slice(1)) || 1) - 1);
+</script>
+</body>
+</html>
