@@ -229,8 +229,11 @@
     .stem table.fill td { padding: 4px 14px; }
     /* כיתוב בתוך גזרות */
     .lbl-layer { position: absolute; inset: 0; direction: ltr; pointer-events: none; }
-    input.ans.cell.lbl { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; width: 96px; height: 34px;
-      font-size: 15px; background: rgba(15, 23, 42, 0.85); }
+    input.ans.cell.lbl { position: absolute; pointer-events: auto; width: 92px; height: 30px;
+      font-size: 14px; background: rgba(15, 23, 42, 0.88); }
+    input.ans.cell.lbl.what { transform: translate(-50%, -100%); }
+    input.ans.cell.lbl.pct { transform: translate(-50%, 2px); width: 64px; }
+    input.ans.cell.lbl::placeholder { color: #94a3b8; }
     .q-grid.big .pic { display: block; }
     .q-grid.top.big .pic { display: inline-block; }
     .q-grid.big .graph img { width: 100%; }
@@ -409,7 +412,9 @@
       const n = [].concat(...sub.table.rows).filter(c => c === null).length;
       return Array.from({ length: n }, (_, j) => base + '-' + j);
     }
-    const many = sub.items || sub.labels || (sub.table && sub.table.cols);
+    // גזרה בדיאגרמת עיגול = שתי תיבות: מה היא מייצגת, והאחוז
+    if (sub.labels) return [].concat(...sub.labels.map((_, j) => [base + '-' + j + 'w', base + '-' + j + 'p']));
+    const many = sub.items || (sub.table && sub.table.cols);
     return many ? many.map((_, j) => base + '-' + j) : [base];
   }
 
@@ -423,12 +428,12 @@
       const C = s.grid && s.grid.cols.length;
       LABEL[k] = s.items ? l + '(' + (j + 1) + ')'
         : s.table && s.table.rows ? l + ' – תא ' + (j + 1)
-        : s.labels ? l + ' – גזרה ' + (j + 1)
+        : s.labels ? l + ' – גזרה ' + (Math.floor(j / 2) + 1) + (j % 2 ? ' (אחוז)' : ' (מה)')
         : s.table ? l + ' – ' + s.table.cols[j]
         : s.grid && j < cells.length ? l + ' – ' + s.grid.rows[Math.floor(j / C)] + '/' + s.grid.cols[j % C].replace(/ \(.*\)$/, '')
         : l;
-      UNIT[k] = s.items ? s.items[j].unit : s.grid && j < cells.length ? '' : s.unit;
-      const want = cells && j < cells.length ? cells[j] : Array.isArray(a) ? a[j] : a;
+      UNIT[k] = s.items ? s.items[j].unit : s.labels ? (j % 2 ? 'pct' : '') : s.grid && j < cells.length ? '' : s.unit;
+      const want = cells && j < cells.length ? cells[j] : s.labels ? (a && a[Math.floor(j / 2)] || [])[j % 2] : Array.isArray(a) ? a[j] : a;
       if (want) ANS[k] = want;
       if (s.choices || (s.items && s.items[j].choices)) CHOICE[k] = true;
     });
@@ -504,9 +509,10 @@
     const l = Object.keys(q.subs).find(x => subOf(q.subs[x]).labels);
     if (!l) return '';
     const s = subOf(q.subs[l]), keys = keysOf(qi, l, s);
+    const box = (k, p, cls, ph) => '<input class="ans cell lbl ' + cls + '" data-k="' + k + '" dir="auto" autocomplete="off"' +
+      ' placeholder="' + ph + '" style="left:' + p[0] * 100 + '%;top:' + p[1] * 100 + '%">';
     return '<div class="lbl-layer">' + s.labels.map((p, j) =>
-      '<input class="ans cell lbl" data-k="' + keys[j] + '" dir="auto" autocomplete="off" style="left:' +
-      p[0] * 100 + '%;top:' + p[1] * 100 + '%">').join('') + '</div>';
+      box(keys[2 * j], p, 'what', s.labelHint || 'מה?') + box(keys[2 * j + 1], p, 'pct', '%')).join('') + '</div>';
   }
 
   // בחירה בין תשובות
@@ -521,7 +527,7 @@
       const s = subOf(q.subs[l]);
       const long = s.long || /נמקו|הסבירו/.test(s.text);
       const keys = keysOf(qi, l, s);
-      const rows = s.labels ? '<p class="draw-note">כתבו בתיבות שבתוך הגזרות בדיאגרמה. "בדיקת התשובות" בודקת גם אותן.</p>'
+      const rows = s.labels ? '<p class="draw-note">בכל גזרה בדיאגרמה יש שתי תיבות: למעלה – מה הגזרה מייצגת, למטה – האחוז. "בדיקת התשובות" בודקת גם אותן.</p>'
         : s.paper ?'<p class="draw-note">את הסעיף הזה עושים במחברת. הדף לא בודק אותו, אבל חשוב לדעת לשרטט!</p>'
         : s.draw ? drawBox(s, keys[0])
         : s.grid ? gridBox(s, keys)
