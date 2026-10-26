@@ -184,6 +184,32 @@
     .reveal:hover { border-color: #ffffff; color: #ffffff; }
     .ans.bad { border-color: rgba(249, 168, 184, 0.7); }
     .ans.good { border-color: rgba(74, 222, 128, 0.7); }
+    /* שליחה למורה */
+    .hidden { display: none !important; }
+    .submit-head { font-family: 'Heebo', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 10px; display: flex; gap: 10px; align-items: center; }
+    .summary { list-style: none; margin: 10px 0; font-size: 18px; }
+    .summary li { padding: 6px 0; border-bottom: 1px solid var(--border-subtle); }
+    .muted { color: #94a3b8; font-size: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; max-width: 420px; }
+    .field label { font-size: 19px; }
+    .field input, .field select {
+      height: 48px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #ffffff;
+      font-family: 'Assistant', sans-serif;
+      font-size: 20px;
+      padding: 0 12px;
+      outline: none;
+    }
+    .field select option { background: #1e293b; }
+    .field input:focus, .field select:focus { border-color: var(--c-qty); }
+    .fb { font-size: 17px; margin-top: 10px; font-weight: 600; }
+    .fb:empty { display: none; }
+    .fb.err { color: #f9a8b8; }
+    .fb.ok { color: var(--c-rate); }
+
     .nocheck { flex-basis: 100%; display: block; font-size: 15px; color: #94a3b8; margin-top: 4px; }
     .intro { margin-top: 8px; color: #cbd5e1; }
     table.fill.grid th { white-space: normal; font-size: 15px; }
@@ -304,6 +330,26 @@
   <nav class="qnav" id="qnav"></nav>
   <section class="card" id="q-card"></section>
   <div class="after" id="after"></div>
+
+  <!-- שליחה למורה: השם והכיתה רק כאן -->
+  <section class="card hidden" id="submit-card">
+    <div class="submit-head"><i class="fa-solid fa-paper-plane"></i> שליחה למורה</div>
+    <ul class="summary" id="summary"></ul>
+    <div class="field">
+      <label for="student-name">שם מלא</label>
+      <input id="student-name" autocomplete="name">
+    </div>
+    <div class="field">
+      <label for="student-group">כיתה</label>
+      <select id="student-group">
+        <option value="">בחרו…</option>
+        <option>י' כנף א'</option>
+        <option>י' כנף ב'</option>
+      </select>
+    </div>
+    <button class="btn-step" onclick="submitSet()">שליחה <i class="fa-solid fa-paper-plane"></i></button>
+    <p class="fb" id="submit-msg"></p>
+  </section>
   <p class="reset"><button class="btn-link" onclick="resetAll()">להתחיל מחדש (מוחק את כל התשובות במקבץ הזה בדפדפן הזה)</button></p>
 </div>
 <site-footer style="--tp-max:1100px"></site-footer>
@@ -312,6 +358,9 @@
   const SET = GRAPH_SETS.find(s => s.id === new URLSearchParams(location.search).get('c')) || GRAPH_SETS[0];
   const QUESTIONS = SET.questions;
   const STORAGE_KEY = 'graphs-' + SET.id;
+  // כתובת ה-Apps Script שמקבל את ההגשות (גיליון "גרפים – הגשות"). ריק = השליחה עוד לא מחוברת.
+  const SUBMIT_URL = '';
+  const STUDENT_KEY = 'graphs-student'; // שם וכיתה, משותפים לכל המקבצים
   document.title = 'גרפים: ' + SET.title;
 
   // a = התשובות, rev = תיבות שבהן גילו את היחידה, chk = שאלות שבדקו (מאז הבדיקה מסמנים נכון/לא נכון),
@@ -550,14 +599,70 @@
 
     const last = qi === QUESTIONS.length - 1;
     document.getElementById('after').innerHTML = last
-      ? '<a class="btn-step" href="./">סיימתי את המקבץ – חזרה לכל המקבצים <i class="fa-solid fa-arrow-left"></i></a>'
+      ? '<button class="btn-step" onclick="showSubmit()">סיימתי את המקבץ – שליחה למורה <i class="fa-solid fa-paper-plane"></i></button>'
       : '<button class="btn-step" onclick="goTo(' + (qi + 1) + ')">לשאלה הבאה <i class="fa-solid fa-arrow-left"></i></button>';
 
     document.getElementById('qnav').innerHTML =
       '<span class="title">' + SET.title + '</span>' +
       QUESTIONS.map((_, i) =>
         '<button class="' + (i === qi ? 'cur ' : '') + (questionDone(i) ? 'done' : '') + '" onclick="goTo(' + i + ')">' +
-        (i + 1) + '</button>').join('');
+        (i + 1) + '</button>').join('') +
+      '<button onclick="showSubmit()"><i class="fa-solid fa-paper-plane"></i> שליחה</button>';
+  }
+
+  // ---------- שליחה למורה ----------
+  // נכונות בכל שאלה, לפי אותה בדיקה של "בדיקת התשובות" (גם אם לא לחצו עליה)
+  function questionScore(qi) {
+    const q = QUESTIONS[qi];
+    let right = 0, total = 0;
+    Object.keys(q.subs).forEach(l => keysOf(qi, l, subOf(q.subs[l])).forEach(k => {
+      if (!ANS[k]) return;
+      total++;
+      if (correct(k)) right++;
+    }));
+    return { right, total };
+  }
+
+  function showSubmit() {
+    const scores = QUESTIONS.map((_, i) => questionScore(i));
+    document.getElementById('summary').innerHTML = scores.map((s, i) =>
+      '<li>שאלה ' + (i + 1) + ': ' + s.right + ' מתוך ' + s.total + ' נכונות' +
+      (state.chk[i] ? '' : ' <span class="muted">(עוד לא לחצתם "בדיקת התשובות")</span>') + '</li>').join('');
+    const card = document.getElementById('submit-card');
+    card.classList.remove('hidden');
+    card.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function submitSet() {
+    const msg = document.getElementById('submit-msg');
+    const student = { name: document.getElementById('student-name').value.trim(), group: document.getElementById('student-group').value };
+    try { localStorage.setItem(STUDENT_KEY, JSON.stringify(student)); } catch (e) {}
+    if (!student.name || !student.group) {
+      msg.className = 'fb err';
+      msg.textContent = 'כתבו שם ובחרו כיתה, כדי שאדע של מי ההגשה.';
+      return;
+    }
+    if (!SUBMIT_URL) {
+      msg.className = 'fb err';
+      msg.textContent = 'השליחה עוד לא מחוברת. התשובות שמורות בדפדפן הזה.';
+      return;
+    }
+    const scores = QUESTIONS.map((_, i) => questionScore(i));
+    const sum = scores.reduce((a, s) => ({ right: a.right + s.right, total: a.total + s.total }), { right: 0, total: 0 });
+    const payload = {
+      form: 'graphs', name: student.name, group: student.group, set: SET.title,
+      score: sum.right + ' מתוך ' + sum.total,
+      perQuestion: scores.map((s, i) => (i + 1) + ': ' + s.right + '/' + s.total).join(' · '),
+      checked: Object.keys(state.chk).filter(i => state.chk[i]).map(i => +i + 1).join(', '),
+      unitReveals: Object.keys(state.rev).length,
+      hints: Object.keys(state.hint).length,
+      answers: JSON.stringify(state.a)
+    };
+    msg.className = 'fb';
+    msg.textContent = 'שולחים...';
+    fetch(SUBMIT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+      .then(() => { msg.className = 'fb ok'; msg.textContent = 'נשלח! כל הכבוד על העבודה.'; })
+      .catch(() => { msg.className = 'fb err'; msg.textContent = 'השליחה נכשלה. בדקו את החיבור לאינטרנט ונסו שוב.'; });
   }
 
   function checkQuestion() {
@@ -580,6 +685,7 @@
 
   function goTo(i) {
     state.cur = i;
+    document.getElementById('submit-card').classList.add('hidden');
     persist();
     build();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -599,6 +705,11 @@
     const qp = +new URLSearchParams(location.search).get('q');
     if (qp) state.cur = qp - 1;
     if (!(state.cur >= 0 && state.cur < QUESTIONS.length)) state.cur = 0;
+    try {
+      const st = JSON.parse(localStorage.getItem(STUDENT_KEY)) || {};
+      document.getElementById('student-name').value = st.name || '';
+      document.getElementById('student-group').value = st.group || '';
+    } catch (e) {}
   }
 
   function persist() {
@@ -614,6 +725,7 @@
   if (QUESTIONS.length) {
     load();
     build();
+    if (location.hash === '#send') showSubmit(); // קישור ישר לכרטיס השליחה
   } else {
     document.getElementById('q-card').innerHTML = '<p class="note">המקבץ הזה עוד לא מוכן.</p>';
     document.querySelector('.reset').remove();
