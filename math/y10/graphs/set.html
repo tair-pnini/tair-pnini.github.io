@@ -117,6 +117,10 @@
       gap: 0 24px;
     }
     .q-grid.wide { grid-template-columns: minmax(0, 1fr) minmax(0, 540px); }
+    /* top: שתי דיאגרמות זו לצד זו – הגרף ברוחב מלא מעל הסעיפים, לא נעוץ */
+    .q-grid.top { grid-template-columns: 1fr; grid-template-areas: "stem" "graph" "subs"; grid-template-rows: auto; }
+    .q-grid.top .graph { position: static; margin-bottom: 14px; }
+    .q-grid.top .graph img { width: 100%; max-width: 900px; max-height: none; }
     .stem { grid-area: stem; margin-bottom: 8px; }
     .subs { grid-area: subs; }
     .stem {
@@ -510,7 +514,7 @@
 
     document.getElementById('q-card').innerHTML =
       '<span class="q-badge">' + q.part + ' · שאלה ' + (qi + 1) + '</span>' +
-      '<div class="q-grid' + (q.wide ? ' wide' : '') + '">' +
+      '<div class="q-grid' + (q.wide ? ' wide' : '') + (q.top ? ' top' : '') + '">' +
         '<div class="stem">' + q.stem + '</div>' +
         '<div class="graph"><div class="pic"><img id="graph-img" src="img/' + q.img + '.png" alt="הגרף של שאלה ' + (qi + 1) + '">' +
         '<svg id="draw-layer"></svg></div></div>' +
