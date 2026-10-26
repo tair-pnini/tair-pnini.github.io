@@ -227,6 +227,23 @@
     .intro { margin-top: 8px; color: #cbd5e1; }
     .stem table.fill { margin-top: 8px; font-size: 18px; }
     .stem table.fill td { padding: 4px 14px; }
+    /* כלי בנייה: צביעת עוגה ובניית עמודות */
+    .tool { margin-top: 10px; }
+    .palette { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .palette button { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.2);
+      color: #fff; border-radius: 20px; padding: 3px 12px; font-family: inherit; font-size: 16px; cursor: pointer; }
+    .palette button.on { border-color: #ffffff; background: rgba(255,255,255,0.16); }
+    .palette .sw { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+    .palette .cnt { color: #94a3b8; font-size: 14px; }
+    .pie-svg { direction: ltr; display: block; width: 100%; max-width: 300px; margin: 0 auto; background: #fff; border-radius: 50%; touch-action: none; cursor: pointer; }
+    .pie-svg path { stroke-width: 0.6; }
+    .bars-svg { direction: ltr; display: block; width: 100%; max-width: 460px; background: #fff; border-radius: 12px; touch-action: none; cursor: pointer; }
+    .bars-svg .g1 { stroke: #94a3b8; stroke-width: 0.8; } .bars-svg .g2 { stroke: #e2e8f0; stroke-width: 0.6; }
+    .bars-svg .ax { stroke: #0f172a; stroke-width: 1.6; }
+    .bars-svg text { font-size: 11px; fill: #0f172a; font-family: 'Assistant', sans-serif; }
+    .bars-svg rect { fill: #8b5cf6; } .bars-svg rect.given { fill: #6b4a7e; }
+    .tool.good .pie-svg, .tool.good .bars-svg { outline: 3px solid rgba(74, 222, 128, 0.8); }
+    .tool.bad .pie-svg, .tool.bad .bars-svg { outline: 3px solid rgba(249, 168, 184, 0.8); }
     /* כיתוב בתוך גזרות */
     .lbl-layer { position: absolute; inset: 0; direction: ltr; pointer-events: none; }
     input.ans.cell.lbl { position: absolute; pointer-events: auto; width: 92px; height: 30px;
@@ -527,7 +544,12 @@
       const s = subOf(q.subs[l]);
       const long = s.long || /נמקו|הסבירו/.test(s.text);
       const keys = keysOf(qi, l, s);
-      const rows = s.labels ? '<p class="draw-note">בכל גזרה בדיאגרמה יש שתי תיבות: למעלה – מה הגזרה מייצגת, למטה – האחוז. "בדיקת התשובות" בודקת גם אותן.</p>'
+      const tool = (attr, note) => '<p class="draw-note">' + note + '</p><div class="tool" data-' + attr + '="' + keys[0] + '"></div>' +
+        '<div class="draw-tools"><button type="button" class="reveal" onclick="clearTool(\'' + keys[0] + '\')">ניקוי</button></div>' +
+        '<span class="ufb" data-fb="' + keys[0] + '"></span>';
+      const rows = s.pie ? tool('pie', 'בחרו קבוצה, ואז לחצו על גזרות בעיגול (או גררו עליהן) כדי לצבוע אותן. ליד כל קבוצה רואים כמה אחוזים צבעתם.')
+        : s.bars ? tool('bars', 'לחצו בתוך כל עמודה בגובה המתאים (אפשר גם לגרור).')
+        : s.labels ?'<p class="draw-note">בכל גזרה בדיאגרמה יש שתי תיבות: למעלה – מה הגזרה מייצגת, למטה – האחוז. "בדיקת התשובות" בודקת גם אותן.</p>'
         : s.paper ?'<p class="draw-note">את הסעיף הזה עושים במחברת. הדף לא בודק אותו, אבל חשוב לדעת לשרטט!</p>'
         : s.draw ? drawBox(s, keys[0])
         : s.grid ? gridBox(s, keys)
@@ -536,7 +558,7 @@
         : s.items ? '<div class="items">' + s.items.map((o, j) => ansRow(keys[j], o)).join('') + '</div>'
         : long ? '<div class="ans-row">' + longBox(keys[0]) + '</div>' : ansRow(keys[0], s);
       // שורה שלמה: נימוק, הדרכה, טבלה, שרטוט, בחירה, או יותר משתי תיבות (שלא יימתח לאורך ליד סעיף קצר)
-      const full = long || s.hint || s.table || s.grid || s.draw || s.paper || s.labels || s.choices ||
+      const full = long || s.hint || s.table || s.grid || s.draw || s.paper || s.labels || s.pie || s.bars || s.choices ||
         (s.items && (s.items.length > 2 || s.items.some(o => o.long)));
       // cont = המשך של הסעיף הקודם (בלי אות משלו)
       return '<div class="sub' + (full ? ' full' : '') + '" data-sub="' + l + '"><div>' +
@@ -603,7 +625,108 @@
         render();
       });
     }
+    // דיאגרמת עיגול לצביעה ודיאגרמת עמודות לבנייה
+    Object.keys(q.subs).forEach(l => {
+      const s = subOf(q.subs[l]), key = qi + '-' + l;
+      if (s.pie) initPie(document.querySelector('[data-pie="' + key + '"]'), s.pie, key);
+      if (s.bars) initBars(document.querySelector('[data-bars="' + key + '"]'), s.bars, key);
+    });
     render();
+  }
+
+  // ---------- כלי בנייה ----------
+  const TOOL_COLORS = ['#f59e0b', '#3b82f6', '#22c55e', '#ec4899', '#a855f7', '#ef4444'];
+
+  function toolValue(key, fallback) {
+    try { return JSON.parse(state.a[key]) || fallback; } catch (e) { return fallback; }
+  }
+
+  // צביעת גזרות: בוחרים קבוצה ומעבירים את העכבר/האצבע על העיגול. n = מספר הגזרות
+  function initPie(el, p, key) {
+    const n = p.n;
+    let arr = toolValue(key, Array(n).fill(-1)), cur = 0, down = false;
+    const path = i => {
+      const a0 = i / n * 2 * Math.PI, a1 = (i + 1) / n * 2 * Math.PI, pt = a => (100 * Math.sin(a)).toFixed(2) + ',' + (-100 * Math.cos(a)).toFixed(2);
+      return 'M0,0 L' + pt(a0) + ' A100,100 0 0 1 ' + pt(a1) + ' Z';
+    };
+    el.innerHTML = '<div class="palette">' + p.groups.map((g, i) =>
+      '<button type="button" data-g="' + i + '"><span class="sw" style="background:' + TOOL_COLORS[i] + '"></span>' + g +
+      ' <span class="cnt"></span></button>').join('') +
+      '<button type="button" data-g="-1"><i class="fa-solid fa-eraser"></i> מחק</button></div>' +
+      '<svg class="pie-svg" viewBox="-104 -104 208 208">' +
+      arr.map((_, i) => '<path d="' + path(i) + '" data-i="' + i + '" />').join('') + '</svg>';
+    const svg = el.querySelector('svg'), paths = svg.querySelectorAll('path');
+    function draw() {
+      paths.forEach((pa, i) => {
+        pa.style.fill = arr[i] >= 0 ? TOOL_COLORS[arr[i]] : '#ffffff';
+        pa.style.stroke = n > 20 ? (arr[i] >= 0 ? TOOL_COLORS[arr[i]] : '#e2e8f0') : '#64748b';
+      });
+      el.querySelectorAll('[data-g]').forEach(b => {
+        const g = +b.dataset.g;
+        b.classList.toggle('on', g === cur);
+        const c = b.querySelector('.cnt');
+        if (c) c.textContent = '(' + Math.round(arr.filter(x => x === g).length * 100 / n) + '%)';
+      });
+    }
+    function paint(e) {
+      const r = svg.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      if (Math.hypot(dx, dy) > r.width / 2) return;
+      let a = Math.atan2(dx, -dy);
+      if (a < 0) a += 2 * Math.PI;
+      const i = Math.min(n - 1, Math.floor(a / (2 * Math.PI) * n));
+      if (arr[i] !== cur) { arr[i] = cur; draw(); }
+    }
+    const save = () => { state.a[key] = JSON.stringify(arr); persist(); render(); };
+    el.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => { cur = +b.dataset.g; draw(); }));
+    svg.addEventListener('pointerdown', e => { down = true; svg.setPointerCapture(e.pointerId); paint(e); });
+    svg.addEventListener('pointermove', e => { if (down) paint(e); });
+    svg.addEventListener('pointerup', () => { down = false; save(); });
+    el.clearTool = () => { arr = Array(n).fill(-1); draw(); save(); };
+    draw();
+  }
+
+  // בניית עמודות: לוחצים (או גוררים) בעמודה בגובה הרצוי. given = [עמודה, ערך] שכבר מסורטטת
+  function initBars(el, b, key) {
+    const C = b.cats.length, X0 = 46, X1 = 396, Y0 = 232, Y1 = 14, cw = (X1 - X0) / C;
+    let arr = toolValue(key, b.cats.map((_, i) => b.given && b.given[0] === i ? b.given[1] : 0)), down = false;
+    const y = v => Y0 - v / b.max * (Y0 - Y1);
+    let grid = '';
+    for (let v = 0; v <= b.max; v += b.step) {
+      const major = v % b.label === 0;
+      grid += '<line x1="' + X0 + '" x2="' + X1 + '" y1="' + y(v) + '" y2="' + y(v) + '" class="' + (major ? 'g1' : 'g2') + '"/>' +
+        (major ? '<text x="' + (X0 - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v + b.unit + '</text>' : '');
+    }
+    el.innerHTML = '<svg class="bars-svg" viewBox="0 0 400 290">' + grid +
+      b.cats.map((c, i) => '<rect data-i="' + i + '"/>' +
+        '<text x="' + (X0 + cw * (i + 0.5)) + '" y="' + (Y0 + 18) + '" text-anchor="middle" class="cat">' + c.split('|')[0] + '</text>' +
+        (c.includes('|') ? '<text x="' + (X0 + cw * (i + 0.5)) + '" y="' + (Y0 + 34) + '" text-anchor="middle" class="cat">' + c.split('|')[1] + '</text>' : '')).join('') +
+      '<line x1="' + X0 + '" x2="' + X0 + '" y1="' + Y1 + '" y2="' + Y0 + '" class="ax"/><line x1="' + X0 + '" x2="' + X1 + '" y1="' + Y0 + '" y2="' + Y0 + '" class="ax"/></svg>';
+    const svg = el.querySelector('svg'), rects = svg.querySelectorAll('rect');
+    function draw() {
+      rects.forEach((r, i) => {
+        r.setAttribute('x', X0 + cw * (i + 0.2)); r.setAttribute('width', cw * 0.6);
+        r.setAttribute('y', y(arr[i])); r.setAttribute('height', Y0 - y(arr[i]));
+        r.setAttribute('class', b.given && b.given[0] === i ? 'given' : '');
+      });
+    }
+    function set(e) {
+      const r = svg.getBoundingClientRect(), sx = (e.clientX - r.left) / r.width * 400, sy = (e.clientY - r.top) / r.height * 290;
+      const i = Math.floor((sx - X0) / cw);
+      if (i < 0 || i >= C || (b.given && b.given[0] === i)) return;
+      const v = Math.max(0, Math.min(b.max, Math.round((Y0 - sy) / (Y0 - Y1) * b.max / b.step) * b.step));
+      if (arr[i] !== v) { arr[i] = v; draw(); }
+    }
+    const save = () => { state.a[key] = JSON.stringify(arr); persist(); render(); };
+    svg.addEventListener('pointerdown', e => { down = true; svg.setPointerCapture(e.pointerId); set(e); });
+    svg.addEventListener('pointermove', e => { if (down) set(e); });
+    svg.addEventListener('pointerup', () => { down = false; save(); });
+    el.clearTool = () => { arr = b.cats.map((_, i) => b.given && b.given[0] === i ? b.given[1] : 0); draw(); save(); };
+    draw();
+  }
+
+  function clearTool(key) {
+    const el = document.querySelector('[data-pie="' + key + '"],[data-bars="' + key + '"]');
+    if (el && el.clearTool) el.clearTool();
   }
 
   function drawPoints(key) {
@@ -654,7 +777,7 @@
     });
     document.querySelectorAll('[data-fb]').forEach(fb => {
       const k = fb.dataset.fb;
-      const el = document.querySelector('[data-k="' + k + '"]') || fb.previousElementSibling;
+      const el = document.querySelector('[data-k="' + k + '"]') || document.querySelector('[data-pie="' + k + '"],[data-bars="' + k + '"]') || fb.previousElementSibling;
       const v = (state.a[k] || '').trim(), unit = unitProblem(k);
       const testable = checked && ANS[k];
       const ok = testable && correct(k);
@@ -728,7 +851,7 @@
       const parts = keysOf(qi, l, s).filter(k => (state.a[k] || '').trim()).map(k => {
         const v = state.a[k].trim();
         const mark = ANS[k] ? (correct(k) ? ' ✓' : ' ✗') : '';
-        return LABEL[k] + ': ' + (s.draw ? 'שורטט' : v.replace(/\s+/g, ' ')) + mark;
+        return LABEL[k] + ': ' + (s.draw || s.pie || s.bars ? 'שורטט' : v.replace(/\s+/g, ' ')) + mark;
       });
       return parts.length ? parts.join(' · ') : l + ': —';
     }).join(' · ')).join('\n');
@@ -741,7 +864,7 @@
       const v = (state.a[k] || '').trim();
       if (!v || !ANS[k] || correct(k)) return;
       const unit = unitProblem(k);
-      out.push('ש' + (qi + 1) + ' ' + LABEL[k] + ': ' + (subOf(q.subs[l]).draw ? 'שרטוט' : v.replace(/\s+/g, ' ')) +
+      out.push('ש' + (qi + 1) + ' ' + LABEL[k] + ': ' + (subOf(q.subs[l]).draw || subOf(q.subs[l]).pie || subOf(q.subs[l]).bars ? 'שרטוט' : v.replace(/\s+/g, ' ')) +
         (unit ? ' (' + unit + ')' : ''));
     })));
     return out.join('\n');

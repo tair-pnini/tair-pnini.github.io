@@ -71,6 +71,8 @@
       try { const pts = JSON.parse(v); return pointIn(pts[pts.length - 1], want.area); } catch (e) { return false; }
     }
     if (want.path) return samePath(v, want.path);
+    if (want.pie) return samePie(v, want);
+    if (want.bars) { try { return JSON.stringify(JSON.parse(v)) === JSON.stringify(want.bars); } catch (e) { return false; } }
     if (want.points) return samePoints(v, want.points);
     if (want.pick) {
       // "תנו דוגמה ל-2 חודשים": לפחות pick מילים מתוך from, ואף מילה מתוך other
@@ -123,6 +125,20 @@
       got.add(Math.min(a, b));
     }
     return got.size === path.length - 1;
+  }
+
+  // עוגה שנצבעה (מערך: הקבוצה של כל גזרה, −1 = לא צבוע) מול מספר הגזרות שכל קבוצה צריכה (pie).
+  // כל קבוצה ברצף אחד, ועד tol גזרות סטייה לכל קבוצה (וגם לגזרות שלא נצבעו)
+  function samePie(v, want) {
+    let arr;
+    try { arr = JSON.parse(v); } catch (e) { return false; }
+    const n = arr.length, tol = want.tol || 0;
+    if (arr.filter(x => x < 0).length > tol) return false;
+    return want.pie.every((need, g) => {
+      const count = arr.filter(x => x === g).length;
+      const runs = arr.filter((x, i) => x === g && arr[(i - 1 + n) % n] !== g).length;
+      return Math.abs(count - need) <= tol && (count === 0 || runs === 1 || count === n);
+    });
   }
 
   // נקודות שסומנו מול הנקודות הנכונות (אותה קבוצה, בלי חשיבות לסדר)
