@@ -60,7 +60,8 @@
   }
   const sameRanges = (v, want) => { const s = daySegments(v); return s !== null && s === daySegments(want); };
 
-  // האם התשובה נכונה. want: מחרוזת | { a, tol, not } | { days } | { ranges } | { area } | { path }.
+  // האם התשובה נכונה. want: מחרוזת | { a, tol, not } | { days } | { ranges } | { area } | { path } | { points }
+  //   | { pick, from, other }.
   // choice = בחירה מרשימה.
   function isCorrect(v, want, unit, choice) {
     v = String(v || '').trim();
@@ -70,6 +71,12 @@
       try { const pts = JSON.parse(v); return pointIn(pts[pts.length - 1], want.area); } catch (e) { return false; }
     }
     if (want.path) return samePath(v, want.path);
+    if (want.points) return samePoints(v, want.points);
+    if (want.pick) {
+      // "תנו דוגמה ל-2 חודשים": לפחות pick מילים מתוך from, ואף מילה מתוך other
+      const good = want.from.filter(w => v.includes(w)).length;
+      return good >= want.pick && !(want.other || []).some(w => v.includes(w));
+    }
     if (want.days) return sameDays(v, want.days);
     if (want.ranges) return sameRanges(v, want.ranges);
     const text = typeof want === 'string' ? want : want.a;
@@ -109,6 +116,14 @@
       got.add(Math.min(a, b));
     }
     return got.size === path.length - 1;
+  }
+
+  // נקודות שסומנו מול הנקודות הנכונות (אותה קבוצה, בלי חשיבות לסדר)
+  function samePoints(v, want) {
+    let pts;
+    try { pts = JSON.parse(v); } catch (e) { return false; }
+    const near = (p, q) => Math.abs(p[0] - q[0]) < 0.015 && Math.abs(p[1] - q[1]) < 0.015;
+    return pts.length === want.length && want.every(w => pts.some(p => near(p, w)));
   }
 
   window.GraphCheck = { unitProblem, numbers, dayList, sameDays, daySegments, sameRanges, isCorrect, signSlip, pointIn };

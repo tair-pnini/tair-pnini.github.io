@@ -146,6 +146,7 @@
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 12px;
       align-content: start;
+      align-items: start; /* סעיף קצר לא נמתח לגובה של השכן שלו */
     }
     .sub {
       display: flex;
@@ -240,6 +241,7 @@
     table.fill { border-collapse: collapse; font-size: 17px; }
     table.fill th, table.fill td { border: 1px solid rgba(255,255,255,0.2); padding: 3px; text-align: center; }
     table.fill th { font-weight: 400; color: #cbd5e1; padding: 3px 8px; }
+    input.ans.cell.wide-cell { width: 120px; }
     input.ans.cell { width: 38px; height: 38px; flex: none; padding: 0 2px; text-align: center; font-size: 16px; }
 
     /* בחירה בין תשובות */
@@ -383,7 +385,12 @@
     if (sub.grid) {
       const cells = [];
       sub.grid.rows.forEach((_, r) => sub.grid.cols.forEach((_, c) => cells.push(base + '-' + r + '-' + c)));
-      return cells.concat(base);
+      return sub.grid.noFinal ? cells : cells.concat(base);
+    }
+    // טבלה עם תאים קבועים ותאים למילוי (rows, null = תא למילוי)
+    if (sub.table && sub.table.rows) {
+      const n = [].concat(...sub.table.rows).filter(c => c === null).length;
+      return Array.from({ length: n }, (_, j) => base + '-' + j);
     }
     const many = sub.items || (sub.table && sub.table.cols);
     return many ? many.map((_, j) => base + '-' + j) : [base];
@@ -398,13 +405,14 @@
     keys.forEach((k, j) => {
       const C = s.grid && s.grid.cols.length;
       LABEL[k] = s.items ? l + '(' + (j + 1) + ')'
+        : s.table && s.table.rows ? l + ' – תא ' + (j + 1)
         : s.table ? l + ' – ' + s.table.cols[j]
         : s.grid && j < cells.length ? l + ' – ' + s.grid.rows[Math.floor(j / C)] + '/' + s.grid.cols[j % C].replace(/ \(.*\)$/, '')
         : l;
       UNIT[k] = s.items ? s.items[j].unit : s.grid && j < cells.length ? '' : s.unit;
       const want = cells && j < cells.length ? cells[j] : Array.isArray(a) ? a[j] : a;
       if (want) ANS[k] = want;
-      if (s.choices) CHOICE[k] = true;
+      if (s.choices || (s.items && s.items[j].choices)) CHOICE[k] = true;
     });
   }));
 
@@ -430,15 +438,26 @@
   // שורת תשובה: [תווית] [מילים לפני] [תיבה]. את יחידת המידה התלמידים כותבים בעצמם.
   const ansRow = (key, o) => o.long
     ? '<div class="ans-row wide-row"><span class="item">' + o.label + ':</span>' + longBox(key) + '</div>'
+    : o.choices ? '<div class="ans-row">' + (o.label ? '<span class="item">' + o.label + ':</span>' : '') +
+      choiceBox(o.choices, key) + '</div>'
     : '<div class="ans-row">' +
       (o.label ? '<span class="item">' + o.label + ':</span>' : '') +
       (o.pre ? '<span>' + o.pre + '</span>' : '') + box(key, false) + '</div>';
 
-  // טבלה למילוי: שורת כותרת קבועה ושורה של תיבות
-  const tableBox = (t, keys) => '<div class="tbl-wrap"><table class="fill"><tr><th>' + t.head + '</th>' +
-    t.cols.map(c => '<td>' + c + '</td>').join('') + '</tr><tr><th>' + t.label + '</th>' +
-    keys.map(k => '<td><input class="ans cell" data-k="' + k + '" inputmode="decimal" autocomplete="off"></td>').join('') +
-    '</tr></table></div>';
+  // טבלה למילוי: שורת כותרת קבועה ושורה של תיבות.
+  // או rows: כל שורה = [כותרת, תא, תא...], תא null = תיבה (רחבה, למשל לטווח "200–51")
+  function tableBox(t, keys) {
+    const cell = k => '<td><input class="ans cell" data-k="' + k + '" inputmode="decimal" autocomplete="off"></td>';
+    if (t.rows) {
+      let j = 0;
+      return '<div class="tbl-wrap"><table class="fill">' + t.rows.map(row => '<tr><th>' + row[0] + '</th>' +
+        row.slice(1).map(c => c === null ? cell(keys[j++]).replace('ans cell', 'ans cell wide-cell').replace(' inputmode="decimal"', '') : '<td>' + c + '</td>').join('') +
+        '</tr>').join('') + '</table></div>';
+    }
+    return '<div class="tbl-wrap"><table class="fill"><tr><th>' + t.head + '</th>' +
+      t.cols.map(c => '<td>' + c + '</td>').join('') + '</tr><tr><th>' + t.label + '</th>' +
+      keys.map(cell).join('') + '</tr></table></div>';
+  }
 
   // טבלה אופקית (grid): שורת כותרת עם הפריטים (rows), ושורה למילוי לכל עמודת נתון (cols).
   // אחריה תיבת התשובה של הסעיף.
@@ -448,13 +467,16 @@
       '<div class="tbl-wrap"><table class="fill grid"><tr><th>' + g.head + '</th>' +
       g.rows.map(r => '<th>' + r + '</th>').join('') + '</tr>' +
       g.cols.map((col, c) => '<tr><th>' + col + '</th>' + g.rows.map((_, r) =>
-        '<td><input class="ans cell" data-k="' + keys[r * C + c] + '" inputmode="decimal" autocomplete="off"></td>').join('') + '</tr>').join('') +
-      '</table></div>' + ansRow(keys[keys.length - 1], { pre: s.pre, unit: s.unit });
+        '<td><input class="ans cell' + (g.wide ? ' wide-cell' : '') + '" data-k="' + keys[r * C + c] + '"' +
+        (g.wide ? '' : ' inputmode="decimal"') + ' autocomplete="off"></td>').join('') + '</tr>').join('') +
+      '</table></div>' + (g.noFinal ? '' : ansRow(keys[keys.length - 1], { pre: s.pre, unit: s.unit }));
   }
 
   // שרטוט על הגרף: הוראה, כפתור ניקוי והערה
   const drawBox = (s, key) => '<div class="draw-tools"><span class="draw-note">' +
-    (s.draw === 'point' ? 'לחצו על הגרף כדי לסמן את הנקודה.' : 'לחצו על הנקודות בגרף, אחת אחרי השנייה. כל שתי נקודות מתחברות בקו.') +
+    (s.draw === 'point' ? 'לחצו על הגרף כדי לסמן את הנקודה.'
+      : s.draw === 'points' ? 'לחצו על הגרף כדי לסמן נקודות. לחיצה על נקודה שסימנתם מוחקת אותה.'
+      : 'לחצו על הנקודות בגרף, אחת אחרי השנייה. כל שתי נקודות מתחברות בקו.') +
     '</span><button type="button" class="reveal" onclick="clearDraw(\'' + key + '\')">ניקוי</button></div>' +
     '<span class="ufb" data-fb="' + key + '"></span>' +
     (ANS[key] ? '' : '<span class="nocheck">את השרטוט הדף לא בודק, אבל חשוב לדעת לשרטט!</span>');
@@ -477,15 +499,19 @@
         : s.choices ? choiceBox(s.choices, keys[0])
         : s.items ? '<div class="items">' + s.items.map((o, j) => ansRow(keys[j], o)).join('') + '</div>'
         : long ? '<div class="ans-row">' + longBox(keys[0]) + '</div>' : ansRow(keys[0], s);
-      const full = long || s.hint || s.table || s.grid || s.draw || s.choices || (s.items && s.items.some(o => o.long));
-      return '<div class="sub' + (full ? ' full' : '') + '" data-sub="' + l + '"><div><strong>' + l + '.</strong> ' + s.text +
+      // שורה שלמה: נימוק, הדרכה, טבלה, שרטוט, בחירה, או יותר משתי תיבות (שלא יימתח לאורך ליד סעיף קצר)
+      const full = long || s.hint || s.table || s.grid || s.draw || s.choices ||
+        (s.items && (s.items.length > 2 || s.items.some(o => o.long)));
+      // cont = המשך של הסעיף הקודם (בלי אות משלו)
+      return '<div class="sub' + (full ? ' full' : '') + '" data-sub="' + l + '"><div>' +
+        (s.cont ? '' : '<strong>' + l + '.</strong> ') + s.text +
         (s.hint ? '<div class="hint">' + s.hint + '</div>' : '') + '</div>' + rows + '</div>';
     }).join('');
 
     document.getElementById('q-card').innerHTML =
       '<span class="q-badge">' + q.part + ' · שאלה ' + (qi + 1) + '</span>' +
       '<div class="q-grid' + (q.wide ? ' wide' : '') + '">' +
-        '<p class="stem">' + q.stem + '</p>' +
+        '<div class="stem">' + q.stem + '</div>' +
         '<div class="graph"><div class="pic"><img id="graph-img" src="img/' + q.img + '.png" alt="הגרף של שאלה ' + (qi + 1) + '">' +
         '<svg id="draw-layer"></svg></div></div>' +
         '<div class="subs">' + subs + '</div>' +
@@ -523,8 +549,19 @@
         // נקודה "מגנטית" קרובה
         const near = (s.snap || []).find(n => Math.hypot(n[0] - p[0], (n[1] - p[1]) * r.height / r.width) < 0.04);
         if (near) p = near.slice();
+        // רשת: הנקודה נתפסת לצומת הקרוב (xs, ys = מיקומי הקווים בתמונה)
+        if (s.snapGrid) {
+          const closest = (list, x) => list.reduce((a, b) => Math.abs(b - x) < Math.abs(a - x) ? b : a);
+          p = [closest(s.snapGrid.xs, p[0]), closest(s.snapGrid.ys, p[1])];
+        }
         p = p.map(x => Math.round(x * 1000) / 1000);
-        const pts = s.draw === 'point' ? [p] : drawPoints(key).concat([p]);
+        let pts;
+        if (s.draw === 'point') pts = [p];
+        else if (s.draw === 'points') {
+          // לחיצה על נקודה קיימת מוחקת אותה
+          const old = drawPoints(key), same = old.findIndex(o => Math.abs(o[0] - p[0]) < 0.01 && Math.abs(o[1] - p[1]) < 0.01);
+          pts = same >= 0 ? old.filter((_, i) => i !== same) : old.concat([p]);
+        } else pts = drawPoints(key).concat([p]);
         state.a[key] = JSON.stringify(pts);
         persist();
         render();
@@ -554,7 +591,7 @@
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.innerHTML = (s.draw === 'line' && pts.length > 1
         ? '<polyline points="' + pts.map(p => p.join(',')).join(' ') + '" />' : '') +
-      pts.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (s.draw === 'point' ? 7 : 5) + '" />').join('');
+      pts.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (s.draw === 'line' ? 5 : 7) + '" />').join('');
   }
 
   function render() {
