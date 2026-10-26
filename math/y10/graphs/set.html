@@ -227,6 +227,14 @@
     .intro { margin-top: 8px; color: #cbd5e1; }
     .stem table.fill { margin-top: 8px; font-size: 18px; }
     .stem table.fill td { padding: 4px 14px; }
+    /* כיתוב בתוך גזרות */
+    .lbl-layer { position: absolute; inset: 0; direction: ltr; pointer-events: none; }
+    input.ans.cell.lbl { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; width: 96px; height: 34px;
+      font-size: 15px; background: rgba(15, 23, 42, 0.85); }
+    .q-grid.big .pic { display: block; }
+    .q-grid.top.big .pic { display: inline-block; }
+    .q-grid.big .graph img { width: 100%; }
+    .q-grid.top.big .graph img { width: 520px; max-width: 100%; }
     .inline-pic { background: #fff; border-radius: 12px; padding: 8px; margin: 10px 0; display: inline-block; }
     .inline-pic img { display: block; max-width: 100%; }
     table.fill.grid th { white-space: normal; font-size: 15px; }
@@ -401,7 +409,7 @@
       const n = [].concat(...sub.table.rows).filter(c => c === null).length;
       return Array.from({ length: n }, (_, j) => base + '-' + j);
     }
-    const many = sub.items || (sub.table && sub.table.cols);
+    const many = sub.items || sub.labels || (sub.table && sub.table.cols);
     return many ? many.map((_, j) => base + '-' + j) : [base];
   }
 
@@ -415,6 +423,7 @@
       const C = s.grid && s.grid.cols.length;
       LABEL[k] = s.items ? l + '(' + (j + 1) + ')'
         : s.table && s.table.rows ? l + ' – תא ' + (j + 1)
+        : s.labels ? l + ' – גזרה ' + (j + 1)
         : s.table ? l + ' – ' + s.table.cols[j]
         : s.grid && j < cells.length ? l + ' – ' + s.grid.rows[Math.floor(j / C)] + '/' + s.grid.cols[j % C].replace(/ \(.*\)$/, '')
         : l;
@@ -490,8 +499,18 @@
     '<span class="ufb" data-fb="' + key + '"></span>' +
     (ANS[key] ? '' : '<span class="nocheck">את השרטוט הדף לא בודק, אבל חשוב לדעת לשרטט!</span>');
 
+  // תיבות כתיבה בתוך הגזרות של דיאגרמת עיגול (labels = מרכזי הגזרות, 0–1 ביחס לתמונה)
+  function labelLayer(qi, q) {
+    const l = Object.keys(q.subs).find(x => subOf(q.subs[x]).labels);
+    if (!l) return '';
+    const s = subOf(q.subs[l]), keys = keysOf(qi, l, s);
+    return '<div class="lbl-layer">' + s.labels.map((p, j) =>
+      '<input class="ans cell lbl" data-k="' + keys[j] + '" dir="auto" autocomplete="off" style="left:' +
+      p[0] * 100 + '%;top:' + p[1] * 100 + '%">').join('') + '</div>';
+  }
+
   // בחירה בין תשובות
-  const choiceBox = (choices, key) => '<div class="choice">' +
+  const choiceBox =(choices, key) => '<div class="choice">' +
     choices.map(c => '<button type="button" data-choice="' + key + '">' + c + '</button>').join('') +
     '</div><span class="ufb" data-fb="' + key + '"></span>';
 
@@ -502,7 +521,8 @@
       const s = subOf(q.subs[l]);
       const long = s.long || /נמקו|הסבירו/.test(s.text);
       const keys = keysOf(qi, l, s);
-      const rows = s.paper ? '<p class="draw-note">את הסעיף הזה עושים במחברת. הדף לא בודק אותו, אבל חשוב לדעת לשרטט!</p>'
+      const rows = s.labels ? '<p class="draw-note">כתבו בתיבות שבתוך הגזרות בדיאגרמה. "בדיקת התשובות" בודקת גם אותן.</p>'
+        : s.paper ?'<p class="draw-note">את הסעיף הזה עושים במחברת. הדף לא בודק אותו, אבל חשוב לדעת לשרטט!</p>'
         : s.draw ? drawBox(s, keys[0])
         : s.grid ? gridBox(s, keys)
         : s.table ? tableBox(s.table, keys)
@@ -510,7 +530,7 @@
         : s.items ? '<div class="items">' + s.items.map((o, j) => ansRow(keys[j], o)).join('') + '</div>'
         : long ? '<div class="ans-row">' + longBox(keys[0]) + '</div>' : ansRow(keys[0], s);
       // שורה שלמה: נימוק, הדרכה, טבלה, שרטוט, בחירה, או יותר משתי תיבות (שלא יימתח לאורך ליד סעיף קצר)
-      const full = long || s.hint || s.table || s.grid || s.draw || s.paper || s.choices ||
+      const full = long || s.hint || s.table || s.grid || s.draw || s.paper || s.labels || s.choices ||
         (s.items && (s.items.length > 2 || s.items.some(o => o.long)));
       // cont = המשך של הסעיף הקודם (בלי אות משלו)
       return '<div class="sub' + (full ? ' full' : '') + '" data-sub="' + l + '"><div>' +
@@ -520,10 +540,10 @@
 
     document.getElementById('q-card').innerHTML =
       '<span class="q-badge">' + q.part + ' · שאלה ' + (qi + 1) + '</span>' +
-      '<div class="q-grid' + (q.wide ? ' wide' : '') + (q.top ? ' top' : '') + '">' +
+      '<div class="q-grid' + (q.wide ? ' wide' : '') + (q.top ? ' top' : '') + (q.big ? ' big' : '') + '">' +
         '<div class="stem">' + q.stem + '</div>' +
         '<div class="graph"><div class="pic"><img id="graph-img" src="img/' + q.img + '.png" alt="הגרף של שאלה ' + (qi + 1) + '">' +
-        '<svg id="draw-layer"></svg></div></div>' +
+        '<svg id="draw-layer"></svg>' + labelLayer(qi, q) + '</div></div>' +
         '<div class="subs">' + subs + '</div>' +
       '</div>' +
       '<div class="check-row"><button class="btn-check" onclick="checkQuestion()"><i class="fa-solid fa-check"></i> בדיקת התשובות</button>' +

@@ -86,9 +86,16 @@
       return text.split(/\s+/).map(x => x.replace(/^ו(?=..)/, '').replace(/ה$/, '')).every(x => v.includes(x)) &&
         !(want.not && v.includes(want.not));
     }
-    const tol = want.tol || 0.01, got = numbers(v);
+    // word = מילה שחייבת להופיע ליד המספר (למשל "נשוא" בגזרה של הנשואים)
+    if (want.word && !v.includes(want.word)) return false;
+    // spell = מספרים במילים ("שעתיים", "עבירה אחת") – בכיתוב בתוך גזרות של דיאגרמת עיגול
+    const tol = want.tol || 0.01, got = numbers(want.spell ? spelled(v) : v);
     return got.length === w.length && got.every((x, i) => Math.abs(x - w[i]) <= tol);
   }
+
+  const SPELL = { אחת: 1, אחד: 1, שתיים: 2, שניים: 2, שתי: 2, שני: 2, שלוש: 3, שלושה: 3, ארבע: 4, ארבעה: 4 };
+  const spelled = v => v.replace(/שעתיים/g, '2 שעות')
+    .replace(/(^|[^א-ת])(אחת|אחד|שתיים|שניים|שתי|שני|שלושה|שלוש|ארבעה|ארבע)(?![א-ת])/g, (m, b, w) => b + SPELL[w]);
 
   // תשובה לא נכונה שבה רק הסימן הפוך (2.5 במקום −2.5)
   function signSlip(v, want, unit) {
