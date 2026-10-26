@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>גרפים: תרגול</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&amp;family=Heebo:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Shared site bars (<site-header>, <site-footer>) -->
+  <script src="/assets/site.js"></script>
+  <script src="data.js"></script>
+  <script src="check.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* אותה פלטה כמו בדף הגדילה והדעיכה */
+    :root {
+      --c-qty: #38bdf8;
+      --c-time: #fbbf24;
+      --c-rate: #4ade80;
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-subtle: rgba(255, 255, 255, 0.12);
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: 'Assistant', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px;
+    }
+
+    site-header, site-footer { align-self: stretch; margin: 0 -16px; }
+    site-footer { background: #ffffff; }
+
+    .wrap { width: 100%; max-width: 1100px; padding: 20px 0 40px; }
+    .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1.15;
+      margin: 0 4px;
+    }
+    .frac > span { padding: 0 5px; }
+    .frac > span + span { border-top: 2px solid currentColor; }
+
+    /* ---------- ניווט בין השאלות ---------- */
+    .back { color: #94a3b8; font-size: 17px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+    .back:hover { color: #ffffff; }
+    .qnav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .qnav .title { font-family: 'Heebo', sans-serif; font-size: 20px; font-weight: 700; margin-left: 10px; }
+    .qnav button {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.18);
+      color: #cbd5e1;
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+      min-width: 44px;
+    }
+    .qnav button.cur { border-color: var(--c-qty); color: #ffffff; }
+    .qnav button.done { background: rgba(74, 222, 128, 0.18); border-color: rgba(74, 222, 128, 0.6); color: #ffffff; }
+
+    /* ---------- כרטיס שאלה ---------- */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .q-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--c-qty);
+      font-family: 'Heebo', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    /* השאלה והסעיפים מימין, הגרף משמאל ונעוץ בזמן הגלילה */
+    .q-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+      grid-template-areas: "stem graph" "subs graph";
+      grid-template-rows: auto 1fr;
+      gap: 0 24px;
+    }
+    .q-grid.wide { grid-template-columns: minmax(0, 1fr) minmax(0, 540px); }
+    .stem { grid-area: stem; margin-bottom: 8px; }
+    .subs { grid-area: subs; }
+    .stem {
+      font-size: 22px;
+      line-height: 1.8;
+      color: #f8fafc;
+    }
+
+    /* הגרף מהסריקה: מסגרת לבנה על הרקע הכהה */
+    .graph {
+      grid-area: graph;
+      align-self: start;
+      position: sticky;
+      top: 84px; /* מתחת לסרגל העליון הדביק */
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+    }
+    .graph img { display: block; max-width: 100%; max-height: calc(100vh - 120px); width: auto; height: auto; margin: 0 auto; }
+    .q-grid.wide .graph img { width: 100%; object-fit: contain; }
+
+    /* ---------- סעיפים ---------- */
+    /* סעיפים קצרים עומדים כמה בשורה; סעיף עם הדרכה או "נמקו" תופס שורה שלמה */
+    .subs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      align-content: start;
+    }
+    .sub {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: rgba(0,0,0,0.25);
+      border-right: 4px solid var(--c-qty);
+      padding: 12px 16px;
+      border-radius: 0 10px 10px 0;
+      font-size: 19px;
+      line-height: 1.6;
+    }
+    .sub.full { grid-column: 1 / -1; }
+    .sub.filled { border-right-color: var(--c-rate); }
+    .sub .hint {
+      background: rgba(251, 191, 36, 0.08);
+      border-right: 3px solid var(--c-time);
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 17px;
+      line-height: 1.6;
+      margin: 10px 0 4px;
+      color: #fde68a;
+    }
+    .ans-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 10px; }
+    .items { display: flex; flex-wrap: wrap; gap: 0 28px; }
+    .item { white-space: nowrap; }
+    .ufb { flex-basis: 100%; font-size: 16px; color: #f9a8b8; }
+    .ufb.right { color: var(--c-rate); }
+    .sign-hint { color: #fde68a; }
+    .ufb:empty { display: none; }
+    .ufb strong { color: #ffffff; }
+    .reveal {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      color: #cbd5e1;
+      font-family: inherit;
+      font-size: 15px;
+      padding: 1px 12px;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+    .reveal:hover { border-color: #ffffff; color: #ffffff; }
+    .ans.bad { border-color: rgba(249, 168, 184, 0.7); }
+    .ans.good { border-color: rgba(74, 222, 128, 0.7); }
+    .nocheck { flex-basis: 100%; display: block; font-size: 15px; color: #94a3b8; margin-top: 4px; }
+    .intro { margin-top: 8px; color: #cbd5e1; }
+    table.fill.grid th { white-space: normal; font-size: 15px; }
+
+    /* שרטוט על הגרף */
+    .pic { position: relative; display: inline-block; max-width: 100%; }
+    .q-grid.wide .pic { display: block; }
+    .pic.drawing { cursor: crosshair; }
+    #draw-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    #draw-layer polyline { fill: none; stroke: #2563eb; stroke-width: 3; stroke-linejoin: round; }
+    #draw-layer circle { fill: #2563eb; stroke: #ffffff; stroke-width: 1.5; }
+    .draw-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin-top: 8px; }
+    .ans-row.wide-row { flex-basis: 100%; }
+    .ans-row.wide-row textarea.ans { flex: 1 1 100%; min-height: 64px; }
+    .draw-note { color: #94a3b8; font-size: 17px; margin-top: 8px; }
+    .ad { border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px; padding: 8px 14px; margin: 8px 0; color: #e2e8f0; }
+
+    /* טבלה למילוי */
+    .tbl-wrap { overflow-x: auto; margin-top: 10px; }
+    table.fill { border-collapse: collapse; font-size: 17px; }
+    table.fill th, table.fill td { border: 1px solid rgba(255,255,255,0.2); padding: 3px; text-align: center; }
+    table.fill th { font-weight: 400; color: #cbd5e1; padding: 3px 8px; }
+    input.ans.cell { width: 38px; height: 38px; flex: none; padding: 0 2px; text-align: center; font-size: 16px; }
+
+    /* בחירה בין תשובות */
+    .choice { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .choice button {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.2);
+      color: #ffffff;
+      border-radius: 30px;
+      padding: 6px 18px;
+      font-family: 'Assistant', sans-serif;
+      font-size: 18px;
+      cursor: pointer;
+      text-align: right;
+    }
+    .choice button.on { border-color: var(--c-qty); background: rgba(56, 189, 248, 0.15); }
+    .choice.good button.on { border-color: var(--c-rate); background: rgba(74, 222, 128, 0.15); }
+    .choice.bad button.on { border-color: rgba(249, 168, 184, 0.7); }
+
+    /* בדיקה בסוף השאלה */
+    .check-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+    .btn-check {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-check:hover { background: #38bdf8; color: #000; }
+    .score { font-size: 18px; color: #cbd5e1; }
+    .ans {
+      flex: 1;
+      min-width: 0;
+      height: 46px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Assistant', sans-serif;
+      font-size: 19px;
+      padding: 0 12px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    textarea.ans { height: auto; min-height: 80px; padding: 8px 12px; resize: vertical; line-height: 1.5; }
+    .ans:focus { border-color: var(--c-qty); background: rgba(0, 0, 0, 0.6); }
+    .ans::placeholder { color: #64748b; }
+    input.ans.short { flex: 0 0 170px; width: 170px; text-align: center; padding: 0 6px; }
+
+    .btn-step {
+      background: var(--c-rate);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .btn-link { background: none; border: none; color: #94a3b8; text-decoration: underline; font-family: inherit; font-size: 17px; cursor: pointer; margin: 10px 8px 0; }
+    .after { margin-bottom: 20px; }
+    .reset { text-align: center; }
+    .note { color: #94a3b8; font-size: 17px; }
+
+    @media (max-width: 860px) {
+      .q-grid, .q-grid.wide { grid-template-columns: 1fr; grid-template-areas: "stem" "graph" "subs"; grid-template-rows: auto; }
+      .graph { position: static; margin-bottom: 14px; }
+    }
+
+    /* ---------- Phone layout ---------- */
+    @media (max-width: 640px) {
+      html { font-size: 110%; }
+      .wrap { padding: 14px 0 32px; }
+      .card { padding: 20px 14px; }
+      .stem { font-size: 20px; }
+      .sub { font-size: 18px; padding: 10px 12px; }
+      .graph { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+<site-header style="--tp-max:1100px"></site-header>
+<div class="wrap">
+  <a class="back" href="./"><i class="fa-solid fa-arrow-right"></i> כל המקבצים</a>
+  <nav class="qnav" id="qnav"></nav>
+  <section class="card" id="q-card"></section>
+  <div class="after" id="after"></div>
+  <p class="reset"><button class="btn-link" onclick="resetAll()">להתחיל מחדש (מוחק את כל התשובות במקבץ הזה בדפדפן הזה)</button></p>
+</div>
+<site-footer style="--tp-max:1100px"></site-footer>
+
+<script>
+  const SET = GRAPH_SETS.find(s => s.id === new URLSearchParams(location.search).get('c')) || GRAPH_SETS[0];
+  const QUESTIONS = SET.questions;
+  const STORAGE_KEY = 'graphs-' + SET.id;
+  document.title = 'גרפים: ' + SET.title;
+
+  // a = התשובות, rev = תיבות שבהן גילו את היחידה, chk = שאלות שבדקו (מאז הבדיקה מסמנים נכון/לא נכון),
+  // hint = תיבות שבהן ביקשו רמז על הסימן
+  let state = { cur: 0, a: {}, rev: {}, chk: {}, hint: {} };
+
+  // כל סעיף = תיבה אחת, או כמה תיבות (items / עמודות בטבלה / תאי grid ואחריהם התשובה).
+  // שרטוט על הגרף = "תיבה" אחת שבה נשמרות הנקודות (JSON). מפתח: <שאלה>-<סעיף>[-<פריט>]
+  const subOf = v => typeof v === 'string' ? { text: v } : v;
+  function keysOf(qi, letter, sub) {
+    const base = qi + '-' + letter;
+    if (sub.grid) {
+      const cells = [];
+      sub.grid.rows.forEach((_, r) => sub.grid.cols.forEach((_, c) => cells.push(base + '-' + r + '-' + c)));
+      return cells.concat(base);
+    }
+    const many = sub.items || (sub.table && sub.table.cols);
+    return many ? many.map((_, j) => base + '-' + j) : [base];
+  }
+
+  // לכל תיבה: היחידה שהיא דורשת (מפתח ב-GRAPH_UNITS) והתשובה מדף התשובות
+  const UNIT = {}, ANS = {}, CHOICE = {};
+  QUESTIONS.forEach((q, qi) => Object.keys(q.subs).forEach(l => {
+    const s = subOf(q.subs[l]), keys = keysOf(qi, l, s), ans = q.ans || {}, a = ans[l];
+    const cells = s.grid ? [].concat(...(ans[l + '#'] || [])) : null;
+    keys.forEach((k, j) => {
+      UNIT[k] = s.items ? s.items[j].unit : s.grid && j < cells.length ? '' : s.unit;
+      const want = cells && j < cells.length ? cells[j] : Array.isArray(a) ? a[j] : a;
+      if (want) ANS[k] = want;
+      if (s.choices) CHOICE[k] = true;
+    });
+  }));
+
+  // הבדיקות עצמן ב-check.js
+  const unitProblem = k => GraphCheck.unitProblem(state.a[k], UNIT[k]);
+  const filled = k => !!(state.a[k] || '').trim() && !unitProblem(k);
+  const correct = k => GraphCheck.isCorrect(state.a[k], ANS[k], UNIT[k], CHOICE[k]);
+  const signSlip = k => GraphCheck.signSlip(state.a[k], ANS[k], UNIT[k]);
+  function questionDone(qi) {
+    const q = QUESTIONS[qi];
+    return Object.keys(q.subs).every(l => keysOf(qi, l, subOf(q.subs[l])).every(filled));
+  }
+
+  function box(key, long) {
+    return long
+      ? '<textarea class="ans" data-k="' + key + '" placeholder="התשובה וההסבר שלי…"></textarea>'
+      : '<input class="ans short" data-k="' + key + '" dir="auto" autocomplete="off"><span class="ufb" data-fb="' + key + '"></span>';
+  }
+  // תיבה גדולה. אם אין לה תשובה לבדיקה – אומרים את זה
+  const longBox = key => box(key, true) + '<span class="ufb" data-fb="' + key + '"></span>' +
+    (ANS[key] ? '' : '<span class="nocheck">את ההסבר הדף לא בודק, אבל חשוב לדעת להסביר!</span>');
+
+  // שורת תשובה: [תווית] [מילים לפני] [תיבה]. את יחידת המידה התלמידים כותבים בעצמם.
+  const ansRow = (key, o) => o.long
+    ? '<div class="ans-row wide-row"><span class="item">' + o.label + ':</span>' + longBox(key) + '</div>'
+    : '<div class="ans-row">' +
+      (o.label ? '<span class="item">' + o.label + ':</span>' : '') +
+      (o.pre ? '<span>' + o.pre + '</span>' : '') + box(key, false) + '</div>';
+
+  // טבלה למילוי: שורת כותרת קבועה ושורה של תיבות
+  const tableBox = (t, keys) => '<div class="tbl-wrap"><table class="fill"><tr><th>' + t.head + '</th>' +
+    t.cols.map(c => '<td>' + c + '</td>').join('') + '</tr><tr><th>' + t.label + '</th>' +
+    keys.map(k => '<td><input class="ans cell" data-k="' + k + '" inputmode="decimal" autocomplete="off"></td>').join('') +
+    '</tr></table></div>';
+
+  // טבלה אופקית (grid): שורת כותרת עם הפריטים (rows), ושורה למילוי לכל עמודת נתון (cols).
+  // אחריה תיבת התשובה של הסעיף.
+  function gridBox(s, keys) {
+    const g = s.grid, C = g.cols.length;
+    return (s.intro ? '<p class="intro">' + s.intro + '</p>' : '') +
+      '<div class="tbl-wrap"><table class="fill grid"><tr><th>' + g.head + '</th>' +
+      g.rows.map(r => '<th>' + r + '</th>').join('') + '</tr>' +
+      g.cols.map((col, c) => '<tr><th>' + col + '</th>' + g.rows.map((_, r) =>
+        '<td><input class="ans cell" data-k="' + keys[r * C + c] + '" inputmode="decimal" autocomplete="off"></td>').join('') + '</tr>').join('') +
+      '</table></div>' + ansRow(keys[keys.length - 1], { pre: s.pre, unit: s.unit });
+  }
+
+  // שרטוט על הגרף: הוראה, כפתור ניקוי והערה
+  const drawBox = (s, key) => '<div class="draw-tools"><span class="draw-note">' +
+    (s.draw === 'point' ? 'לחצו על הגרף כדי לסמן את הנקודה.' : 'לחצו על הנקודות בגרף, אחת אחרי השנייה. כל שתי נקודות מתחברות בקו.') +
+    '</span><button type="button" class="reveal" onclick="clearDraw(\'' + key + '\')">ניקוי</button></div>' +
+    '<span class="ufb" data-fb="' + key + '"></span>' +
+    (ANS[key] ? '' : '<span class="nocheck">את השרטוט הדף לא בודק, אבל חשוב לדעת לשרטט!</span>');
+
+  // בחירה בין תשובות
+  const choiceBox = (choices, key) => '<div class="choice">' +
+    choices.map(c => '<button type="button" data-choice="' + key + '">' + c + '</button>').join('') +
+    '</div><span class="ufb" data-fb="' + key + '"></span>';
+
+  function build() {
+    const qi = state.cur, q = QUESTIONS[qi];
+
+    const subs = Object.keys(q.subs).map(l => {
+      const s = subOf(q.subs[l]);
+      const long = s.long || /נמקו|הסבירו/.test(s.text);
+      const keys = keysOf(qi, l, s);
+      const rows = s.draw ? drawBox(s, keys[0])
+        : s.grid ? gridBox(s, keys)
+        : s.table ? tableBox(s.table, keys)
+        : s.choices ? choiceBox(s.choices, keys[0])
+        : s.items ? '<div class="items">' + s.items.map((o, j) => ansRow(keys[j], o)).join('') + '</div>'
+        : long ? '<div class="ans-row">' + longBox(keys[0]) + '</div>' : ansRow(keys[0], s);
+      const full = long || s.hint || s.table || s.grid || s.draw || s.choices || (s.items && s.items.some(o => o.long));
+      return '<div class="sub' + (full ? ' full' : '') + '" data-sub="' + l + '"><div><strong>' + l + '.</strong> ' + s.text +
+        (s.hint ? '<div class="hint">' + s.hint + '</div>' : '') + '</div>' + rows + '</div>';
+    }).join('');
+
+    document.getElementById('q-card').innerHTML =
+      '<span class="q-badge">' + q.part + ' · שאלה ' + (qi + 1) + '</span>' +
+      '<div class="q-grid' + (q.wide ? ' wide' : '') + '">' +
+        '<p class="stem">' + q.stem + '</p>' +
+        '<div class="graph"><div class="pic"><img id="graph-img" src="img/' + q.img + '.png" alt="הגרף של שאלה ' + (qi + 1) + '">' +
+        '<svg id="draw-layer"></svg></div></div>' +
+        '<div class="subs">' + subs + '</div>' +
+      '</div>' +
+      '<div class="check-row"><button class="btn-check" onclick="checkQuestion()"><i class="fa-solid fa-check"></i> בדיקת התשובות</button>' +
+      '<span class="score" id="score"></span></div>';
+
+    document.querySelectorAll('[data-k]').forEach(el => {
+      el.value = state.a[el.dataset.k] || '';
+      el.addEventListener('input', () => {
+        state.a[el.dataset.k] = el.value;
+        persist();
+        render();
+      });
+      el.addEventListener('blur', render);
+    });
+    document.querySelectorAll('[data-choice]').forEach(b => {
+      b.addEventListener('click', () => {
+        state.a[b.dataset.choice] = b.textContent;
+        persist();
+        render();
+      });
+    });
+
+    // שרטוט: לחיצה על הגרף מוסיפה נקודה לסעיף השרטוט של השאלה (אם יש)
+    const img = document.getElementById('graph-img');
+    const drawL = Object.keys(q.subs).find(l => subOf(q.subs[l]).draw);
+    img.parentElement.classList.toggle('drawing', !!drawL);
+    img.addEventListener('load', render);
+    if (drawL) {
+      const s = subOf(q.subs[drawL]), key = qi + '-' + drawL;
+      img.parentElement.addEventListener('click', e => {
+        const r = img.getBoundingClientRect();
+        let p = [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height];
+        // נקודה "מגנטית" קרובה
+        const near = (s.snap || []).find(n => Math.hypot(n[0] - p[0], (n[1] - p[1]) * r.height / r.width) < 0.04);
+        if (near) p = near.slice();
+        p = p.map(x => Math.round(x * 1000) / 1000);
+        const pts = s.draw === 'point' ? [p] : drawPoints(key).concat([p]);
+        state.a[key] = JSON.stringify(pts);
+        persist();
+        render();
+      });
+    }
+    render();
+  }
+
+  function drawPoints(key) {
+    try { return JSON.parse(state.a[key] || '[]'); } catch (e) { return []; }
+  }
+
+  function clearDraw(key) {
+    delete state.a[key];
+    persist();
+    render();
+  }
+
+  // מציירים על הגרף את הנקודות (והקווים) של סעיף השרטוט
+  function renderDrawing() {
+    const qi = state.cur, q = QUESTIONS[qi], img = document.getElementById('graph-img');
+    const svg = document.getElementById('draw-layer');
+    const drawL = Object.keys(q.subs).find(l => subOf(q.subs[l]).draw);
+    if (!drawL || !img.naturalWidth) { svg.innerHTML = ''; return; }
+    const W = img.naturalWidth, H = img.naturalHeight, s = subOf(q.subs[drawL]);
+    const pts = drawPoints(qi + '-' + drawL).map(p => [p[0] * W, p[1] * H]);
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.innerHTML = (s.draw === 'line' && pts.length > 1
+        ? '<polyline points="' + pts.map(p => p.join(',')).join(' ') + '" />' : '') +
+      pts.map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (s.draw === 'point' ? 7 : 5) + '" />').join('');
+  }
+
+  function render() {
+    const qi = state.cur, q = QUESTIONS[qi];
+    renderDrawing();
+    Object.keys(q.subs).forEach(l => {
+      // פס ירוק: הסעיף מולא (ואחרי בדיקה – גם נכון)
+      const done = keysOf(qi, l, subOf(q.subs[l])).every(k => state.chk[qi] && ANS[k] ? correct(k) : filled(k));
+      document.querySelector('.sub[data-sub="' + l + '"]').classList.toggle('filled', done);
+    });
+
+    // הערה מתחת לכל תיבה – רק כשלא מקלידים בה. קודם היחידה (אפשר לבקש לגלות אותה),
+    // ואחרי "בדיקת התשובות" – נכון או לא נכון.
+    const checked = !!state.chk[qi];
+    let right = 0, total = 0;
+    document.querySelectorAll('[data-choice]').forEach(b => b.classList.toggle('on', state.a[b.dataset.choice] === b.textContent));
+    // תאי טבלה: רק מסגרת ירוקה/אדומה
+    document.querySelectorAll('.cell').forEach(el => {
+      const k = el.dataset.k, testable = checked && ANS[k], ok = testable && correct(k);
+      if (testable) { total++; if (ok) right++; }
+      const show = testable && (state.a[k] || '').trim() && el !== document.activeElement;
+      el.classList.toggle('good', !!show && ok);
+      el.classList.toggle('bad', !!show && !ok);
+    });
+    document.querySelectorAll('[data-fb]').forEach(fb => {
+      const k = fb.dataset.fb;
+      const el = document.querySelector('[data-k="' + k + '"]') || fb.previousElementSibling;
+      const v = (state.a[k] || '').trim(), unit = unitProblem(k);
+      const testable = checked && ANS[k];
+      const ok = testable && correct(k);
+      if (testable) { total++; if (ok) right++; }
+      let html = '', good = false;
+      if (el !== document.activeElement && v) {
+        if (unit) {
+          html = state.rev[k] ? unit + ' היחידה כאן: <strong>' + GRAPH_UNIT_NAMES[UNIT[k]] + '</strong>'
+            : unit + '<button class="reveal" onclick="revealUnit(\'' + k + '\')">לגלות את היחידה</button>';
+        } else if (testable) {
+          good = ok;
+          html = ok ? '<i class="fa-solid fa-check"></i> נכון' : 'לא נכון. נסו שוב.';
+          if (signSlip(k)) {
+            html += state.hint[k]
+              ? '<br><span class="sign-hint">' + (GRAPH_SIGN_HINTS[UNIT[k]] || GRAPH_SIGN_HINTS.other) + '</span>'
+              : '<button class="reveal" onclick="showHint(\'' + k + '\')">רמז</button>';
+          }
+        }
+      }
+      // מחליפים רק כשההודעה השתנתה, כדי שלחיצה על הכפתור לא תלך לאיבוד
+      if (fb.dataset.html !== html) { fb.innerHTML = html; fb.dataset.html = html; }
+      fb.classList.toggle('right', good);
+      el.classList.toggle('good', good);
+      el.classList.toggle('bad', !!html && !good);
+    });
+    document.getElementById('score').textContent = checked
+      ? (right === total ? 'כל התשובות נכונות! כל הכבוד.' : 'נכונות: ' + right + ' מתוך ' + total + '.')
+      : '';
+
+    const last = qi === QUESTIONS.length - 1;
+    document.getElementById('after').innerHTML = last
+      ? '<a class="btn-step" href="./">סיימתי את המקבץ – חזרה לכל המקבצים <i class="fa-solid fa-arrow-left"></i></a>'
+      : '<button class="btn-step" onclick="goTo(' + (qi + 1) + ')">לשאלה הבאה <i class="fa-solid fa-arrow-left"></i></button>';
+
+    document.getElementById('qnav').innerHTML =
+      '<span class="title">' + SET.title + '</span>' +
+      QUESTIONS.map((_, i) =>
+        '<button class="' + (i === qi ? 'cur ' : '') + (questionDone(i) ? 'done' : '') + '" onclick="goTo(' + i + ')">' +
+        (i + 1) + '</button>').join('');
+  }
+
+  function checkQuestion() {
+    state.chk[state.cur] = true;
+    persist();
+    render();
+  }
+
+  function showHint(k) {
+    state.hint[k] = true;
+    persist();
+    render();
+  }
+
+  function revealUnit(k) {
+    state.rev[k] = true;
+    persist();
+    render();
+  }
+
+  function goTo(i) {
+    state.cur = i;
+    persist();
+    build();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ---------- שמירה בדפדפן ----------
+
+  function load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved && saved.a) state = Object.assign(state, saved);
+      state.rev = state.rev || {};
+      state.chk = state.chk || {};
+      state.hint = state.hint || {};
+    } catch (e) {}
+    // set.html?c=rate&q=3 פותח ישר את שאלה 3
+    const qp = +new URLSearchParams(location.search).get('q');
+    if (qp) state.cur = qp - 1;
+    if (!(state.cur >= 0 && state.cur < QUESTIONS.length)) state.cur = 0;
+  }
+
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function resetAll() {
+    if (!confirm('למחוק את כל התשובות במקבץ הזה ולהתחיל מחדש?')) return;
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    location.reload();
+  }
+
+  if (QUESTIONS.length) {
+    load();
+    build();
+  } else {
+    document.getElementById('q-card').innerHTML = '<p class="note">המקבץ הזה עוד לא מוכן.</p>';
+    document.querySelector('.reset').remove();
+  }
+</script>
+</body>
+</html>
