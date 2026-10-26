@@ -120,7 +120,7 @@
     /* top: שתי דיאגרמות זו לצד זו – הגרף ברוחב מלא מעל הסעיפים, לא נעוץ */
     .q-grid.top { grid-template-columns: 1fr; grid-template-areas: "stem" "graph" "subs"; grid-template-rows: auto; }
     .q-grid.top .graph { position: static; margin-bottom: 14px; }
-    .q-grid.top .graph img { width: 100%; max-width: 900px; max-height: none; }
+    .q-grid.top .graph img { width: auto; max-width: 100%; max-height: none; }
     .stem { grid-area: stem; margin-bottom: 8px; }
     .subs { grid-area: subs; }
     .stem {
@@ -225,6 +225,8 @@
 
     .nocheck { flex-basis: 100%; display: block; font-size: 15px; color: #94a3b8; margin-top: 4px; }
     .intro { margin-top: 8px; color: #cbd5e1; }
+    .inline-pic { background: #fff; border-radius: 12px; padding: 8px; margin: 10px 0; display: inline-block; }
+    .inline-pic img { display: block; max-width: 100%; }
     table.fill.grid th { white-space: normal; font-size: 15px; }
 
     /* שרטוט על הגרף */
@@ -386,6 +388,7 @@
   const subOf = v => typeof v === 'string' ? { text: v } : v;
   function keysOf(qi, letter, sub) {
     const base = qi + '-' + letter;
+    if (sub.paper) return []; // סעיף שעושים על הדף (שרטוט דיאגרמה) – בלי תיבות
     if (sub.grid) {
       const cells = [];
       sub.grid.rows.forEach((_, r) => sub.grid.cols.forEach((_, c) => cells.push(base + '-' + r + '-' + c)));
@@ -497,14 +500,15 @@
       const s = subOf(q.subs[l]);
       const long = s.long || /נמקו|הסבירו/.test(s.text);
       const keys = keysOf(qi, l, s);
-      const rows = s.draw ? drawBox(s, keys[0])
+      const rows = s.paper ? '<p class="draw-note">את הסעיף הזה עושים במחברת. הדף לא בודק אותו, אבל חשוב לדעת לשרטט!</p>'
+        : s.draw ? drawBox(s, keys[0])
         : s.grid ? gridBox(s, keys)
         : s.table ? tableBox(s.table, keys)
         : s.choices ? choiceBox(s.choices, keys[0])
         : s.items ? '<div class="items">' + s.items.map((o, j) => ansRow(keys[j], o)).join('') + '</div>'
         : long ? '<div class="ans-row">' + longBox(keys[0]) + '</div>' : ansRow(keys[0], s);
       // שורה שלמה: נימוק, הדרכה, טבלה, שרטוט, בחירה, או יותר משתי תיבות (שלא יימתח לאורך ליד סעיף קצר)
-      const full = long || s.hint || s.table || s.grid || s.draw || s.choices ||
+      const full = long || s.hint || s.table || s.grid || s.draw || s.paper || s.choices ||
         (s.items && (s.items.length > 2 || s.items.some(o => o.long)));
       // cont = המשך של הסעיף הקודם (בלי אות משלו)
       return '<div class="sub' + (full ? ' full' : '') + '" data-sub="' + l + '"><div>' +
