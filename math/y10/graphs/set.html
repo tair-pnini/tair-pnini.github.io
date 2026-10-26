@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
+  <!-- התצוגה המקדימה בוואטסאפ וכו' (התמונה נוצרת מ-_local/og-graphs.html) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="גרפים? בקטנה. תרגול לבוחן">
+  <meta property="og:description" content="כל השאלות מהמקבץ, עם בדיקה מיידית ורמזים כשנתקעים. כמה דקות של תרגול, והבוחן אצלכם בכיס 💪">
+  <meta property="og:image" content="https://tair-pnini.github.io/math/y10/graphs/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <title>גרפים: תרגול</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -336,7 +344,7 @@
     <div class="submit-head"><i class="fa-solid fa-paper-plane"></i> שליחה למורה</div>
     <ul class="summary" id="summary"></ul>
     <div class="field">
-      <label for="student-name">שם מלא</label>
+      <label for="student-name">שם מלא (שם פרטי ושם משפחה)</label>
       <input id="student-name" autocomplete="name">
     </div>
     <div class="field">
@@ -381,12 +389,18 @@
     return many ? many.map((_, j) => base + '-' + j) : [base];
   }
 
-  // לכל תיבה: היחידה שהיא דורשת (מפתח ב-GRAPH_UNITS) והתשובה מדף התשובות
-  const UNIT = {}, ANS = {}, CHOICE = {};
+  // לכל תיבה: היחידה שהיא דורשת (מפתח ב-GRAPH_UNITS), התשובה מדף התשובות,
+  // ושם קריא לגיליון ההגשות ("ב(2)", "ה – 4", "ז – אגס/משקל")
+  const UNIT = {}, ANS = {}, CHOICE = {}, LABEL = {};
   QUESTIONS.forEach((q, qi) => Object.keys(q.subs).forEach(l => {
     const s = subOf(q.subs[l]), keys = keysOf(qi, l, s), ans = q.ans || {}, a = ans[l];
     const cells = s.grid ? [].concat(...(ans[l + '#'] || [])) : null;
     keys.forEach((k, j) => {
+      const C = s.grid && s.grid.cols.length;
+      LABEL[k] = s.items ? l + '(' + (j + 1) + ')'
+        : s.table ? l + ' – ' + s.table.cols[j]
+        : s.grid && j < cells.length ? l + ' – ' + s.grid.rows[Math.floor(j / C)] + '/' + s.grid.cols[j % C].replace(/ \(.*\)$/, '')
+        : l;
       UNIT[k] = s.items ? s.items[j].unit : s.grid && j < cells.length ? '' : s.unit;
       const want = cells && j < cells.length ? cells[j] : Array.isArray(a) ? a[j] : a;
       if (want) ANS[k] = want;
@@ -633,13 +647,27 @@
     card.scrollIntoView({ behavior: 'smooth' });
   }
 
+  // כל התשובות כטקסט קריא לגיליון: שורה לכל שאלה, "א: 10 ק"מ ✓ · ב: 5 ✗ · ג: —"
+  function answersText() {
+    return QUESTIONS.map((q, qi) => 'שאלה ' + (qi + 1) + ': ' + Object.keys(q.subs).map(l => {
+      const s = subOf(q.subs[l]);
+      // רק תיבות שמילאו; סעיף ריק לגמרי = "א: —"
+      const parts = keysOf(qi, l, s).filter(k => (state.a[k] || '').trim()).map(k => {
+        const v = state.a[k].trim();
+        const mark = ANS[k] ? (correct(k) ? ' ✓' : ' ✗') : '';
+        return LABEL[k] + ': ' + (s.draw ? 'שורטט' : v.replace(/\s+/g, ' ')) + mark;
+      });
+      return parts.length ? parts.join(' · ') : l + ': —';
+    }).join(' · ')).join('\n');
+  }
+
   function submitSet() {
     const msg = document.getElementById('submit-msg');
     const student = { name: document.getElementById('student-name').value.trim(), group: document.getElementById('student-group').value };
     try { localStorage.setItem(STUDENT_KEY, JSON.stringify(student)); } catch (e) {}
-    if (!student.name || !student.group) {
+    if (student.name.split(/\s+/).length < 2 || !student.group) {
       msg.className = 'fb err';
-      msg.textContent = 'כתבו שם ובחרו כיתה, כדי שאדע של מי ההגשה.';
+      msg.textContent = 'כתבו שם פרטי ושם משפחה ובחרו כיתה, כדי שאדע בדיוק של מי ההגשה 🙂';
       return;
     }
     if (!SUBMIT_URL) {
@@ -656,7 +684,7 @@
       checked: Object.keys(state.chk).filter(i => state.chk[i]).map(i => +i + 1).join(', '),
       unitReveals: Object.keys(state.rev).length,
       hints: Object.keys(state.hint).length,
-      answers: JSON.stringify(state.a)
+      answers: answersText()
     };
     msg.className = 'fb';
     msg.textContent = 'שולחים...';
