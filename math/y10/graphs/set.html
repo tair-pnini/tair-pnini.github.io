@@ -661,6 +661,33 @@
     }).join(' · ')).join('\n');
   }
 
+  // רק הטעויות: "ש1 א(2): 40 (חסרה יחידת מידה.)" · "ש2 ב: 13 מעלות"
+  function mistakesText() {
+    const out = [];
+    QUESTIONS.forEach((q, qi) => Object.keys(q.subs).forEach(l => keysOf(qi, l, subOf(q.subs[l])).forEach(k => {
+      const v = (state.a[k] || '').trim();
+      if (!v || !ANS[k] || correct(k)) return;
+      const unit = unitProblem(k);
+      out.push('ש' + (qi + 1) + ' ' + LABEL[k] + ': ' + (subOf(q.subs[l]).draw ? 'שרטוט' : v.replace(/\s+/g, ' ')) +
+        (unit ? ' (' + unit + ')' : ''));
+    })));
+    return out.join('\n');
+  }
+
+  // רק הנימוקים וההסברים (תיבות גדולות)
+  function reasonsText() {
+    const out = [];
+    QUESTIONS.forEach((q, qi) => Object.keys(q.subs).forEach(l => {
+      const s = subOf(q.subs[l]), keys = keysOf(qi, l, s);
+      keys.forEach((k, j) => {
+        const v = (state.a[k] || '').trim();
+        const long = s.items ? s.items[j].long : (s.long || /נמקו|הסבירו/.test(s.text));
+        if (v && long) out.push('ש' + (qi + 1) + ' ' + l + ': ' + v.replace(/\s+/g, ' '));
+      });
+    }));
+    return out.join('\n');
+  }
+
   function submitSet() {
     const msg = document.getElementById('submit-msg');
     const student = { name: document.getElementById('student-name').value.trim(), group: document.getElementById('student-group').value };
@@ -684,7 +711,9 @@
       checked: Object.keys(state.chk).filter(i => state.chk[i]).map(i => +i + 1).join(', '),
       unitReveals: Object.keys(state.rev).length,
       hints: Object.keys(state.hint).length,
-      answers: answersText()
+      answers: answersText(),
+      mistakes: mistakesText(),
+      reasons: reasonsText()
     };
     msg.className = 'fb';
     msg.textContent = 'שולחים...';
