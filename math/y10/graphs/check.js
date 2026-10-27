@@ -72,6 +72,7 @@
     }
     if (want.path) return samePath(v, want.path);
     if (want.pie) return samePie(v, want);
+    if (want.estimate) return pieEstimateOk(v, want.estimate);
     if (want.bars) { try { return JSON.stringify(JSON.parse(v)) === JSON.stringify(want.bars); } catch (e) { return false; } }
     if (want.points) return samePoints(v, want.points);
     if (want.pick) {
@@ -141,6 +142,40 @@
     });
   }
 
+  // עוגה שחולקה בהערכה: { b: קווי חלוקה (0–1, לפי כיוון השעון מלמעלה), g: הקבוצה של כל גזרה }.
+  // מחזיר את האחוז של כל קבוצה, או null אם יש גזרה שלא נצבעה
+  function pieShares(v, groups, partial) {
+    let d;
+    try { d = JSON.parse(v); } catch (e) { return null; }
+    const b = (d.b || []).slice().sort((x, y) => x - y), k = Math.max(1, b.length), shares = Array(groups).fill(0);
+    for (let i = 0; i < k; i++) {
+      const g = d.g ? d.g[i] : -1;
+      if (g === undefined || g < 0) { if (partial) continue; return null; }
+      const s = b.length ? b[i] : 0, e = b.length ? b[(i + 1) % k] + (i + 1 === k ? 1 : 0) : 1;
+      shares[g] += (b.length === 1 ? 1 : e - s) * 100;
+    }
+    return shares;
+  }
+  // סטייה מותרת בהערכה: 20% מהגודל, ולפחות 3 נקודות אחוז
+  const estTol = t => Math.max(3, t * 0.2);
+  function pieEstimateOk(v, want) {
+    const sh = pieShares(v, want.length);
+    return !!sh && want.every((t, g) => sh[g] > 0 && Math.abs(sh[g] - t) <= estTol(t));
+  }
+  // משוב על עוגה בהערכה: איזו קבוצה גדולה או קטנה מדי, ובערך כמה היא צריכה להיות
+  function rough(t) {
+    return t >= 45 ? 'בערך חצי עיגול' : t >= 33 ? 'קצת פחות מחצי עיגול' : t >= 22 ? 'בערך רבע עיגול'
+      : t >= 14 ? 'קצת פחות מרבע עיגול' : t >= 8 ? 'בערך עשירית מהעיגול' : 'חלק קטן מאוד מהעיגול';
+  }
+  function pieEstimateAdvice(v, want, names) {
+    const sh = pieShares(v, want.length, true);
+    if (!sh) return [];
+    const blank = pieShares(v, want.length) ? [] : ['יש גזרה שעוד לא צבעתם.'];
+    return blank.concat(want.map((t, g) => sh[g] <= 0 ? names[g] + ': חסרה גזרה (' + rough(t) + ').'
+      : sh[g] - t > estTol(t) ? names[g] + ': הגזרה גדולה מדי (צריך ' + rough(t) + ').'
+      : t - sh[g] > estTol(t) ? names[g] + ': הגזרה קטנה מדי (צריך ' + rough(t) + ').' : '').filter(Boolean));
+  }
+
   // נקודות שסומנו מול הנקודות הנכונות (אותה קבוצה, בלי חשיבות לסדר)
   function samePoints(v, want) {
     let pts;
@@ -149,5 +184,5 @@
     return pts.length === want.length && want.every(w => pts.some(p => near(p, w)));
   }
 
-  window.GraphCheck = { unitProblem, numbers, dayList, sameDays, daySegments, sameRanges, isCorrect, signSlip, pointIn };
+  window.GraphCheck = { pieShares, pieEstimateAdvice, unitProblem, numbers, dayList, sameDays, daySegments, sameRanges, isCorrect, signSlip, pointIn };
 })();
