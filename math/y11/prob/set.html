@@ -154,8 +154,9 @@
     .tree-wrap input.cell.good { box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.8); }
     .tree-wrap input.cell.bad { box-shadow: 0 0 0 2px rgba(249, 168, 184, 0.8); }
     .choice.paths button.on { border-color: var(--c-case0); background: rgba(251, 191, 36, 0.15); }
-    .way-note { font-size: 16px; color: #cbd5e1; margin-top: 6px; }
-    .way-note:empty { display: none; }
+    .way { border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 8px 12px 12px; margin-top: 10px; }
+    .way-title { font-family: 'Heebo', sans-serif; font-weight: 700; color: #e2e8f0; }
+    .way-note { font-size: 16px; color: #94a3b8; }
 
     /* ---------- סעיפים ---------- */
     /* סעיפים קצרים עומדים כמה בשורה; סעיף עם בניית מאורע או בחירה תופס שורה שלמה */
@@ -226,8 +227,6 @@
       cursor: pointer;
     }
     .keys button:hover { border-color: #ffffff; }
-    .way { border-top: 1px dashed rgba(255,255,255,0.15); margin-top: 10px; }
-    .way:first-of-type { border-top: none; }
 
     /* ---------- בניית המאורע במילים ---------- */
     .builder { margin-top: 4px; }
@@ -389,15 +388,44 @@
     }
     Object.keys(q.subs).forEach(l => {
       const s = q.subs[l], b = qi + '-' + l;
-      if (s.build) out.push(b + '-w');
-      if (s.paths) out.push(b + '-s');
-      if (s.expr || s.ways) out.push(b + '-x');
+      if (s.ways) out.push(...[].concat(...wayKeys(b, s)));
+      else {
+        if (s.build) out.push(b + '-w');
+        if (s.paths) out.push(b + '-s');
+        if (s.expr) out.push(b + '-x');
+      }
       if (s.choices) out.push(b + '-c');
       else if (s.ans) out.push(b + '-r');
     });
     return out;
   }
-  const subKeys = (qi, l) => keysOf(qi).filter(k => k.startsWith(qi + '-' + l + '-'));
+  const subKeys = (qi, l) => gradedKeys(qi).filter(k => k.startsWith(qi + '-' + l + '-'));
+
+  // בשתי דרכים: לכל דרך תיבות משלה (-w0 -s0 -x0 = חיבור המקרים, -w1 -s1 -x1 = המשלים).
+  // מתאימים את המאורע במילים / את המסלולים לדרך: בדרך המשלים – של המאורע המשלים.
+  function wayKeys(b, s) {
+    return [0, 1].map(i => {
+      const out = [];
+      if (i ? s.cbuild : s.build) out.push(b + '-w' + i);
+      if (i ? s.cpaths : s.paths) out.push(b + '-s' + i);
+      out.push(b + '-x' + i);
+      return out;
+    });
+  }
+  // התיבות שנספרות: מספיקה דרך אחת. דרך שהתחילו בה נבדקת; אם לא התחילו באף אחת – הראשונה.
+  function gradedKeys(qi) {
+    const q = QUESTIONS[qi], skip = new Set();
+    Object.keys(q.subs).forEach(l => {
+      const s = q.subs[l];
+      if (!s.ways) return;
+      const groups = wayKeys(qi + '-' + l, s), started = groups.map(g => g.some(filled));
+      groups.forEach((g, i) => {
+        if (started[i] || (i === 0 && !started[1])) return;
+        g.forEach(k => skip.add(k));
+      });
+    });
+    return keysOf(qi).filter(k => !skip.has(k));
+  }
 
   // מה כל תיבה צריכה להיות
   function want(k) {
@@ -406,8 +434,12 @@
     if (l === 't') return { kind: 'cell', ans: q.table.rows[+kind].p[+c] }; // <שאלה>-t-<שורה>-<עמודה>
     if (l === 'T') return { kind: 'cell', ans: treeValue(q.tree, kind, c) };
     const s = q.subs[l];
-    // בשתי דרכים: מתקבל התרגיל של כל אחת מהן
-    return { kind, s, expr: s.expr || [].concat(...(s.ways || []).map(w => w.expr)) };
+    // תיבה של דרך (w0, x1, s1...): המקרים / המסלולים / התרגיל של הדרך הזאת
+    if (s.ways && /^[wsx]\d$/.test(kind)) {
+      const i = +kind[1], way = s.ways[i];
+      return { kind: kind[0], s: { build: i ? s.cbuild : s.build, paths: i ? s.cpaths : s.paths, hint: i ? way.hint : s.hint }, expr: way.expr };
+    }
+    return { kind, s, expr: s.expr };
   }
 
   // בניית מאורע נשמרת כ-JSON: { c: [[תוצאה0, מילה, תוצאה1], ...], j: [מילה בין מקרים, ...] }
@@ -462,7 +494,7 @@
     return ProbCheck.resultOk(v, w.s.ans);
   }
 
-  const questionDone = qi => keysOf(qi).every(filled);
+  const questionDone = qi => gradedKeys(qi).every(filled);
 
   // ---------- בנייה ----------
   const sideTable = (qi, t) => '<div class="side"><h3>טבלת ההסתברויות</h3><table class="ptab"><tr><th></th>' +
@@ -556,7 +588,7 @@
     if (!svg) return;
     svg.querySelectorAll('.on').forEach(el => el.classList.remove('on'));
     const legend = document.getElementById('legend');
-    const k = focusBuild && focusBuild.endsWith('-s') ? focusBuild : null;
+    const k = focusBuild && /-s\d?$/.test(focusBuild) ? focusBuild : null;
     if (!k) { legend.textContent = ''; return; }
     readPaths(k).forEach(id => {
       const [i, j] = id.split('-');
@@ -589,12 +621,22 @@
     const subs = Object.keys(q.subs).map(l => {
       const s = q.subs[l], b = qi + '-' + l;
       let body = '';
-      if (s.build) body += '<span class="step-lbl">המאורע במילים:</span><div class="builder" data-w="' + b + '-w">' + buildBox(qi, b + '-w') + '</div>';
-      if (s.paths) body += '<span class="step-lbl">המסלולים של המאורע (לוחצים על כל מסלול מתאים):</span>' + pathsBox(q.tree, b + '-s');
-      if (s.ways) body += '<span class="step-lbl">אפשר לפתור בשתי דרכים – בחרו אחת:</span><div class="choice ways" data-ways="' + b + '-y">' +
-        s.ways.map((w, i) => '<button type="button" data-way="' + i + '">' + w.label + '</button>').join('') + '</div>' +
-        '<p class="way-note" data-waynote="' + b + '-y"></p>';
-      if (s.expr || s.ways) body += exprRow(b + '-x');
+      const words = (k, what) => '<span class="step-lbl">' + what + ' במילים:</span><div class="builder" data-w="' + k + '">' + buildBox(qi, k) + '</div>';
+      const paths = (k, what) => '<span class="step-lbl">המסלולים של ' + what + ' (לוחצים על כל מסלול מתאים):</span>' + pathsBox(q.tree, k);
+      if (s.ways) {
+        body += '<div class="howto">אפשר לפתור בשתי דרכים. מספיקה דרך אחת – ואפשר גם את שתיהן.</div>' +
+          s.ways.map((w, i) => {
+            const what = i ? 'המאורע המשלים' : 'המאורע';
+            return '<div class="way"><div class="way-title">' + w.label + '</div><p class="way-note">' + w.note + '</p>' +
+              ((i ? s.cbuild : s.build) ? words(b + '-w' + i, what) : '') +
+              ((i ? s.cpaths : s.paths) ? paths(b + '-s' + i, what) : '') +
+              exprRow(b + '-x' + i) + '</div>';
+          }).join('');
+      } else {
+        if (s.build) body += words(b + '-w', 'המאורע');
+        if (s.paths) body += paths(b + '-s', 'המאורע');
+        if (s.expr) body += exprRow(b + '-x');
+      }
       if (s.choices) body += choiceBox(s.choices, b + '-c');
       else if (s.ans) body += resRow(b + '-r', s.expr || s.ways ? 'התוצאה:' : 'התשובה:');
       const full = s.build || s.choices || s.tableSub || s.treeSub || s.ways || s.paths;
@@ -629,13 +671,6 @@
       const k = b.dataset.pathk, id = b.dataset.path, cur = readPaths(k);
       state.a[k] = JSON.stringify(cur.includes(id) ? cur.filter(x => x !== id) : cur.concat(id));
       focusBuild = state.fw = k;
-      persist();
-      render();
-    }));
-    document.querySelectorAll('[data-ways]').forEach(box => box.addEventListener('click', e => {
-      const b = e.target.closest('[data-way]');
-      if (!b) return;
-      state.a[box.dataset.ways] = b.dataset.way;
       persist();
       render();
     }));
@@ -736,7 +771,7 @@
     const qi = state.cur, q = QUESTIONS[qi], checked = !!state.chk[qi];
     renderTable();
     let right = 0, total = 0;
-    const keys = keysOf(qi);
+    const keys = gradedKeys(qi);
     keys.forEach(k => { total++; if (correct(k)) right++; });
 
     Object.keys(q.subs).forEach(l => {
@@ -757,12 +792,6 @@
       el.classList.toggle('bad', !!show && !correct(k));
     });
     document.querySelectorAll('[data-choice]').forEach(b => b.classList.toggle('on', state.a[b.dataset.choice] === b.textContent));
-    document.querySelectorAll('[data-ways]').forEach(box => {
-      const sel = state.a[box.dataset.ways], l = box.dataset.ways.split('-')[1];
-      box.querySelectorAll('[data-way]').forEach(b => b.classList.toggle('on', b.dataset.way === sel));
-      const w = sel !== undefined && q.subs[l].ways[+sel];
-      document.querySelector('[data-waynote="' + box.dataset.ways + '"]').textContent = w ? w.note : '';
-    });
     document.querySelectorAll('[data-pathk]').forEach(b => b.classList.toggle('on', readPaths(b.dataset.pathk).includes(b.dataset.path)));
 
     document.querySelectorAll('[data-fb]').forEach(fb => {
