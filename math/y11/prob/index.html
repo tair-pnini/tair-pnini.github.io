@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>הסתברות: תרגול</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&amp;family=Heebo:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Shared site bars (<site-header>, <site-footer>) -->
+  <script src="/assets/site.js"></script>
+  <script src="data.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-qty: #38bdf8;
+      --c-rate: #4ade80;
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-subtle: rgba(255, 255, 255, 0.12);
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: 'Assistant', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px;
+    }
+
+    site-header, site-footer { align-self: stretch; margin: 0 -16px; }
+    site-footer { background: #ffffff; }
+
+    .wrap { width: 100%; max-width: 1100px; padding: 28px 0 48px; flex: 1; }
+    h1 { font-family: 'Heebo', sans-serif; font-size: 32px; font-weight: 800; margin-bottom: 6px; }
+    .lead { font-size: 20px; color: #cbd5e1; margin-bottom: 24px; line-height: 1.6; }
+
+    .sets {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .set {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 20px 22px;
+      color: inherit;
+      text-decoration: none;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    a.set:hover { border-color: var(--c-qty); transform: translateY(-2px); }
+    .set .n { font-family: 'Heebo', sans-serif; font-size: 15px; font-weight: 700; color: var(--c-qty); }
+    .set h2 { font-family: 'Heebo', sans-serif; font-size: 22px; font-weight: 700; }
+    .set p { font-size: 17px; color: #cbd5e1; line-height: 1.5; }
+    .set .meta { font-size: 16px; color: #94a3b8; margin-top: auto; padding-top: 8px; }
+    .set .meta .started { color: var(--c-rate); }
+    .set.soon { opacity: 0.45; }
+    .set.soon .n { color: #94a3b8; }
+
+    /* ---------- Phone layout ---------- */
+    @media (max-width: 640px) {
+      html { font-size: 110%; }
+      .wrap { padding: 18px 0 32px; }
+      h1 { font-size: 28px; }
+      .lead { font-size: 19px; }
+      .sets { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<site-header style="--tp-max:1100px"></site-header>
+<div class="wrap">
+  <h1>הסתברות</h1>
+  <p class="lead">בחרו מקבץ. מנסחים את המאורע, כותבים את התרגיל ואת התוצאה, לוחצים "בדיקת התשובות" ורואים מה נכון.</p>
+  <div class="sets" id="sets"></div>
+</div>
+<site-footer style="--tp-max:1100px"></site-footer>
+
+<script>
+  // בכמה שאלות במקבץ כבר יש תשובה (לפי מה שנשמר בדפדפן)
+  function started(set) {
+    try {
+      const saved = JSON.parse(localStorage.getItem('prob-' + set.id));
+      if (!saved || !saved.a) return 0;
+      return new Set(Object.keys(saved.a).filter(k => String(saved.a[k]).trim()).map(k => k.split('-')[0])).size;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  document.getElementById('sets').innerHTML = PROB_SETS.map((s, i) => {
+    const n = s.questions.length;
+    const head = '<span class="n">מקבץ ' + (i + 1) + '</span><h2>' + s.title + '</h2><p>' + s.desc + '</p>';
+    if (!n) return '<div class="set soon">' + head + '<span class="meta">בקרוב</span></div>';
+    const k = started(s);
+    return '<a class="set" href="set.html?c=' + s.id + '">' + head +
+      '<span class="meta">' + n + ' שאלות' + (k ? ' · <span class="started">התחלתם: ' + k + ' מתוך ' + n + '</span>' : '') + '</span></a>';
+  }).join('');
+</script>
+</body>
+</html>

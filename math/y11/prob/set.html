@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>הסתברות: תרגול</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&amp;family=Heebo:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Shared site bars (<site-header>, <site-footer>) -->
+  <script src="/assets/site.js"></script>
+  <script src="data.js"></script>
+  <script src="check.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* אותה פלטה כמו בתרגול הגרפים */
+    :root {
+      --c-qty: #38bdf8;
+      --c-time: #fbbf24;
+      --c-rate: #4ade80;
+      --c-case0: #fbbf24;
+      --c-case1: #c084fc;
+      --c-case2: #f472b6;
+      --c-case3: #2dd4bf;
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --border-subtle: rgba(255, 255, 255, 0.12);
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: #f1f5f9;
+      font-family: 'Assistant', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px;
+    }
+
+    site-header, site-footer { align-self: stretch; margin: 0 -16px; }
+    site-footer { background: #ffffff; }
+
+    .wrap { width: 100%; max-width: 1100px; padding: 20px 0 40px; }
+    .ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1.15;
+      margin: 0 4px;
+    }
+    .frac > span { padding: 0 5px; }
+    .frac > span + span { border-top: 2px solid currentColor; }
+
+    /* ---------- ניווט בין השאלות ---------- */
+    .back { color: #94a3b8; font-size: 17px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+    .back:hover { color: #ffffff; }
+    .qnav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 18px; }
+    .qnav .title { font-family: 'Heebo', sans-serif; font-size: 20px; font-weight: 700; margin-left: 10px; }
+    .qnav button {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.18);
+      color: #cbd5e1;
+      border-radius: 10px;
+      padding: 6px 14px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+      min-width: 44px;
+    }
+    .qnav button.cur { border-color: var(--c-qty); color: #ffffff; }
+    .qnav button.done { background: rgba(74, 222, 128, 0.18); border-color: rgba(74, 222, 128, 0.6); color: #ffffff; }
+
+    /* ---------- כרטיס שאלה ---------- */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .q-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--c-qty);
+      font-family: 'Heebo', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    /* השאלה והסעיפים מימין, טבלת ההסתברויות משמאל ונעוצה בזמן הגלילה */
+    .q-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+      grid-template-areas: "stem side" "subs side";
+      grid-template-rows: auto 1fr;
+      gap: 0 24px;
+    }
+    .q-grid.solo { grid-template-columns: 1fr; grid-template-areas: "stem" "subs"; }
+    .stem { grid-area: stem; margin-bottom: 12px; font-size: 22px; line-height: 1.8; color: #f8fafc; }
+    .subs { grid-area: subs; }
+
+    .side {
+      grid-area: side;
+      align-self: start;
+      position: sticky;
+      top: 84px; /* מתחת לסרגל העליון הדביק */
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .side h3 { font-family: 'Heebo', sans-serif; font-size: 17px; font-weight: 500; color: #cbd5e1; margin-bottom: 8px; }
+    table.ptab { border-collapse: collapse; width: 100%; font-size: 18px; }
+    table.ptab th, table.ptab td { border: 1px solid rgba(255,255,255,0.2); padding: 6px; text-align: center; }
+    table.ptab th { font-weight: 600; color: #e2e8f0; }
+    table.ptab td.given, table.ptab td.total { color: #cbd5e1; }
+    table.ptab td { transition: background 0.2s; }
+    /* צביעת התאים של המקרים שבונים עכשיו */
+    /* תא שנבדק: המסגרת על התיבה, לא על התא */
+    table.ptab input.cell.good { box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.8); }
+    table.ptab input.cell.bad { box-shadow: 0 0 0 2px rgba(249, 168, 184, 0.8); }
+    table.ptab td.hl0 { background: rgba(251, 191, 36, 0.22); box-shadow: inset 0 0 0 2px var(--c-case0); }
+    table.ptab td.hl1 { background: rgba(192, 132, 252, 0.22); box-shadow: inset 0 0 0 2px var(--c-case1); }
+    table.ptab td.hl2 { background: rgba(244, 114, 182, 0.22); box-shadow: inset 0 0 0 2px var(--c-case2); }
+    table.ptab td.hl3 { background: rgba(45, 212, 191, 0.22); box-shadow: inset 0 0 0 2px var(--c-case3); }
+    table.ptab td.hlx { background-image: linear-gradient(135deg, rgba(251,191,36,0.25) 50%, rgba(192,132,252,0.25) 50%); }
+    .side .legend { font-size: 15px; color: #94a3b8; margin-top: 8px; line-height: 1.5; }
+
+    /* עץ: SVG ומעליו תיבות */
+    .tree-wrap { position: relative; direction: ltr; }
+    svg.tree { display: block; width: 100%; height: auto; }
+    svg.tree .br { stroke: #94a3b8; stroke-width: 2; }
+    svg.tree .br.on { stroke: var(--c-case0); stroke-width: 4; }
+    svg.tree .nd ellipse { fill: #1e293b; stroke: #cbd5e1; stroke-width: 1.5; }
+    svg.tree .nd.on ellipse { fill: rgba(251, 191, 36, 0.25); stroke: var(--c-case0); stroke-width: 2.5; }
+    svg.tree text { fill: #f1f5f9; font-family: 'Assistant', sans-serif; font-size: 16px; text-anchor: middle; direction: rtl; }
+    svg.tree text.stage { fill: #94a3b8; font-size: 13px; text-anchor: start; }
+    svg.tree .root { fill: #cbd5e1; }
+    .tree-wrap .tbox, .tree-wrap .tgiven { position: absolute; transform: translate(-50%, -50%); }
+    .tree-wrap input.tbox { width: 58px; height: 32px; font-size: 16px; }
+    .tree-wrap input.tbox.prod { width: 78px; font-size: 15px; }
+    .tree-wrap .tgiven { color: #fde68a; font-size: 17px; font-weight: 600; background: var(--bg-dark); padding: 0 4px; border-radius: 4px; }
+    .tree-wrap input.cell.good { box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.8); }
+    .tree-wrap input.cell.bad { box-shadow: 0 0 0 2px rgba(249, 168, 184, 0.8); }
+    .choice.paths button.on { border-color: var(--c-case0); background: rgba(251, 191, 36, 0.15); }
+    .way-note { font-size: 16px; color: #cbd5e1; margin-top: 6px; }
+    .way-note:empty { display: none; }
+
+    /* ---------- סעיפים ---------- */
+    /* סעיפים קצרים עומדים כמה בשורה; סעיף עם בניית מאורע או בחירה תופס שורה שלמה */
+    .subs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+      align-content: start;
+      align-items: start;
+    }
+    .sub {
+      background: rgba(0,0,0,0.25);
+      border-right: 4px solid var(--c-qty);
+      padding: 12px 16px;
+      border-radius: 0 10px 10px 0;
+      font-size: 19px;
+      line-height: 1.6;
+    }
+    .sub.full { grid-column: 1 / -1; }
+    .sub.filled { border-right-color: var(--c-rate); }
+    .step-lbl { display: block; font-size: 15px; color: #94a3b8; margin-top: 12px; }
+    .ans-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin-top: 4px; }
+    .ufb { flex-basis: 100%; font-size: 16px; color: #f9a8b8; }
+    .ufb.right { color: var(--c-rate); }
+    .ufb:empty { display: none; }
+    .hint-text { color: #fde68a; }
+    .reveal {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      color: #cbd5e1;
+      font-family: inherit;
+      font-size: 15px;
+      padding: 1px 12px;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+    .reveal:hover { border-color: #ffffff; color: #ffffff; }
+
+    .ans {
+      height: 46px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Assistant', sans-serif;
+      font-size: 19px;
+      padding: 0 12px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .ans:focus { border-color: var(--c-qty); background: rgba(0, 0, 0, 0.6); }
+    .ans::placeholder { color: #64748b; }
+    .ans.bad { border-color: rgba(249, 168, 184, 0.7); }
+    .ans.good { border-color: rgba(74, 222, 128, 0.7); }
+    input.ans.res { width: 130px; text-align: center; direction: ltr; }
+    input.ans.expr { flex: 1 1 260px; min-width: 0; direction: ltr; text-align: left; font-variant-numeric: tabular-nums; }
+    input.ans.cell { width: 80px; height: 40px; text-align: center; direction: ltr; padding: 0 4px; font-size: 18px; }
+    /* כפתורי עזר להקלדת התרגיל (בעיקר בטלפון) */
+    .keys { display: flex; gap: 4px; direction: ltr; }
+    .keys button {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .keys button:hover { border-color: #ffffff; }
+    .way { border-top: 1px dashed rgba(255,255,255,0.15); margin-top: 10px; }
+    .way:first-of-type { border-top: none; }
+
+    /* ---------- בניית המאורע במילים ---------- */
+    .builder { margin-top: 4px; }
+    .case {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+      border-right: 4px solid var(--c-case0);
+      background: rgba(255,255,255,0.03);
+      padding: 8px 10px;
+      border-radius: 0 8px 8px 0;
+    }
+    .case.c1 { border-right-color: var(--c-case1); }
+    .case.c2 { border-right-color: var(--c-case2); }
+    .case.c3 { border-right-color: var(--c-case3); }
+    .case-lbl { font-size: 15px; color: #94a3b8; min-width: 56px; }
+    .join { padding: 4px 64px 4px 0; }
+    .builder select {
+      height: 42px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #ffffff;
+      font-family: 'Assistant', sans-serif;
+      font-size: 18px;
+      padding: 0 8px;
+      outline: none;
+      max-width: 100%;
+    }
+    .builder select.conn { font-weight: 700; color: #fde68a; }
+    .builder select option { background: #1e293b; color: #fff; }
+    .builder select:focus { border-color: var(--c-qty); }
+    .builder.good .case { background: rgba(74, 222, 128, 0.06); }
+    .builder .tools { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .case .x { background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; margin-right: auto; }
+    .case .x:hover { color: #ffffff; }
+
+    /* בחירה בין תשובות */
+    .choice { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .choice button {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.2);
+      color: #ffffff;
+      border-radius: 30px;
+      padding: 6px 18px;
+      font-family: 'Assistant', sans-serif;
+      font-size: 18px;
+      cursor: pointer;
+      text-align: right;
+    }
+    .choice button.on { border-color: var(--c-qty); background: rgba(56, 189, 248, 0.15); }
+    .choice.good button.on { border-color: var(--c-rate); background: rgba(74, 222, 128, 0.15); }
+    .choice.bad button.on { border-color: rgba(249, 168, 184, 0.7); }
+
+    /* בדיקה בסוף השאלה */
+    .check-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+    .btn-check {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-check:hover { background: #38bdf8; color: #000; }
+    .score { font-size: 18px; color: #cbd5e1; }
+    .btn-step {
+      background: var(--c-rate);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .btn-link { background: none; border: none; color: #94a3b8; text-decoration: underline; font-family: inherit; font-size: 17px; cursor: pointer; margin: 10px 8px 0; }
+    .after { margin-bottom: 20px; }
+    .reset { text-align: center; }
+    .note { color: #94a3b8; font-size: 17px; }
+    .howto {
+      background: rgba(56, 189, 248, 0.08);
+      border-right: 3px solid var(--c-qty);
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 17px;
+      color: #cbd5e1;
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 860px) {
+      .q-grid { grid-template-columns: 1fr; grid-template-areas: "stem" "side" "subs"; grid-template-rows: auto; }
+      .side { position: static; margin-bottom: 14px; }
+    }
+
+    /* ---------- Phone layout ---------- */
+    @media (max-width: 640px) {
+      html { font-size: 110%; }
+      .wrap { padding: 14px 0 32px; }
+      .card { padding: 20px 14px; }
+      .stem { font-size: 20px; }
+      .sub { font-size: 18px; padding: 10px 12px; }
+      .subs { grid-template-columns: 1fr; }
+      .join { padding-right: 12px; }
+      .builder select { font-size: 17px; flex: 1 1 100%; }
+      .builder select.conn { flex: 0 0 auto; }
+      .side { padding: 10px 8px; }
+      .side h3 .stages { display: block; font-size: 14px; color: #94a3b8; }
+      .tree-wrap input.tbox { width: 50px; height: 30px; font-size: 15px; padding: 0 2px; }
+      .tree-wrap input.tbox.prod { width: 60px; font-size: 14px; }
+      .tree-wrap .tgiven { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+<site-header style="--tp-max:1100px"></site-header>
+<div class="wrap">
+  <a class="back" href="./"><i class="fa-solid fa-arrow-right"></i> כל המקבצים</a>
+  <nav class="qnav" id="qnav"></nav>
+  <section class="card" id="q-card"></section>
+  <div class="after" id="after"></div>
+  <p class="reset"><button class="btn-link" onclick="resetAll()">להתחיל מחדש (מוחק את כל התשובות במקבץ הזה בדפדפן הזה)</button></p>
+</div>
+<site-footer style="--tp-max:1100px"></site-footer>
+
+<script>
+  const SET = PROB_SETS.find(s => s.id === new URLSearchParams(location.search).get('c')) || PROB_SETS[0];
+  const QUESTIONS = SET.questions;
+  const STORAGE_KEY = 'prob-' + SET.id;
+  document.title = 'הסתברות: ' + SET.title;
+
+  // a = התשובות, chk = שאלות שבדקו (מאז הבדיקה מסמנים נכון/לא נכון), hint = תיבות שבהן ביקשו רמז
+  let state = { cur: 0, a: {}, chk: {}, hint: {} };
+  let focusBuild = null; // בניית המאורע שעובדים עליה עכשיו – המקרים שלה נצבעים בטבלה
+
+  const CONN = ['וגם', 'או'];
+
+  // מפתחות: <שאלה>-t-<שורה>-<עמודה> = תא בטבלה, <שאלה>-T-<ענף> = ענף בעץ (a0 = שלב ראשון, b0-1 = שלב שני),
+  // <שאלה>-T-p<i>-<j> = המכפלה של המסלול, <שאלה>-<סעיף>-w = בניית המאורע, -s = המסלולים שנבחרו,
+  // -x = התרגיל, -r = התוצאה, -c = בחירה. (-y = הדרך שבחרו – לא נבדקת)
+  const TREE_BRANCHES = ['a0', 'a1', 'b0-0', 'b0-1', 'b1-0', 'b1-1'];
+  function keysOf(qi) {
+    const q = QUESTIONS[qi], out = [];
+    if (q.table) q.table.rows.forEach((row, r) => row.p.forEach((_, c) => {
+      if (!(row.given || []).includes(c)) out.push(qi + '-t-' + r + '-' + c);
+    }));
+    if (q.tree) {
+      TREE_BRANCHES.forEach(id => { if (!(q.tree.given || []).includes(id)) out.push(qi + '-T-' + id); });
+      ['0-0', '0-1', '1-0', '1-1'].forEach(id => out.push(qi + '-T-p' + id));
+    }
+    Object.keys(q.subs).forEach(l => {
+      const s = q.subs[l], b = qi + '-' + l;
+      if (s.build) out.push(b + '-w');
+      if (s.paths) out.push(b + '-s');
+      if (s.expr || s.ways) out.push(b + '-x');
+      if (s.choices) out.push(b + '-c');
+      else if (s.ans) out.push(b + '-r');
+    });
+    return out;
+  }
+  const subKeys = (qi, l) => keysOf(qi).filter(k => k.startsWith(qi + '-' + l + '-'));
+
+  // מה כל תיבה צריכה להיות
+  function want(k) {
+    const [qi, l, kind, c] = k.split('-');
+    const q = QUESTIONS[+qi];
+    if (l === 't') return { kind: 'cell', ans: q.table.rows[+kind].p[+c] }; // <שאלה>-t-<שורה>-<עמודה>
+    if (l === 'T') return { kind: 'cell', ans: treeValue(q.tree, kind, c) };
+    const s = q.subs[l];
+    // בשתי דרכים: מתקבל התרגיל של כל אחת מהן
+    return { kind, s, expr: s.expr || [].concat(...(s.ways || []).map(w => w.expr)) };
+  }
+
+  // בניית מאורע נשמרת כ-JSON: { c: [[תוצאה0, מילה, תוצאה1], ...], j: [מילה בין מקרים, ...] }
+  function readBuild(k) {
+    try {
+      const v = JSON.parse(state.a[k]);
+      if (v && v.c && v.c.length) return v;
+    } catch (e) {}
+    return { c: [['', '', '']], j: [] };
+  }
+  const buildFilled = v => v.c.every(x => x.every(y => y !== '')) && v.j.every(y => y !== '');
+
+  // '' = נכון; אחרת – סוג הטעות (לרמז)
+  function buildProblem(k, s) {
+    const v = readBuild(k);
+    if (!buildFilled(v)) return 'incomplete';
+    if (v.c.some(x => x[1] !== 'וגם')) return 'inner';
+    if (v.j.some(y => y !== 'או')) return 'join';
+    const got = v.c.map(x => x[0] + ',' + x[2]).sort().join('|');
+    const exp = s.build.map(x => x.join(',')).sort().join('|');
+    return got === exp ? '' : 'cases';
+  }
+
+  // ההסתברות של ענף בעץ (a0; b1 + 0) או המכפלה של מסלול (p1 + 0)
+  function treeValue(t, id, c) {
+    if (id[0] === 'a') return t.first[+id[1]].p;
+    if (id[0] === 'b') return t.second[+id[1]][+c].p;
+    const i = +id[1], j = +c;
+    return String(ProbCheck.value(t.first[i].p) * ProbCheck.value(t.second[i][j].p));
+  }
+
+  // המסלולים שנבחרו: ["0-1", "1-0"]
+  function readPaths(k) {
+    try { return JSON.parse(state.a[k]) || []; } catch (e) { return []; }
+  }
+  const pathsOk = (k, s) => readPaths(k).slice().sort().join() === s.paths.map(x => x.join('-')).sort().join();
+
+  function filled(k) {
+    const w = want(k);
+    if (w.kind === 'w') return buildFilled(readBuild(k));
+    if (w.kind === 's') return readPaths(k).length > 0;
+    return !!(state.a[k] || '').trim();
+  }
+
+  function correct(k) {
+    const w = want(k), v = state.a[k];
+    if (w.kind === 'cell') return ProbCheck.resultOk(v, w.ans, 0.0005);
+    if (w.kind === 'w') return buildProblem(k, w.s) === '';
+    if (w.kind === 's') return pathsOk(k, w.s);
+    if (w.kind === 'x') return ProbCheck.exprProblem(v, w.expr) === '';
+    if (w.kind === 'c') return v === w.s.ans;
+    return ProbCheck.resultOk(v, w.s.ans);
+  }
+
+  const questionDone = qi => keysOf(qi).every(filled);
+
+  // ---------- בנייה ----------
+  const sideTable = (qi, t) => '<div class="side"><h3>טבלת ההסתברויות</h3><table class="ptab"><tr><th></th>' +
+    t.cols.map(c => '<th>' + c + '</th>').join('') + '<th>סך הכול</th></tr>' +
+    t.rows.map((row, r) => '<tr><th>' + row.name + '</th>' + row.p.map((p, c) =>
+      (row.given || []).includes(c)
+        ? '<td class="given" data-cell="' + r + '-' + c + '"><span class="ltr">' + p + '</span></td>'
+        : '<td data-cell="' + r + '-' + c + '"><input class="ans cell" data-k="' + qi + '-t-' + r + '-' + c + '" autocomplete="off" inputmode="decimal"></td>'
+    ).join('') + '<td class="total">1</td></tr>').join('') +
+    '</table><p class="legend" id="legend"></p></div>';
+
+  const exprRow = (k, label) => '<span class="step-lbl">' + (label || 'התרגיל:') + '</span><div class="ans-row">' +
+    '<input class="ans expr" data-k="' + k + '" autocomplete="off" spellcheck="false" placeholder="למשל 0.5·0.3+0.5·0.7">' +
+    '<span class="keys">' + ['·', '+', '−', '(', ')', '/', '%'].map(c =>
+      '<button type="button" tabindex="-1" data-key="' + k + '">' + c + '</button>').join('') + '</span>' +
+    '<span class="ufb" data-fb="' + k + '"></span></div>';
+
+  const resRow = (k, label) => '<span class="step-lbl">' + label + '</span><div class="ans-row">' +
+    '<input class="ans res" data-k="' + k + '" autocomplete="off">' +
+    '<span class="ufb" data-fb="' + k + '"></span></div>';
+
+  const choiceBox = (choices, k) => '<div class="choice" data-cbox="' + k + '">' +
+    choices.map(c => '<button type="button" data-choice="' + k + '">' + c + '</button>').join('') +
+    '</div><div class="ans-row"><span class="ufb" data-fb="' + k + '"></span></div>';
+
+  // ---------- עץ (מלמעלה למטה, כמו בדף העבודה) ----------
+  // השורש למעלה, שני ענפים לשלב הראשון ושניים מכל צומת לשלב השני. התוצאה הראשונה מימין.
+  // בטלפון: בלי עמודת שמות השלבים (הם בכותרת), ועם יותר גובה בין השורות
+  const NARROW = matchMedia('(max-width: 640px)').matches;
+  const TW = NARROW ? 420 : 510, TH = NARROW ? 360 : 300;
+  const TY = NARROW ? [22, 145, 268, 330] : [22, 122, 222, 272]; // שורש, שלב 1, שלב 2, המכפלות
+  const TP = {
+    root: [NARROW ? 210 : 220, TY[0]],
+    n: [[NARROW ? 316 : 326, TY[1]], [NARROW ? 104 : 114, TY[1]]],
+    leaf: [[NARROW ? 374 : 386, TY[2]], [NARROW ? 262 : 268, TY[2]], [NARROW ? 158 : 172, TY[2]], [46, TY[2]]]
+  };
+  const leafOf = (i, j) => TP.leaf[i * 2 + j];
+  // מיקום התיבה של ענף: באמצע הקו, קצת החוצה
+  function branchPos(id) {
+    const i = +id[1], j = +(id.split('-')[1] || 0);
+    const [a, b] = id[0] === 'a' ? [TP.root, TP.n[i]] : [TP.n[i], leafOf(i, j)];
+    const out = b[0] > a[0] ? 1 : -1;
+    return [(a[0] + b[0]) / 2 + out * 26, (a[1] + b[1]) / 2 - 4];
+  }
+  const pct = (x, y) => 'left:' + (x / TW * 100) + '%;top:' + (y / TH * 100) + '%';
+
+  function sideTree(qi, t) {
+    const given = t.given || [];
+    const line = (a, b, cls) => '<line class="' + cls + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
+    const node = (p, name, cls) => '<g class="' + cls + '"><ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="44" ry="17"/>' +
+      '<text x="' + p[0] + '" y="' + (p[1] + 5) + '">' + name + '</text></g>';
+    let svg = '';
+    [0, 1].forEach(i => {
+      svg += line(TP.root, TP.n[i], 'br a' + i);
+      [0, 1].forEach(j => { svg += line(TP.n[i], leafOf(i, j), 'br b' + i + '-' + j); });
+    });
+    [0, 1].forEach(i => {
+      svg += node(TP.n[i], t.first[i].name, 'nd n' + i);
+      [0, 1].forEach(j => { svg += node(leafOf(i, j), t.second[i][j].name, 'nd l' + i + '-' + j); });
+    });
+    svg += '<circle cx="' + TP.root[0] + '" cy="' + TP.root[1] + '" r="5" class="root"/>';
+    if (!NARROW) {
+      svg += '<text class="stage" x="' + (TW - 2) + '" y="' + (TY[1] + 5) + '">' + t.stages[0] + '</text>';
+      svg += '<text class="stage" x="' + (TW - 2) + '" y="' + (TY[2] + 5) + '">' + t.stages[1] + '</text>';
+      svg += '<text class="stage" x="' + (TW - 2) + '" y="' + (TY[3] + 5) + '">המכפלה</text>';
+    }
+    const boxes = TREE_BRANCHES.map(id => {
+      const [x, y] = branchPos(id);
+      const val = treeValue(t, id.split('-')[0], id.split('-')[1]);
+      return given.includes(id)
+        ? '<span class="tgiven" style="' + pct(x, y) + '">' + val + '</span>'
+        : '<input class="ans cell tbox" data-k="' + qi + '-T-' + id + '" autocomplete="off" inputmode="decimal" style="' + pct(x, y) + '">';
+    }).join('') + [0, 1].map(i => [0, 1].map(j => {
+      const p = leafOf(i, j);
+      return '<input class="ans cell tbox prod" data-k="' + qi + '-T-p' + i + '-' + j + '" autocomplete="off" style="' + pct(p[0], TY[3]) + '">';
+    }).join('')).join('');
+    return '<div class="side"><h3>דיאגרמת עץ' + (NARROW ? ' <span class="stages">(למעלה: ' + t.stages[0] + ' · למטה: ' + t.stages[1] + ' · בתחתית: המכפלות)</span>' : '') +
+      '</h3><div class="tree-wrap"><svg viewBox="0 0 ' + TW + ' ' + TH + '" class="tree">' + svg + '</svg>' + boxes + '</div>' +
+      '<p class="legend" id="legend"></p></div>';
+  }
+
+  // כפתור לכל מסלול: (בסל, בחוץ)
+  const pathName = (t, i, j) => '(' + t.first[i].name + ', ' + t.second[i][j].name + ')';
+  const pathsBox = (t, k) => '<div class="choice paths" data-pbox="' + k + '">' +
+    [0, 1].map(i => [0, 1].map(j => '<button type="button" data-pathk="' + k + '" data-path="' + i + '-' + j + '">' + pathName(t, i, j) + '</button>').join('')).join('') +
+    '</div><div class="ans-row"><span class="ufb" data-fb="' + k + '"></span></div>';
+
+  // צובעים בעץ את המסלולים שנבחרו בסעיף האחרון שעבדו עליו
+  function renderTree(q) {
+    const svg = document.querySelector('svg.tree');
+    if (!svg) return;
+    svg.querySelectorAll('.on').forEach(el => el.classList.remove('on'));
+    const legend = document.getElementById('legend');
+    const k = focusBuild && focusBuild.endsWith('-s') ? focusBuild : null;
+    if (!k) { legend.textContent = ''; return; }
+    readPaths(k).forEach(id => {
+      const [i, j] = id.split('-');
+      ['.a' + i, '.b' + i + '-' + j, '.n' + i, '.l' + i + '-' + j].forEach(sel => svg.querySelector(sel).classList.add('on'));
+    });
+    legend.textContent = 'צבועים: המסלולים של סעיף ' + k.split('-')[1] + '.';
+  }
+
+  function buildBox(qi, k) {
+    const t = QUESTIONS[qi].table, v = readBuild(k);
+    const opts = (r, val) => '<select data-wpart="' + r + '"><option value="">…</option>' +
+      t.rows[r].say.map((s, i) => '<option value="' + i + '"' + (String(val) === String(i) ? ' selected' : '') + '>' + s + '</option>').join('') + '</select>';
+    const conn = (attr, val) => '<select class="conn" ' + attr + '><option value="">…</option>' +
+      CONN.map(c => '<option' + (val === c ? ' selected' : '') + '>' + c + '</option>').join('') + '</select>';
+    return v.c.map((x, i) =>
+      (i ? '<div class="join">' + conn('data-wjoin="' + (i - 1) + '"', v.j[i - 1]) + '</div>' : '') +
+      '<div class="case c' + (i % 4) + '" data-wcase="' + i + '"><span class="case-lbl">מקרה ' + (i + 1) + '</span>' +
+      opts(0, x[0]) + conn('data-wpart="k"', x[1]) + opts(1, x[2]) +
+      (v.c.length > 1 ? '<button type="button" class="x" data-wdel="' + i + '" title="למחוק את המקרה"><i class="fa-solid fa-xmark"></i></button>' : '') +
+      '</div>').join('') +
+      '<div class="tools">' + (v.c.length < 4 ? '<button type="button" class="reveal" data-wadd>+ עוד מקרה</button>' : '') + '</div>' +
+      '<div class="ans-row"><span class="ufb" data-fb="' + k + '"></span></div>';
+  }
+
+  function build() {
+    const qi = state.cur, q = QUESTIONS[qi];
+    // צובעים את הבנייה האחרונה שעבדו עליה בשאלה הזאת (גם אחרי טעינה מחדש)
+    focusBuild = state.fw && state.fw.startsWith(qi + '-') ? state.fw : null;
+    const first = Object.keys(q.subs).find(l => q.subs[l].build);
+    const subs = Object.keys(q.subs).map(l => {
+      const s = q.subs[l], b = qi + '-' + l;
+      let body = '';
+      if (s.build) body += '<span class="step-lbl">המאורע במילים:</span><div class="builder" data-w="' + b + '-w">' + buildBox(qi, b + '-w') + '</div>';
+      if (s.paths) body += '<span class="step-lbl">המסלולים של המאורע (לוחצים על כל מסלול מתאים):</span>' + pathsBox(q.tree, b + '-s');
+      if (s.ways) body += '<span class="step-lbl">אפשר לפתור בשתי דרכים – בחרו אחת:</span><div class="choice ways" data-ways="' + b + '-y">' +
+        s.ways.map((w, i) => '<button type="button" data-way="' + i + '">' + w.label + '</button>').join('') + '</div>' +
+        '<p class="way-note" data-waynote="' + b + '-y"></p>';
+      if (s.expr || s.ways) body += exprRow(b + '-x');
+      if (s.choices) body += choiceBox(s.choices, b + '-c');
+      else if (s.ans) body += resRow(b + '-r', s.expr || s.ways ? 'התוצאה:' : 'התשובה:');
+      const full = s.build || s.choices || s.tableSub || s.treeSub || s.ways || s.paths;
+      return '<div class="sub' + (full ? ' full' : '') + '" data-sub="' + l + '"><div><strong>' + l + '.</strong> ' + s.text + '</div>' +
+        (l === first ? '<div class="howto">בונים את המאורע: בכל מקרה בוחרים מה קורה בכל שלב ואיזו מילה מחברת. ' +
+          'אם יש כמה מקרים – מוסיפים מקרה, ובוחרים מילה גם ביניהם. המקרים נצבעים בטבלה.</div>' : '') +
+        body + '</div>';
+    }).join('');
+
+    document.getElementById('q-card').innerHTML =
+      '<span class="q-badge">שאלה ' + (qi + 1) + ' · ' + (/^עמ/.test(q.src) ? 'מהספר, ' : '') + q.src + '</span>' +
+      '<div class="q-grid' + (q.table || q.tree ? '' : ' solo') + '">' +
+        '<div class="stem">' + q.stem +
+          (qi === 0 ? '<div class="howto">בתיבת התרגיל כותבים את החישוב עצמו. לכפל: <span class="ltr">·</span> (או <span class="ltr">*</span>, או <span class="ltr">x</span>). ' +
+            'לחיבור: <span class="ltr">+</span>. מספרים: עשרוני, שבר (<span class="ltr">3/4</span>) או אחוזים (<span class="ltr">75%</span>).</div>' : '') +
+        '</div>' +
+        (q.table ? sideTable(qi, q.table) : '') + (q.tree ? sideTree(qi, q.tree) : '') +
+        '<div class="subs">' + subs + '</div>' +
+      '</div>' +
+      '<div class="check-row"><button class="btn-check" onclick="checkQuestion()"><i class="fa-solid fa-check"></i> בדיקת התשובות</button>' +
+      '<span class="score" id="score"></span></div>';
+
+    bindInputs(document.getElementById('q-card'));
+    document.querySelectorAll('[data-choice]').forEach(b => b.addEventListener('click', () => {
+      state.a[b.dataset.choice] = b.textContent;
+      persist();
+      render();
+    }));
+    document.querySelectorAll('[data-key]').forEach(b => b.addEventListener('click', () => insertKey(b.dataset.key, b.textContent)));
+    document.querySelectorAll('.builder').forEach(bindBuilder);
+    document.querySelectorAll('[data-pathk]').forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.pathk, id = b.dataset.path, cur = readPaths(k);
+      state.a[k] = JSON.stringify(cur.includes(id) ? cur.filter(x => x !== id) : cur.concat(id));
+      focusBuild = state.fw = k;
+      persist();
+      render();
+    }));
+    document.querySelectorAll('[data-ways]').forEach(box => box.addEventListener('click', e => {
+      const b = e.target.closest('[data-way]');
+      if (!b) return;
+      state.a[box.dataset.ways] = b.dataset.way;
+      persist();
+      render();
+    }));
+    render();
+  }
+
+  function bindInputs(root) {
+    root.querySelectorAll('input[data-k]').forEach(el => {
+      el.value = state.a[el.dataset.k] || '';
+      el.addEventListener('input', () => {
+        state.a[el.dataset.k] = el.value;
+        persist();
+        render();
+      });
+      el.addEventListener('blur', render);
+    });
+  }
+
+  // כפתור עזר: מכניס את הסימן במקום הסמן
+  function insertKey(k, ch) {
+    const el = document.querySelector('input[data-k="' + k + '"]');
+    const a = el.selectionStart != null ? el.selectionStart : el.value.length, b = el.selectionEnd != null ? el.selectionEnd : a;
+    el.value = el.value.slice(0, a) + ch + el.value.slice(b);
+    el.focus();
+    el.setSelectionRange(a + ch.length, a + ch.length);
+    state.a[k] = el.value;
+    persist();
+    render();
+  }
+
+  function bindBuilder(box) {
+    const k = box.dataset.w, qi = state.cur;
+    const save = v => {
+      state.a[k] = JSON.stringify(v);
+      focusBuild = state.fw = k;
+      persist();
+    };
+    box.addEventListener('change', e => {
+      const v = readBuild(k), el = e.target;
+      if (el.dataset.wjoin !== undefined) v.j[+el.dataset.wjoin] = el.value;
+      else if (el.dataset.wpart !== undefined) {
+        const i = +el.closest('[data-wcase]').dataset.wcase;
+        v.c[i][el.dataset.wpart === 'k' ? 1 : el.dataset.wpart === '0' ? 0 : 2] = el.value;
+      }
+      save(v);
+      render();
+    });
+    box.addEventListener('click', e => {
+      const add = e.target.closest('[data-wadd]'), del = e.target.closest('[data-wdel]');
+      if (!add && !del) return;
+      const v = readBuild(k);
+      if (add) { v.c.push(['', '', '']); v.j.push(''); }
+      else {
+        const i = +del.dataset.wdel;
+        v.c.splice(i, 1);
+        v.j.splice(Math.max(0, i - 1), 1);
+      }
+      save(v);
+      box.innerHTML = buildBox(qi, k);
+      render();
+    });
+    box.addEventListener('focusin', () => { focusBuild = state.fw = k; renderTable(); });
+  }
+
+  // ---------- תצוגה ----------
+  // צובעים בטבלה את התאים של המקרים בבנייה האחרונה שעבדו עליה
+  function renderTable() {
+    const q = QUESTIONS[state.cur];
+    if (q.tree) return renderTree(q);
+    if (!q.table) return;
+    document.querySelectorAll('table.ptab td[data-cell]').forEach(td => td.className = td.className.replace(/\s*hl\S+/g, ''));
+    const legend = document.getElementById('legend');
+    if (!focusBuild) { legend.textContent = ''; return; }
+    const v = readBuild(focusBuild);
+    v.c.forEach((x, i) => [[0, x[0]], [1, x[2]]].forEach(([r, c]) => {
+      if (c === '') return;
+      const td = document.querySelector('td[data-cell="' + r + '-' + c + '"]');
+      if (!td) return;
+      td.classList.add(/hl\d/.test(td.className) ? 'hlx' : 'hl' + (i % 4));
+    }));
+    legend.textContent = 'צבועים: המקרים של סעיף ' + focusBuild.split('-')[1] + '.';
+  }
+
+  const BUILD_HINTS = {
+    incomplete: 'השלימו את כל הבחירות במשפט.',
+    inner: 'בדקו את המילה בתוך כל מקרה: שני הדברים צריכים לקרות ביחד, או שמספיק אחד מהם?',
+    join: 'בדקו את המילה בין המקרים: צריך ששני המקרים יקרו, או שמספיק שאחד מהם יקרה?',
+    cases: 'בדקו את המקרים: האם כל מקרה מתאים לשאלה? חסר מקרה, או שיש מקרה מיותר?'
+  };
+  const EXPR_MSG = {
+    syntax: 'לא הצלחתי לקרוא את התרגיל. כותבים מספרים, · לכפל ו-+ לחיבור.',
+    'only-result': 'כתבו את התרגיל עצמו, לא רק את התוצאה.',
+    'other-way': 'הערך נכון, אבל כתבו את התרגיל מתוך ההסתברויות שבשאלה (את המכפלות עצמן).',
+    wrong: 'לא נכון. נסו שוב.'
+  };
+
+  function render() {
+    const qi = state.cur, q = QUESTIONS[qi], checked = !!state.chk[qi];
+    renderTable();
+    let right = 0, total = 0;
+    const keys = keysOf(qi);
+    keys.forEach(k => { total++; if (correct(k)) right++; });
+
+    Object.keys(q.subs).forEach(l => {
+      const ks = subKeys(qi, l);
+      const done = ks.length && ks.every(k => checked ? correct(k) : filled(k));
+      document.querySelector('.sub[data-sub="' + l + '"]').classList.toggle('filled', !!done);
+    });
+    const tl = Object.keys(q.subs).find(l => q.subs[l].tableSub || q.subs[l].treeSub);
+    if (tl) {
+      const cells = keys.filter(k => /-[tT]-/.test(k));
+      document.querySelector('.sub[data-sub="' + tl + '"]').classList.toggle('filled', cells.every(k => checked ? correct(k) : filled(k)));
+    }
+
+    // תאי הטבלה: רק מסגרת ירוקה/אדומה
+    document.querySelectorAll('input.cell').forEach(el => {
+      const k = el.dataset.k, v = (state.a[k] || '').trim(), show = checked && v && el !== document.activeElement;
+      el.classList.toggle('good', !!show && correct(k));
+      el.classList.toggle('bad', !!show && !correct(k));
+    });
+    document.querySelectorAll('[data-choice]').forEach(b => b.classList.toggle('on', state.a[b.dataset.choice] === b.textContent));
+    document.querySelectorAll('[data-ways]').forEach(box => {
+      const sel = state.a[box.dataset.ways], l = box.dataset.ways.split('-')[1];
+      box.querySelectorAll('[data-way]').forEach(b => b.classList.toggle('on', b.dataset.way === sel));
+      const w = sel !== undefined && q.subs[l].ways[+sel];
+      document.querySelector('[data-waynote="' + box.dataset.ways + '"]').textContent = w ? w.note : '';
+    });
+    document.querySelectorAll('[data-pathk]').forEach(b => b.classList.toggle('on', readPaths(b.dataset.pathk).includes(b.dataset.path)));
+
+    document.querySelectorAll('[data-fb]').forEach(fb => {
+      const k = fb.dataset.fb, w = want(k);
+      const el = document.querySelector('input[data-k="' + k + '"]') || document.querySelector('[data-w="' + k + '"]') ||
+        document.querySelector('[data-cbox="' + k + '"]') || document.querySelector('[data-pbox="' + k + '"]');
+      const typing = el === document.activeElement;
+      const v = (state.a[k] || '').trim();
+      let html = '', good = false;
+      if (w.kind === 'x' && v && !typing && ProbCheck.exprProblem(v, w.expr) === 'syntax') html = EXPR_MSG.syntax;
+      else if (checked && v && !typing) {
+        good = correct(k);
+        if (good) html = '<i class="fa-solid fa-check"></i> נכון';
+        else if (w.kind === 'x') html = EXPR_MSG[ProbCheck.exprProblem(v, w.expr)];
+        else if (w.kind === 'w') {
+          const p = buildProblem(k, w.s);
+          html = p === 'incomplete' ? BUILD_HINTS.incomplete
+            : 'לא נכון. נסו שוב.' + (state.hint[k]
+              ? '<br><span class="hint-text">' + (p === 'cases' && w.s.hint ? w.s.hint : BUILD_HINTS[p]) + '</span>'
+              : '<button class="reveal" onclick="showHint(\'' + k + '\')">רמז</button>');
+        } else if (w.kind === 's') {
+          html = 'לא נכון. נסו שוב.' + (state.hint[k]
+            ? '<br><span class="hint-text">' + (w.s.hint || 'בדקו כל מסלול: האם הוא מתאים למאורע? חסר מסלול, או שיש מסלול מיותר?') + '</span>'
+            : '<button class="reveal" onclick="showHint(\'' + k + '\')">רמז</button>');
+        } else html = 'לא נכון. נסו שוב.';
+      }
+      if (fb.dataset.html !== html) { fb.innerHTML = html; fb.dataset.html = html; }
+      fb.classList.toggle('right', good);
+      if (el) {
+        el.classList.toggle('good', good);
+        el.classList.toggle('bad', !!html && !good);
+      }
+    });
+
+    document.getElementById('score').textContent = checked
+      ? (right === total ? 'כל התשובות נכונות! כל הכבוד.' : 'נכונות: ' + right + ' מתוך ' + total + '.')
+      : '';
+
+    const last = qi === QUESTIONS.length - 1;
+    document.getElementById('after').innerHTML = last
+      ? '<a class="btn-step" href="./">סיימתי את המקבץ – חזרה לכל המקבצים <i class="fa-solid fa-arrow-left"></i></a>'
+      : '<button class="btn-step" onclick="goTo(' + (qi + 1) + ')">לשאלה הבאה <i class="fa-solid fa-arrow-left"></i></button>';
+
+    document.getElementById('qnav').innerHTML =
+      '<span class="title">' + SET.title + '</span>' +
+      QUESTIONS.map((_, i) =>
+        '<button class="' + (i === qi ? 'cur ' : '') + (questionDone(i) ? 'done' : '') + '" onclick="goTo(' + i + ')">' +
+        (i + 1) + '</button>').join('');
+  }
+
+  function checkQuestion() {
+    state.chk[state.cur] = true;
+    persist();
+    render();
+  }
+
+  function showHint(k) {
+    state.hint[k] = true;
+    persist();
+    render();
+  }
+
+  function goTo(i) {
+    state.cur = i;
+    persist();
+    build();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ---------- שמירה בדפדפן ----------
+  function load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved && saved.a) state = Object.assign(state, saved);
+      state.chk = state.chk || {};
+      state.hint = state.hint || {};
+    } catch (e) {}
+    // set.html?c=indep&q=3 פותח ישר את שאלה 3
+    const qp = +new URLSearchParams(location.search).get('q');
+    if (qp) state.cur = qp - 1;
+    if (!(state.cur >= 0 && state.cur < QUESTIONS.length)) state.cur = 0;
+  }
+
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function resetAll() {
+    if (!confirm('למחוק את כל התשובות במקבץ הזה ולהתחיל מחדש?')) return;
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    location.reload();
+  }
+
+  if (QUESTIONS.length) {
+    load();
+    build();
+  } else {
+    document.getElementById('q-card').innerHTML = '<p class="note">המקבץ הזה עוד לא מוכן.</p>';
+    document.querySelector('.reset').remove();
+  }
+</script>
+</body>
+</html>
