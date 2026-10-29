@@ -152,6 +152,8 @@
     .tree-wrap input.tbox { width: 58px; height: 32px; font-size: 16px; }
     .tree-wrap input.tbox.prod { width: 78px; font-size: 15px; }
     .tree-wrap .tgiven { color: #fde68a; font-size: 17px; font-weight: 600; background: var(--bg-dark); padding: 0 4px; border-radius: 4px; }
+    /* בעץ לרוחב: נתון ברוחב של תיבה, כך שהקו נכנס אליו בלי רווח */
+    .tree-wrap.wide .tgiven { min-width: 58px; text-align: center; line-height: 30px; }
     .tree-wrap input.cell.good { box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.8); }
     .tree-wrap input.cell.bad { box-shadow: 0 0 0 2px rgba(249, 168, 184, 0.8); }
     .choice.paths button.on { border-color: var(--c-case0); background: rgba(251, 191, 36, 0.15); }
