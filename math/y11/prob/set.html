@@ -146,6 +146,7 @@
     svg.tree .nd.on ellipse { fill: rgba(251, 191, 36, 0.25); stroke: var(--c-case0); stroke-width: 2.5; }
     svg.tree text { fill: #f1f5f9; font-family: 'Assistant', sans-serif; font-size: 16px; text-anchor: middle; direction: rtl; }
     svg.tree text.stage { fill: #94a3b8; font-size: 13px; text-anchor: start; }
+    svg.tree text.head { fill: #94a3b8; font-size: 14px; }
     svg.tree .root { fill: #cbd5e1; }
     .tree-wrap .tbox, .tree-wrap .tgiven { position: absolute; transform: translate(-50%, -50%); }
     .tree-wrap input.tbox { width: 58px; height: 32px; font-size: 16px; }
@@ -347,6 +348,8 @@
       .tree-wrap input.tbox { width: 50px; height: 30px; font-size: 15px; padding: 0 2px; }
       .tree-wrap input.tbox.prod { width: 60px; font-size: 14px; }
       .tree-wrap .tgiven { font-size: 15px; }
+      .tree-wrap.wide input.tbox { width: 46px; height: 28px; font-size: 14px; }
+      .tree-wrap.wide input.tbox.prod { width: 54px; }
     }
   </style>
 </head>
@@ -376,15 +379,17 @@
   // מפתחות: <שאלה>-t-<שורה>-<עמודה> = תא בטבלה, <שאלה>-T-<ענף> = ענף בעץ (a0 = שלב ראשון, b0-1 = שלב שני),
   // <שאלה>-T-p<i>-<j> = המכפלה של המסלול, <שאלה>-<סעיף>-w = בניית המאורע, -s = המסלולים שנבחרו,
   // -x = התרגיל, -r = התוצאה, -c = בחירה. (-y = הדרך שבחרו – לא נבדקת)
-  const TREE_BRANCHES = ['a0', 'a1', 'b0-0', 'b0-1', 'b1-0', 'b1-1'];
+  // הענפים והמסלולים של עץ (2 או 3 תוצאות בכל שלב)
+  const treeBranches = t => t.first.map((_, i) => 'a' + i).concat(...t.second.map((row, i) => row.map((_, j) => 'b' + i + '-' + j)));
+  const treePaths = t => [].concat(...t.second.map((row, i) => row.map((_, j) => i + '-' + j)));
   function keysOf(qi) {
     const q = QUESTIONS[qi], out = [];
     if (q.table) q.table.rows.forEach((row, r) => row.p.forEach((_, c) => {
       if (!(row.given || []).includes(c)) out.push(qi + '-t-' + r + '-' + c);
     }));
     if (q.tree) {
-      TREE_BRANCHES.forEach(id => { if (!(q.tree.given || []).includes(id)) out.push(qi + '-T-' + id); });
-      ['0-0', '0-1', '1-0', '1-1'].forEach(id => out.push(qi + '-T-p' + id));
+      treeBranches(q.tree).forEach(id => { if (!(q.tree.given || []).includes(id)) out.push(qi + '-T-' + id); });
+      treePaths(q.tree).forEach(id => out.push(qi + '-T-p' + id));
     }
     Object.keys(q.subs).forEach(l => {
       const s = q.subs[l], b = qi + '-' + l;
@@ -539,13 +544,52 @@
     const out = b[0] > a[0] ? 1 : -1;
     return [(a[0] + b[0]) / 2 + out * 26, (a[1] + b[1]) / 2 - 4];
   }
-  const pct = (x, y) => 'left:' + (x / TW * 100) + '%;top:' + (y / TH * 100) + '%';
+  const pct = (x, y, W, H) => 'left:' + (x / (W || TW) * 100) + '%;top:' + (y / (H || TH) * 100) + '%';
+  const tline = (a, b, cls) => '<line class="' + cls + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
+  const tnode = (p, name, cls, rx) => '<g class="' + cls + '"><ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="' + (rx || 44) + '" ry="17"/>' +
+    '<text x="' + p[0] + '" y="' + (p[1] + 5) + '">' + name + '</text></g>';
+  // תיבה של ענף: נתון (צהוב) או תיבה למילוי
+  function branchBox(qi, t, id, style) {
+    const val = treeValue(t, id.split('-')[0], id.split('-')[1]);
+    return (t.given || []).includes(id)
+      ? '<span class="tgiven" style="' + style + '">' + val + '</span>'
+      : '<input class="ans cell tbox" data-k="' + qi + '-T-' + id + '" autocomplete="off" inputmode="decimal" style="' + style + '">';
+  }
+
+  // עץ לרוחב, מימין לשמאל (כמו בספר) – כשיש 3 תוצאות בשלב: שורה לכל מסלול.
+  // עמודות: השורש מימין, השלב הראשון, השלב השני, והמכפלות משמאל.
+  function sideTreeWide(qi, t) {
+    const W = 400, RH = 56, TOP = 40, X = { root: 394, a: 354, n: 290, b: 214, leaf: 146, prod: 46 };
+    const rows = treePaths(t).length, H = TOP + rows * RH + 6;
+    let k = 0;
+    const leafY = t.second.map(row => row.map(() => TOP + RH * (k++ + 0.5)));
+    const nodeY = leafY.map(ys => ys.reduce((a, b) => a + b, 0) / ys.length);
+    const rootY = nodeY.reduce((a, b) => a + b, 0) / nodeY.length;
+    let svg = '', boxes = '';
+    t.first.forEach((f, i) => {
+      svg += tline([X.root, rootY], [X.n + 34, nodeY[i]], 'br a' + i);
+      t.second[i].forEach((_, j) => { svg += tline([X.n - 34, nodeY[i]], [X.b + 26, leafY[i][j]], 'br b' + i + '-' + j) + tline([X.b, leafY[i][j]], [X.leaf + 36, leafY[i][j]], 'br b' + i + '-' + j); });
+      // התיבה של ענף בשלב הראשון: על הקו, קרוב לצומת
+      boxes += branchBox(qi, t, 'a' + i, pct(X.a, nodeY[i] + (rootY - nodeY[i]) * (X.n + 34 - X.a) / (X.n + 34 - X.root), W, H));
+      t.second[i].forEach((_, j) => {
+        boxes += branchBox(qi, t, 'b' + i + '-' + j, pct(X.b, leafY[i][j], W, H)); // בשורה של העלה – כך התיבות לא עולות זו על זו
+        boxes += '<input class="ans cell tbox prod" data-k="' + qi + '-T-p' + i + '-' + j + '" autocomplete="off" style="' + pct(X.prod, leafY[i][j], W, H) + '">';
+      });
+    });
+    t.first.forEach((f, i) => {
+      svg += tnode([X.n, nodeY[i]], f.name, 'nd n' + i, 34);
+      t.second[i].forEach((sec, j) => { svg += tnode([X.leaf, leafY[i][j]], sec.name, 'nd l' + i + '-' + j, 36); });
+    });
+    svg += '<circle cx="' + X.root + '" cy="' + rootY + '" r="5" class="root"/>';
+    svg += '<text class="head" x="' + X.n + '" y="18">' + t.stages[0] + '</text><text class="head" x="' + X.leaf + '" y="18">' + t.stages[1] + '</text>' +
+      '<text class="head" x="' + X.prod + '" y="18">המכפלה</text>';
+    return '<div class="side"><h3>דיאגרמת עץ</h3><div class="tree-wrap wide"><svg viewBox="0 0 ' + W + ' ' + H + '" class="tree">' + svg + '</svg>' + boxes + '</div>' +
+      '<p class="legend" id="legend"></p></div>';
+  }
 
   function sideTree(qi, t) {
-    const given = t.given || [];
-    const line = (a, b, cls) => '<line class="' + cls + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
-    const node = (p, name, cls) => '<g class="' + cls + '"><ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="44" ry="17"/>' +
-      '<text x="' + p[0] + '" y="' + (p[1] + 5) + '">' + name + '</text></g>';
+    if (t.first.length !== 2 || t.second.some(row => row.length !== 2)) return sideTreeWide(qi, t);
+    const line = tline, node = tnode;
     let svg = '';
     [0, 1].forEach(i => {
       svg += line(TP.root, TP.n[i], 'br a' + i);
@@ -561,12 +605,9 @@
       svg += '<text class="stage" x="' + (TW - 2) + '" y="' + (TY[2] + 5) + '">' + t.stages[1] + '</text>';
       svg += '<text class="stage" x="' + (TW - 2) + '" y="' + (TY[3] + 5) + '">המכפלה</text>';
     }
-    const boxes = TREE_BRANCHES.map(id => {
+    const boxes = treeBranches(t).map(id => {
       const [x, y] = branchPos(id);
-      const val = treeValue(t, id.split('-')[0], id.split('-')[1]);
-      return given.includes(id)
-        ? '<span class="tgiven" style="' + pct(x, y) + '">' + val + '</span>'
-        : '<input class="ans cell tbox" data-k="' + qi + '-T-' + id + '" autocomplete="off" inputmode="decimal" style="' + pct(x, y) + '">';
+      return branchBox(qi, t, id, pct(x, y));
     }).join('') + [0, 1].map(i => [0, 1].map(j => {
       const p = leafOf(i, j);
       return '<input class="ans cell tbox prod" data-k="' + qi + '-T-p' + i + '-' + j + '" autocomplete="off" style="' + pct(p[0], TY[3]) + '">';
@@ -579,7 +620,7 @@
   // כפתור לכל מסלול: (בסל, בחוץ)
   const pathName = (t, i, j) => '(' + t.first[i].name + ', ' + t.second[i][j].name + ')';
   const pathsBox = (t, k) => '<div class="choice paths" data-pbox="' + k + '">' +
-    [0, 1].map(i => [0, 1].map(j => '<button type="button" data-pathk="' + k + '" data-path="' + i + '-' + j + '">' + pathName(t, i, j) + '</button>').join('')).join('') +
+    treePaths(t).map(id => '<button type="button" data-pathk="' + k + '" data-path="' + id + '">' + pathName(t, ...id.split('-').map(Number)) + '</button>').join('') +
     '</div><div class="ans-row"><span class="ufb" data-fb="' + k + '"></span></div>';
 
   // צובעים בעץ את המסלולים שנבחרו בסעיף האחרון שעבדו עליו
@@ -592,7 +633,7 @@
     if (!k) { legend.textContent = ''; return; }
     readPaths(k).forEach(id => {
       const [i, j] = id.split('-');
-      ['.a' + i, '.b' + i + '-' + j, '.n' + i, '.l' + i + '-' + j].forEach(sel => svg.querySelector(sel).classList.add('on'));
+      ['.a' + i, '.b' + i + '-' + j, '.n' + i, '.l' + i + '-' + j].forEach(sel => svg.querySelectorAll(sel).forEach(el => el.classList.add('on')));
     });
     legend.textContent = 'צבועים: המסלולים של סעיף ' + k.split('-')[1] + '.';
   }
