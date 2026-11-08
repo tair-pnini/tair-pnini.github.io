@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מפת מצבי המטבעות</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<!-- Shared site bars (<site-header>, <site-footer>) -->
+<script src="/assets/site.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&family=Frank+Ruhl+Libre:wght@500;700&display=swap">
+<style>
+/* Layout: header, then the map (a 5×5 rolling grid centred on פפפפ) beside a sticky side panel; below them the explanation, the per-state checks and the states grouped by number.
+   Each number 0–3 gets a soft tint so the pattern on the map is visible at a glance. */
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface-2: #f8f9fa;
+  --fg: #22262a;
+  --muted: #6a7077;
+  --line: #d6d9dd;
+  --accent: #3d5a80;
+  --good: #2e7a4d;
+  --bad: #b04530;
+  --head-1: #8b929a; --head-2: #343a40;   /* עץ: dark metal */
+  --tail-1: #ffffff; --tail-2: #d3d7dc;   /* פלי: light metal */
+  --head-fg: #f4f5f6; --tail-fg: #4a5056;
+  --n0: #dfe7f2; --n1: #e0eedf; --n2: #f3ead6; --n3: #f2dfe2;
+  --n0-ink: #33507a; --n1-ink: #3a6b38; --n2-ink: #7a5a1c; --n3-ink: #85404d;
+  --shadow: 0 1px 2px rgba(30, 35, 40, .06), 0 4px 14px rgba(30, 35, 40, .06);
+  --font-display: "Frank Ruhl Libre", "David", serif;
+  --font-body: "Assistant", "Segoe UI", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); direction: rtl;
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+}
+main {
+  max-width: 1072px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 2.3rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.35rem; margin: 0; }
+p { margin: 0; max-width: 66ch; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); }
+header { display: flex; flex-direction: column; gap: 8px; }
+
+/* coins */
+.coins { display: grid; grid-template-columns: repeat(2, var(--c, 24px)); gap: 4px; direction: ltr; }
+.coin {
+  width: var(--c, 24px); height: var(--c, 24px); border-radius: 50%;
+  display: grid; place-items: center; font-weight: 800; font-size: calc(var(--c, 24px) * .42); line-height: 1;
+  box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.12), 0 1px 1px rgba(0,0,0,.12);
+}
+.coin.h { background: radial-gradient(circle at 34% 30%, var(--head-1), var(--head-2) 72%); color: var(--head-fg); }
+.coin.t { background: radial-gradient(circle at 34% 30%, var(--tail-1), var(--tail-2) 80%); color: var(--tail-fg); }
+
+/* workspace: map + side panel */
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+@media (max-width: 920px) { .work { grid-template-columns: minmax(0, 1fr); } }
+.panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); display: flex; flex-direction: column; gap: 14px; }
+@media (max-width: 920px) { .panel { position: static; } }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+
+.score { display: flex; align-items: baseline; gap: 8px; }
+.score .num { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.score.ok .num { color: var(--good); }
+.bar { height: 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; display: flex; }
+.bar span { display: block; height: 100%; }
+.bar .ok { background: var(--good); }
+.bar .bad { background: var(--bad); }
+.tally { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.tally div { border-radius: 8px; padding: 4px 0; text-align: center; font-variant-numeric: tabular-nums; }
+.tally b { display: block; font-size: 1.15rem; }
+.tally small { font-size: 0.78rem; }
+
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opts label { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+.opts input[type=checkbox] { accent-color: var(--muted); width: 17px; height: 17px; }
+button {
+  font: inherit; font-size: 0.92rem; color: var(--fg); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 8px; padding: 5px 12px; cursor: pointer; align-self: flex-start;
+}
+button:hover { border-color: var(--muted); }
+button:focus-visible, input:focus-visible, .node:focus-visible, .pick:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.detail ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.detail li { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; }
+.detail .sel-head { display: flex; gap: 12px; align-items: center; }
+
+/* map */
+.map-box { padding: 0; overflow: hidden; }
+.map-wrap { overflow-x: auto; overflow-y: hidden; direction: ltr; }
+.map { position: relative; direction: ltr; margin: 0 auto; }
+.map svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.map line { stroke: var(--line); stroke-width: 2; }
+.map line.hl { stroke: var(--accent); stroke-width: 3; }
+.map .tag rect.bg { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.map .tag rect.c { fill: var(--surface); stroke: var(--muted); stroke-width: 0.8; }
+.map .tag rect.c.on { fill: var(--muted); }
+.map .tag.hl rect.bg { stroke: var(--accent); }
+.map .tag.hl rect.c.on { fill: var(--accent); }
+.map-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 0.88rem; color: var(--muted); padding: 10px 16px; border-top: 1px solid var(--line); background: var(--surface-2); }
+.map-legend > span { display: inline-flex; gap: 6px; align-items: center; }
+.map-legend .dash { width: 22px; height: 15px; border: 1.5px dashed var(--muted); border-radius: 4px; }
+
+.node {
+  position: absolute; transform: translate(-50%, -50%);
+  width: 84px; padding: 8px 6px 6px; border-radius: 12px;
+  background: var(--surface); border: 1.5px solid var(--line); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
+}
+.node[data-n="0"] { background: var(--n0); } .node[data-n="1"] { background: var(--n1); }
+.node[data-n="2"] { background: var(--n2); } .node[data-n="3"] { background: var(--n3); }
+.node.copy { border-style: dashed; box-shadow: none; }
+.node.center { border-width: 2px; border-color: var(--muted); }
+.node.sel { border-color: var(--accent); border-width: 3px; border-style: solid; }
+.node.nb { border-color: var(--accent); border-width: 2px; }
+.node.dim { opacity: 0.35; }
+.node input {
+  width: 40px; height: 28px; text-align: center; font: inherit; font-size: 1.15rem; font-weight: 800;
+  font-variant-numeric: tabular-nums; color: var(--fg); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 7px; padding: 0;
+}
+.node[data-n="0"] input { color: var(--n0-ink); } .node[data-n="1"] input { color: var(--n1-ink); }
+.node[data-n="2"] input { color: var(--n2-ink); } .node[data-n="3"] input { color: var(--n3-ink); }
+.mark { font-size: 0.72rem; line-height: 1.2; min-height: 1.2em; color: var(--muted); text-align: center; direction: rtl; font-weight: 600; }
+.mark.ok { color: var(--good); }
+.mark.bad { color: var(--bad); }
+
+.t0 { background: var(--n0); color: var(--n0-ink); } .t1 { background: var(--n1); color: var(--n1-ink); }
+.t2 { background: var(--n2); color: var(--n2-ink); } .t3 { background: var(--n3); color: var(--n3-ink); }
+.digit { display: inline-grid; place-items: center; min-width: 26px; height: 26px; border-radius: 7px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.digit.empty { background: var(--surface-2); color: var(--muted); border: 1px dashed var(--line); font-weight: 400; }
+
+.explain { display: flex; flex-direction: column; gap: 10px; }
+.explain ul { margin: 0; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 75ch; }
+
+section.list { display: flex; flex-direction: column; gap: 12px; }
+.checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.pick {
+  display: flex; gap: 10px; align-items: center; padding: 8px 12px; text-align: start;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; font: inherit; font-size: 0.92rem; color: var(--fg); width: 100%;
+}
+.pick:hover { border-color: var(--muted); }
+.pick .coins, .group .coins { --c: 15px; gap: 2px; }
+.pick .coin, .group .coin { font-size: 0; }
+.st { font-weight: 700; }
+.st.ok { color: var(--good); }
+.st.bad { color: var(--bad); }
+.st.wait { color: var(--muted); font-weight: 400; }
+
+.groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.group { border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); background: var(--surface); }
+.group.t0, .group.t1, .group.t2, .group.t3 { border-color: transparent; }
+.group h3 { margin: 0; display: flex; justify-content: space-between; align-items: baseline; }
+.group h3 .n { font-family: var(--font-display); font-size: 1.7rem; line-height: 1; }
+.group h3 .cnt { font-weight: 400; font-size: 0.85rem; }
+.group .items { display: flex; flex-wrap: wrap; gap: 6px; }
+.group .items button { padding: 4px; border-radius: 7px; background: var(--surface); border: 1px solid var(--line); }
+/* Phone layout */
+@media (max-width: 640px) {
+  html { font-size: 110%; }
+  body { font-size: 1rem; }
+  h1 { font-size: 1.8rem; }
+  main { gap: 20px; padding-block: 18px 40px; }
+  .map-legend { font-size: 0.82rem; }
+}
+@media (prefers-reduced-motion: no-preference) { .node, .map line, .pick { transition: opacity .15s, border-color .15s, stroke .15s, background-color .2s; } }
+site-footer { background: #fff; }
+</style>
+</head>
+<body>
+<site-header style="--tp-max:1040px"></site-header>
+
+<main>
+  <header>
+    <span class="eyebrow">יישומון חידה</span>
+    <h1>מפת מצבי המטבעות</h1>
+    <p class="muted">ארבעה מטבעות בריבוע 2×2. כל צעד בגריד – למעלה, למטה, ימינה או שמאלה – הופך מטבע אחד, והריבוע הקטן על הקו מראה איזה. כתבי ליד כל מצב איזה מספר (<span dir="ltr">0–3</span>) הוא מייצג, והבדיקות יראו מאיזה מצב עדיין אי אפשר להגיע לכל ארבעת המספרים.</p>
+  </header>
+
+  <section class="box" id="riddle">
+    <h2>החידה</h2>
+    <p>בוב ואליס מכינים קסם. על השולחן ריבוע של 2×2 משבצות, ובכל משבצת מטבע. הקהל מסדר את המטבעות כרצונו, חלקם עץ וחלקם פלי, ואומר לבוב מספר בין 0 ל-3. אליס לא רואה ולא שומעת כלום מכל זה. עכשיו בוב חייב להפוך בדיוק מטבע אחד, ויוצא מהחדר. אליס נכנסת, מסתכלת על המטבעות ואומרת איזה מספר אמר הקהל.</p>
+    <p><strong>איך הם מתכננים את זה מראש?</strong></p>
+  </section>
+
+  <div class="work">
+    <div class="box map-box">
+      <div class="map-wrap"><div class="map" id="map"><svg id="edges" aria-hidden="true"></svg></div></div>
+      <div class="map-legend">
+        <span><span class="coin h" style="--c:20px">ע</span> עץ</span>
+        <span><span class="coin t" style="--c:20px">פ</span> פלי</span>
+        <span><span class="dash"></span> מצב שחוזר בצד השני</span>
+        <span>לחיצה על מצב מסמנת את שכניו</span>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div class="box">
+        <div class="score" id="score"><span class="num" id="score-num">0</span><span>מתוך 16 מצבים תקינים</span></div>
+        <div class="bar" id="bar"><span class="ok"></span><span class="bad"></span></div>
+        <span class="muted" id="score-sub" style="font-size:.9rem"></span>
+        <div class="tally" id="tally"></div>
+      </div>
+      <div class="box detail" id="detail"></div>
+      <div class="box opts">
+        <label for="opt-stay"><input type="checkbox" id="opt-stay"> מותר גם לא להפוך אף מטבע</label>
+        <button type="button" id="btn-clear">ניקוי כל המספרים</button>
+      </div>
+    </aside>
+  </div>
+
+  <section class="explain">
+    <h2>איך בנוי הגריד</h2>
+    <ul>
+      <li>במרכז פפפפ. כל כיוון הופך מטבע אחר: למעלה – שמאל-למעלה, ימינה – ימין-למעלה, למטה – ימין-למטה, שמאלה – שמאל-למטה.</li>
+      <li>בפינות של הריבוע הפנימי (3×3) נמצא המצב המשותף לשני שכנים סמוכים. למשל, בין "למעלה" ל"ימינה" יושב המצב שבו הפכו את שני המטבעות האלה.</li>
+      <li>16 המצבים לא נכנסים לגריד שטוח כך שלכל מצב יהיו בדיוק 4 שכנים. לכן הגריד "מתגלגל": פעמיים למעלה ופעמיים למטה מגיעים לאותו מצב, וכך גם פעמיים ימינה ופעמיים שמאלה.</li>
+      <li>לכן השורה העליונה זהה לתחתונה והעמודה הימנית זהה לשמאלית. המצבים האלה מסומנים במסגרת מקווקוות. כל 16 המצבים מופיעים בגריד, ומספר שכותבים במצב אחד מתעדכן בכל המקומות שבהם הוא מופיע.</li>
+    </ul>
+  </section>
+
+  <section class="list">
+    <h2>המצבים לפי מספר</h2>
+    <div class="groups" id="groups"></div>
+  </section>
+
+  <section class="list">
+    <h2>בדיקה לכל מצב</h2>
+    <div class="checks" id="checks"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const N = 16, BITS = 4, KEY = 'coins2x2-labels-v1';
+  const CELL_X = 118, CELL_Y = 156, PAD_X = 62, PAD_Y = 68;
+  // coin i: 0 = top-left, 1 = top-right, 2 = bottom-left, 3 = bottom-right; bit on = עץ
+  // From the centre: up flips top-left, down flips bottom-right, right flips top-right, left flips bottom-left.
+  // Two steps in the same direction flip both coins of that axis, so rows -2/+2 (and columns -2/+2) are the same states.
+  const V = { '-2': 0b1001, '-1': 0b0001, '0': 0, '1': 0b1000, '2': 0b1001 };
+  const H = { '-2': 0b0110, '-1': 0b0100, '0': 0, '1': 0b0010, '2': 0b0110 };
+  const stateAt = (r, c) => V[r] | H[c];
+
+  let labels = Array(N).fill('');
+  let allowStay = false;
+  let selected = null;
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved && Array.isArray(saved.labels) && saved.labels.length === N) labels = saved.labels;
+    if (saved && typeof saved.allowStay === 'boolean') allowStay = saved.allowStay;
+  } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ labels, allowStay })); } catch (e) {} }
+
+  const neighbors = s => [0, 1, 2, 3].map(i => s ^ (1 << i));
+  const digit = v => v === '' ? '<span class="digit empty">?</span>' : '<span class="digit t' + v + '">' + v + '</span>';
+
+  function coinsHTML(s) {
+    let h = '<div class="coins">';
+    for (let i = 0; i < BITS; i++) {
+      const on = (s >> i) & 1;
+      h += '<span class="coin ' + (on ? 'h' : 't') + '">' + (on ? 'ע' : 'פ') + '</span>';
+    }
+    return h + '</div>';
+  }
+
+  // which numbers can be reached from state s, and what is still missing
+  function status(s) {
+    const targets = neighbors(s).concat(allowStay ? [s] : []);
+    const empty = targets.filter(t => labels[t] === '').length;
+    const got = new Set(targets.map(t => labels[t]).filter(v => v !== ''));
+    const missing = ['0', '1', '2', '3'].filter(v => !got.has(v));
+    let state;
+    if (missing.length === 0) state = 'ok';
+    else if (empty >= missing.length) state = 'wait';
+    else state = 'bad';
+    return { missing, empty, state };
+  }
+
+  const map = document.getElementById('map');
+  const svg = document.getElementById('edges');
+  const cells = [];
+  map.style.width = (PAD_X * 2 + CELL_X * 4) + 'px';
+  map.style.height = (PAD_Y * 2 + CELL_Y * 4) + 'px';
+
+  for (let r = -2; r <= 2; r++) for (let c = -2; c <= 2; c++) {
+    const s = stateAt(r, c);
+    const x = PAD_X + (c + 2) * CELL_X, y = PAD_Y + (r + 2) * CELL_Y;
+    const el = document.createElement('div');
+    el.className = 'node' + (Math.abs(r) === 2 || Math.abs(c) === 2 ? ' copy' : '') + (r === 0 && c === 0 ? ' center' : '');
+    el.tabIndex = 0;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.innerHTML = coinsHTML(s) +
+      '<input id="lab-' + (r + 2) + '-' + (c + 2) + '" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="המספר של המצב">' +
+      '<div class="mark"></div>';
+    const inp = el.querySelector('input');
+    inp.addEventListener('input', () => {
+      labels[s] = inp.value.replace(/[^0-3]/g, '').slice(-1);
+      save(); refresh();
+    });
+    inp.addEventListener('focus', () => select(s));
+    el.addEventListener('click', e => { if (e.target !== inp) select(selected === s ? null : s); });
+    el.addEventListener('keydown', e => { if (e.target === el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); select(selected === s ? null : s); } });
+    map.appendChild(el);
+    cells.push({ r, c, s, el, inp, x, y });
+  }
+
+  // edges between grid neighbours, with a small 2×2 tag showing which coin flips
+  const at = (r, c) => cells[(r + 2) * 5 + (c + 2)];
+  let lines = '', tags = '';
+  for (const a of cells) for (const [dr, dc] of [[0, 1], [1, 0]]) {
+    if (a.r + dr > 2 || a.c + dc > 2) continue;
+    const b = at(a.r + dr, a.c + dc);
+    const bit = Math.log2(a.s ^ b.s);
+    lines += '<line data-a="' + a.s + '" data-b="' + b.s + '" x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '"/>';
+    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    let t = '<g class="tag" data-a="' + a.s + '" data-b="' + b.s + '" transform="translate(' + (mx - 9) + ',' + (my - 9) + ')">' +
+      '<rect class="bg" x="0" y="0" width="18" height="18" rx="4"/>';
+    for (let i = 0; i < 4; i++) {
+      t += '<rect class="c' + (i === bit ? ' on' : '') + '" x="' + (3 + (i % 2) * 7) + '" y="' + (3 + Math.floor(i / 2) * 7) + '" width="5" height="5" rx="2.5"/>';
+    }
+    tags += t + '</g>';
+  }
+  svg.innerHTML = lines + tags;
+
+  // on narrow screens the map scrolls sideways: open it centred on פפפפ
+  const wrap = map.parentElement;
+  wrap.scrollLeft = (wrap.scrollWidth - wrap.clientWidth) / 2;
+
+  function select(s) { selected = s; highlight(); renderDetail(); }
+
+  function highlight() {
+    const nb = selected === null ? [] : neighbors(selected);
+    cells.forEach(({ s, el }) => {
+      el.classList.toggle('sel', s === selected);
+      el.classList.toggle('nb', nb.includes(s));
+      el.classList.toggle('dim', selected !== null && s !== selected && !nb.includes(s));
+    });
+    svg.querySelectorAll('line, g.tag').forEach(l => {
+      const a = +l.dataset.a, b = +l.dataset.b;
+      l.classList.toggle('hl', selected !== null && (a === selected || b === selected));
+    });
+  }
+
+  function markText(st) {
+    if (st.state === 'ok') return '✓ הכול';
+    if (st.state === 'bad') return 'חסר ' + st.missing.join(',');
+    return st.empty === 0 ? '' : 'עוד ' + st.empty + ' ריקים';
+  }
+
+  function renderDetail() {
+    const d = document.getElementById('detail');
+    if (selected === null) {
+      d.innerHTML = '<h2>מצב נבחר</h2><p class="muted">לחצי על מצב במפה או ברשימות למטה כדי לראות לאן אפשר להגיע ממנו.</p>';
+      return;
+    }
+    const s = selected, st = status(s);
+    const names = ['שמאל למעלה', 'ימין למעלה', 'שמאל למטה', 'ימין למטה'];
+    let h = '<div class="sel-head">' + coinsHTML(s) + '<h2>המצב הנבחר</h2>' + digit(labels[s]) + '</div><ul>';
+    neighbors(s).forEach((t, i) => { h += '<li>' + digit(labels[t]) + '<span>הופכים ' + names[i] + '</span></li>'; });
+    if (allowStay) h += '<li>' + digit(labels[s]) + '<span>לא הופכים כלום</span></li>';
+    h += '</ul><p>' + (st.state === 'ok'
+      ? '<span class="st ok">✓ מכאן מגיעים לכל ארבעת המספרים</span>'
+      : 'חסרים: <strong>' + st.missing.join(', ') + '</strong>' + (st.state === 'bad' ? ' <span class="st bad">– לא נשארו מספיק שכנים ריקים</span>' : '')) + '</p>';
+    d.innerHTML = h;
+  }
+
+  function refresh() {
+    let ok = 0, bad = 0, ch = '';
+    const sts = [];
+    for (let s = 0; s < N; s++) {
+      const st = sts[s] = status(s);
+      if (st.state === 'ok') ok++;
+      if (st.state === 'bad') bad++;
+      const stText = st.state === 'ok' ? '✓ מגיעים לכל המספרים'
+        : st.state === 'bad' ? '✗ חסר ' + st.missing.join(', ')
+        : 'חסר ' + st.missing.join(', ') + (st.empty ? ' · ' + st.empty + ' ריקים' : '');
+      ch += '<button type="button" class="pick" data-s="' + s + '">' + coinsHTML(s) + digit(labels[s]) +
+        '<span class="st ' + st.state + '">' + stText + '</span></button>';
+    }
+    cells.forEach(({ s, inp, el }) => {
+      if (inp.value !== labels[s]) inp.value = labels[s];
+      el.dataset.n = labels[s];
+      const m = el.querySelector('.mark');
+      m.className = 'mark ' + sts[s].state;
+      m.textContent = markText(sts[s]);
+    });
+    const checks = document.getElementById('checks');
+    checks.innerHTML = ch;
+    checks.querySelectorAll('.pick').forEach(c => c.addEventListener('click', () => select(+c.dataset.s)));
+
+    const groups = document.getElementById('groups');
+    groups.innerHTML = ['0', '1', '2', '3', ''].map(v => {
+      const list = [...Array(N).keys()].filter(s => labels[s] === v);
+      return '<div class="group' + (v === '' ? '' : ' t' + v) + '"><h3>' + (v === '' ? '<span>בלי מספר</span>' : '<span class="n">' + v + '</span>') +
+        '<span class="cnt">' + list.length + ' מצבים</span></h3><div class="items">' +
+        list.map(s => '<button type="button" data-s="' + s + '" aria-label="בחירת מצב">' + coinsHTML(s) + '</button>').join('') + '</div></div>';
+    }).join('');
+    groups.querySelectorAll('button').forEach(c => c.addEventListener('click', () => select(+c.dataset.s)));
+
+    const filled = labels.filter(x => x !== '').length;
+    document.getElementById('score-num').textContent = ok;
+    document.getElementById('score').classList.toggle('ok', ok === N);
+    document.getElementById('score-sub').textContent = ok === N ? 'כל המצבים עובדים!' : 'מולאו ' + filled + ' מתוך 16' + (bad ? ' · ' + bad + ' עם בעיה' : '');
+    const bar = document.getElementById('bar').children;
+    bar[0].style.width = (ok / N * 100) + '%';
+    bar[1].style.width = (bad / N * 100) + '%';
+    document.getElementById('tally').innerHTML = ['0', '1', '2', '3'].map(v =>
+      '<div class="t' + v + '"><b>' + v + '</b><small>' + labels.filter(x => x === v).length + ' מצבים</small></div>').join('');
+    renderDetail();
+  }
+
+  const stayBox = document.getElementById('opt-stay');
+  stayBox.checked = allowStay;
+  stayBox.addEventListener('change', () => { allowStay = stayBox.checked; save(); refresh(); });
+
+  let armed = false;
+  const clearBtn = document.getElementById('btn-clear');
+  clearBtn.addEventListener('click', () => {
+    if (!armed) {
+      armed = true; clearBtn.textContent = 'בטוח? לחצי שוב';
+      setTimeout(() => { armed = false; clearBtn.textContent = 'ניקוי כל המספרים'; }, 3000);
+      return;
+    }
+    armed = false; clearBtn.textContent = 'ניקוי כל המספרים';
+    labels = Array(N).fill('');
+    save(); refresh();
+  });
+
+  refresh();
+})();
+</script>
+<site-footer style="--tp-max:1040px"></site-footer>
+</body>
+</html>
