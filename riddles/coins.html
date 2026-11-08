@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>מפת מצבי המטבעות</title>
+<title>המטבעות של בוב ואליס</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <!-- Shared site bars (<site-header>, <site-footer>) -->
 <script src="/assets/site.js"></script>
@@ -161,6 +161,9 @@ section.list { display: flex; flex-direction: column; gap: 12px; }
 .group h3 .cnt { font-weight: 400; font-size: 0.85rem; }
 .group .items { display: flex; flex-wrap: wrap; gap: 6px; }
 .group .items button { padding: 4px; border-radius: 7px; background: var(--surface); border: 1px solid var(--line); }
+#helper { display: flex; flex-direction: column; gap: 28px; }
+#helper[hidden] { display: none; }
+
 /* Phone layout */
 @media (max-width: 640px) {
   html { font-size: 110%; }
@@ -178,15 +181,21 @@ site-footer { background: #fff; }
 
 <main>
   <header>
-    <span class="eyebrow">יישומון חידה</span>
-    <h1>מפת מצבי המטבעות</h1>
-    <p class="muted">ארבעה מטבעות בריבוע 2×2. כל צעד בגריד – למעלה, למטה, ימינה או שמאלה – הופך מטבע אחד, והריבוע הקטן על הקו מראה איזה. כתבי ליד כל מצב איזה מספר (<span dir="ltr">0–3</span>) הוא מייצג, והבדיקות יראו מאיזה מצב עדיין אי אפשר להגיע לכל ארבעת המספרים.</p>
+    <span class="eyebrow">חידה</span>
+    <h1>המטבעות של בוב ואליס</h1>
   </header>
 
   <section class="box" id="riddle">
     <h2>החידה</h2>
     <p>בוב ואליס מכינים קסם. על השולחן ריבוע של 2×2 משבצות, ובכל משבצת מטבע. הקהל מסדר את המטבעות כרצונו, חלקם עץ וחלקם פלי, ואומר לבוב מספר בין 0 ל-3. אליס לא רואה ולא שומעת כלום מכל זה. עכשיו בוב חייב להפוך בדיוק מטבע אחד, ויוצא מהחדר. אליס נכנסת, מסתכלת על המטבעות ואומרת איזה מספר אמר הקהל.</p>
     <p><strong>איך הם מתכננים את זה מראש?</strong></p>
+    <button type="button" id="btn-help" aria-expanded="false" aria-controls="helper">לעזרה בחשיבה</button>
+  </section>
+
+  <div id="helper" hidden>
+  <section class="explain">
+    <h2>מפת מצבי המטבעות</h2>
+    <p class="muted">ארבעה מטבעות בריבוע 2×2. כל צעד בגריד – למעלה, למטה, ימינה או שמאלה – הופך מטבע אחד, והריבוע הקטן על הקו מראה איזה. כתבי ליד כל מצב איזה מספר (<span dir="ltr">0–3</span>) הוא מייצג, והבדיקות יראו מאיזה מצב עדיין אי אפשר להגיע לכל ארבעת המספרים.</p>
   </section>
 
   <div class="work">
@@ -234,6 +243,7 @@ site-footer { background: #fff; }
     <h2>בדיקה לכל מצב</h2>
     <div class="checks" id="checks"></div>
   </section>
+  </div>
 </main>
 
 <script>
@@ -332,7 +342,25 @@ site-footer { background: #fff; }
 
   // on narrow screens the map scrolls sideways: open it centred on פפפפ
   const wrap = map.parentElement;
-  wrap.scrollLeft = (wrap.scrollWidth - wrap.clientWidth) / 2;
+  const centerMap = () => { wrap.scrollLeft = (wrap.scrollWidth - wrap.clientWidth) / 2; };
+
+  // the thinking aid stays hidden until asked for, so the riddle can be tried on its own
+  const helper = document.getElementById('helper');
+  const helpBtn = document.getElementById('btn-help');
+  function showHelper(open) {
+    helper.hidden = !open;
+    helpBtn.textContent = open ? 'להסתיר את העזרה' : 'לעזרה בחשיבה';
+    helpBtn.setAttribute('aria-expanded', String(open));
+    if (open) centerMap();
+  }
+  let helpOpen = false;
+  try { helpOpen = localStorage.getItem(KEY + '-help') === '1'; } catch (e) {}
+  showHelper(helpOpen);
+  helpBtn.addEventListener('click', () => {
+    const open = helper.hidden;
+    showHelper(open);
+    try { localStorage.setItem(KEY + '-help', open ? '1' : '0'); } catch (e) {}
+  });
 
   function select(s) { selected = s; highlight(); renderDetail(); }
 
