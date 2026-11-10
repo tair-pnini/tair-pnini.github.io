@@ -1,10 +1,5 @@
-// אות-אות: מנוע החידה. הציטוט נקבע כאן, עמוד היצירה ייבנה בשלב 2.
-const PUZZLE = {
-  quote: 'הבינה המלאכותית יודעת לענות. רק אדם יודע לשאול.',
-  source: 'קלוד',
-  cols: 10,
-  seed: 2026,
-};
+// אות-אות: מנוע החידה. הקובץ זהה ב-tair-pnini.github.io/ot-ot ו-gifted-teachers-il.github.io/math/quote-1.
+// הציטוט וההגדרות (PUZZLE) נמצאים ב-index.html של כל דף.
 
 const TO_REGULAR = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
 const TO_FINAL = { 'כ': 'ך', 'מ': 'ם', 'נ': 'ן', 'פ': 'ף', 'צ': 'ץ' };
@@ -74,23 +69,45 @@ sourceChars.forEach((letter, s) => {
 
 const $ = (id) => document.getElementById(id);
 const boardEl = $('board');
-boardEl.style.setProperty('--cols', COLS);
+document.documentElement.style.setProperty('--cols', COLS);
 
-let board, available, active, started, locked, checks, startedAt, ticker;
+let board, available, active, started, locked, checks, startedAt, ticker, markTimer;
+const marked = new Set(); // משבצות שגויות שמסומנות אחרי בדיקה
+const MARK_MS = 2000;
 
-function reset() {
+function clearMarks() {
+  clearTimeout(markTimer);
+  marked.clear();
+}
+
+function clearBoard() {
   board = solution.map(() => '');
   available = columnLetters.map((c) => [...c]);
   active = solution.findIndex((c) => c !== ' ');
+}
+
+// "מחדש" באמצע משחק: לוח נקי, אבל הזמן והבדיקות ממשיכים
+function restart() {
+  clearBoard();
+  clearMarks();
+  $('msg').textContent = '';
+  render();
+}
+
+function reset() {
+  clearBoard();
   started = false;
   locked = false;
   checks = 0;
   clearInterval(ticker);
+  clearMarks();
+  $('checks').textContent = '0';
   $('time').textContent = '00:00';
   $('msg').textContent = '';
   $('start').textContent = 'התחלה';
   $('check').disabled = true;
   $('erase').disabled = true;
+  $('zero').disabled = true;
   boardEl.classList.add('waiting');
   render();
 }
@@ -102,6 +119,7 @@ function start() {
   $('start').textContent = 'מחדש';
   $('check').disabled = false;
   $('erase').disabled = false;
+  $('zero').disabled = false;
   boardEl.classList.remove('waiting');
   boardEl.classList.add('drop');
   render();
@@ -147,6 +165,7 @@ function render() {
     if (ringOf.has(i)) cell.classList.add('ring');
     if (started && !locked && i % COLS === activeCol) cell.classList.add('column');
     if (started && !locked && i === active) cell.classList.add('on');
+    if (marked.has(i)) cell.classList.add('wrong');
     cell.textContent = board[i] ? shown(board[i], isWordEnd(i)) : '';
     cell.setAttribute('aria-label', `שורה ${Math.floor(i / COLS) + 1}, משבצת ${(i % COLS) + 1}`);
     cell.addEventListener('click', () => { if (started && !locked) { active = i; render(); } });
@@ -157,15 +176,23 @@ function render() {
   const label = document.createElement('span');
   label.className = 'label';
   label.textContent = 'מקור:';
-  $('source').replaceChildren(label, ...sourceChars.map((letter, s) => {
+  const circles = sourceChars.map((letter, s) => {
     const el = document.createElement('span');
-    if (letter === ' ') { el.style.width = '14px'; return el; }
+    if (letter === ' ') { el.className = 'gap'; return el; }
     el.className = 'src';
     const wordEnd = s + 1 >= sourceChars.length || sourceChars[s + 1] === ' ';
     if (givenSource.has(s)) { el.classList.add('given'); el.textContent = shown(letter, wordEnd); }
     else if (typedInSource.get(s)) el.textContent = shown(typedInSource.get(s), wordEnd);
     return el;
-  }));
+  });
+  const parts = [label, ...circles];
+  if (PUZZLE.sourceNote) {
+    const note = document.createElement('span');
+    note.className = 'note';
+    note.textContent = PUZZLE.sourceNote;
+    parts.push(note);
+  }
+  $('source').replaceChildren(...parts);
 }
 
 function flash(i) {
@@ -189,6 +216,8 @@ function put(letter) {
   if (old) available[col].unshift(old);
   available[col].splice(available[col].indexOf(letter), 1);
   board[active] = letter;
+  marked.delete(active);
+  $('msg').textContent = '';
   active = step(active, 1);
   render();
   if (isFull()) checkFull();
@@ -199,6 +228,8 @@ function erase() {
   if (board[active]) {
     available[active % COLS].unshift(board[active]);
     board[active] = '';
+    marked.delete(active);
+    $('msg').textContent = '';
   }
   render();
 }
@@ -222,13 +253,19 @@ function checkFull() {
 function check() {
   if (!started || locked) return;
   checks++;
+  $('checks').textContent = checks;
   const wrong = solution.flatMap((c, i) => (c !== ' ' && board[i] && board[i] !== c ? [i] : []));
-  wrong.forEach((i) => { available[i % COLS].unshift(board[i]); board[i] = ''; });
+  clearMarks();
+  if (!wrong.length) {
+    render();
+    if (isFull()) win();
+    else $('msg').textContent = 'הכל תקין!';
+    return;
+  }
+  wrong.forEach((i) => marked.add(i));
   render();
-  wrong.forEach(flash);
-  if (wrong.length) $('msg').textContent = wrong.length === 1 ? 'משבצת אחת הייתה שגויה, והיא נמחקה.' : `${wrong.length} משבצות היו שגויות, והן נמחקו.`;
-  else if (isFull()) win();
-  else $('msg').textContent = 'הכל טוב עד כאן, ממשיכים.';
+  $('msg').textContent = wrong.length === 1 ? 'יש טעות אחת.' : `יש ${wrong.length} טעויות.`;
+  markTimer = setTimeout(() => { marked.clear(); render(); }, MARK_MS);
 }
 
 function win() {
@@ -239,14 +276,59 @@ function win() {
   $('msg').textContent = '';
   $('check').disabled = true;
   $('erase').disabled = true;
+  disarmZero();
+  $('zero').disabled = true;
   render();
   const checksText = checks === 0 ? 'בלי בדיקות' : checks === 1 ? 'בדיקה אחת' : `${checks} בדיקות`;
   $('doneQuote').textContent = PUZZLE.quote;
-  $('doneWho').textContent = PUZZLE.source;
+  $('doneWho').textContent = PUZZLE.sourceNote ? `${PUZZLE.source} ${PUZZLE.sourceNote}` : PUZZLE.source;
   $('doneStats').innerHTML = `זמן: <span dir="ltr">${time}</span> · ${checksText}`;
-  const link = location.origin + location.pathname;
-  $('share').href = 'https://wa.me/?text=' + encodeURIComponent(`פתרתי את אות-אות ב-${time}, ${checksText}. רוצים לנסות?\n${link}`);
+  shareText = `פתרתי את ${PUZZLE.shareName || 'אות-אות'}! 🎉\nזמן: ${time} · בדיקות: ${checks}\nעכשיו תורך: ${location.origin + location.pathname}`;
+  $('share').textContent = SHARE_LABEL;
   $('done').showModal();
+}
+
+// איפוס מלא של הזמן והבדיקות: לחיצה ראשונה מזהירה, השנייה מאפסת
+const ZERO_LABEL = 'איפוס זמן ובדיקות';
+let zeroArmed = false;
+let zeroTimer;
+
+function disarmZero() {
+  clearTimeout(zeroTimer);
+  zeroArmed = false;
+  $('zero').textContent = ZERO_LABEL;
+}
+
+function pressZero() {
+  if (!started || locked) return;
+  if (zeroArmed) {
+    disarmZero();
+    reset();
+    return;
+  }
+  zeroArmed = true;
+  $('zero').textContent = 'בלי לרמות, כן? 😉 לוחצים שוב לאיפוס';
+  zeroTimer = setTimeout(disarmZero, 4000);
+}
+
+const SHARE_LABEL = 'העתקה לשיתוף';
+let shareText = '';
+
+async function copyShare() {
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(shareText);
+    ok = true;
+  } catch {
+    const box = document.createElement('textarea');
+    box.value = shareText;
+    $('done').append(box);
+    box.select();
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    box.remove();
+  }
+  $('share').textContent = ok ? 'הועתק ✓' : 'ההעתקה לא הצליחה';
+  setTimeout(() => { $('share').textContent = SHARE_LABEL; }, 2500);
 }
 
 document.addEventListener('keydown', (e) => {
@@ -258,7 +340,13 @@ document.addEventListener('keydown', (e) => {
   if (key) { e.preventDefault(); put(key); }
 });
 
-$('start').addEventListener('click', () => { if (started) reset(); else start(); });
+$('start').addEventListener('click', () => {
+  if (!started) start();
+  else if (locked) reset();
+  else restart();
+});
+$('share').addEventListener('click', copyShare);
+$('zero').addEventListener('click', pressZero);
 $('check').addEventListener('click', check);
 $('erase').addEventListener('click', () => { if (started && !locked) erase(); });
 $('closeDone').addEventListener('click', () => $('done').close());

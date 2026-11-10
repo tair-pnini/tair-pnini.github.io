@@ -1,0 +1,85 @@
+/* אות-אות: עיצוב המשחק. הקובץ זהה ב-tair-pnini.github.io/ot-ot ו-gifted-teachers-il.github.io/math/quote-1 */
+:root {
+  --ink: #26323f;
+  --muted: #66717d;
+  --line: #c9ced4;
+  --paper: #fbfaf6;
+  --card: #ffffff;
+  --soft: #e9edf0;
+  --accent: #0f6e6e;
+  --current: #bfdedb;
+  --red: #c2362f;
+  --cell-max: 46px;
+  --cell: min(var(--cell-max), calc((100vw - 24px) / var(--cols, 10)));
+  --src: 34px;
+}
+
+.bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.bar .time { font-weight: 700; font-variant-numeric: tabular-nums; direction: ltr; }
+.bar .count { color: var(--muted); font-weight: 600; margin-inline-end: auto; white-space: nowrap; }
+.bar button, #erase, #zero, dialog button { font: inherit; color: inherit; }
+.btn {
+  min-height: 44px; padding: 6px 16px; font-weight: 600;
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+}
+.btn.main { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.msg { min-height: 1.5em; text-align: center; font-weight: 700; margin: 0 0 6px; }
+
+#board { width: fit-content; margin: 0 auto; }
+.tops, .grid { display: grid; grid-template-columns: repeat(var(--cols), var(--cell)); }
+.stack {
+  display: flex; flex-direction: column; justify-content: flex-end;
+  margin: 0 2px; padding-top: 4px;
+  background: var(--card); border: 1px solid var(--muted); border-bottom: 0; border-radius: 7px 7px 0 0;
+}
+.stack.on { background: var(--soft); }
+.tile {
+  width: 100%; height: min(36px, var(--cell));
+  padding: 0; background: none; border: 0; cursor: pointer; color: inherit;
+  font-family: inherit; font-size: calc(var(--cell) * .58); font-weight: 600; line-height: 1;
+}
+.waiting .tile { visibility: hidden; }
+.drop .tile { animation: fall .45s both; animation-delay: var(--d); }
+@keyframes fall { from { transform: translateY(-46px); opacity: 0; } }
+
+.grid { border-top: 1px solid var(--ink); border-right: 1px solid var(--ink); }
+.cell {
+  position: relative; width: var(--cell); height: var(--cell); padding: 0; color: inherit;
+  background: var(--card); border: 0; border-left: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  font-family: inherit; font-size: calc(var(--cell) * .62); font-weight: 700; line-height: 1; cursor: pointer;
+}
+.cell.black { background: var(--ink); cursor: default; }
+.cell.column { background: var(--soft); }
+.cell.on { background: var(--current); }
+.cell.wrong { background: #f4c7c3; color: var(--red); }
+.cell.ring::before {
+  content: ""; position: absolute; inset: 9%;
+  border: 1.5px solid var(--muted); border-radius: 50%;
+}
+.nope { animation: nope .5s; }
+@keyframes nope { 30% { background: var(--red); color: #fff; } }
+
+.source { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 3px; margin: 14px 0 8px; }
+.source .label { color: var(--muted); margin-inline-end: 6px; }
+.source .gap { width: 14px; }
+.source .note { color: var(--muted); font-weight: 600; margin-inline-start: 6px; white-space: nowrap; }
+.src {
+  width: var(--src); height: var(--src); display: grid; place-items: center;
+  border: 1.5px solid var(--muted); border-radius: 50%; font-weight: 700;
+  font-size: calc(var(--src) * .55);
+}
+.src.given { background: var(--soft); }
+
+.phone-del { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+
+dialog {
+  width: min(460px, calc(100vw - 32px)); padding: 22px;
+  border: 0; border-radius: 12px; color: var(--ink); text-align: center;
+}
+dialog::backdrop { background: rgba(38, 50, 63, .45); }
+dialog h2 { margin: 0 0 8px; font-size: 1.6rem; }
+dialog blockquote { margin: 0 0 4px; font-size: 1.2rem; font-weight: 700; }
+dialog .who { color: var(--muted); margin: 0 0 12px; }
+dialog .stats { margin: 0 0 16px; }
+dialog .acts { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
