@@ -1,4 +1,4 @@
-// אות-אות: מנוע החידה. הקובץ זהה ב-tair-pnini.github.io/ot-ot ו-gifted-teachers-il.github.io/math/quote-1.
+// אות-אות: מנוע החידה. הקובץ זהה ב-tair-pnini.github.io/ot-ot ו-gifted-teachers-il.github.io/math/quotes/1.
 // הציטוט וההגדרות (PUZZLE) נמצאים ב-index.html של כל דף.
 
 const TO_REGULAR = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
