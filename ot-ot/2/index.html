@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>אות-אות 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../game.css">
+<style>
+  * { box-sizing: border-box; }
+  html { font-size: 110%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Assistant', sans-serif;
+    line-height: 1.45;
+  }
+  main { max-width: 560px; margin: 0 auto; padding: 18px 12px 28px; }
+  h1 { font-size: 2rem; font-weight: 800; margin: 0; }
+  .how { color: var(--muted); margin: 2px 0 14px; }
+  footer {
+    max-width: 560px; margin: 0 auto; padding: 14px 12px 26px;
+    border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; text-align: center;
+  }
+  footer strong { color: var(--ink); }
+  footer a { color: inherit; }
+  /* בפלאפון: כל מילה של המקור בשורה משלה, בלי לחתוך מילה */
+  @media (max-width: 640px) { .source .gap { flex-basis: 100%; height: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>אות-אות</h1>
+  <p class="how">מעל כל עמודה נמצאות האותיות שלה, בסדר מעורב. בוחרים משבצת ולוחצים על אות מהעמודה. המשפט נקרא מימין לשמאל, ומשבצת שחורה היא רווח.</p>
+
+  <div class="bar">
+    <span class="time" id="time">00:00</span>
+    <span class="count">בדיקות: <span id="checks">0</span></span>
+    <button class="btn" id="check" disabled>בדיקה</button>
+    <button class="btn main" id="start">התחלה</button>
+  </div>
+
+  <p class="msg" id="msg" role="status"></p>
+
+  <div id="board" class="waiting">
+    <div class="tops" id="tops"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="source" id="source"></div>
+  <div class="phone-del">
+    <button class="btn" id="erase" disabled>מחיקה</button>
+    <button class="btn" id="zero" disabled>איפוס זמן ובדיקות</button>
+  </div>
+</main>
+
+<footer>
+  <strong>תאיר פניני | מרחב למחשבה</strong><br>
+  הפורמט בהשראת <a href="https://gisnep.com" rel="noopener">gisnep.com</a> ·
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.he" rel="noopener">CC BY-NC-SA</a>: שימוש חינוכי חופשי, בלי שימוש מסחרי
+</footer>
+
+<dialog id="done">
+  <h2>כל הכבוד!</h2>
+  <blockquote id="doneQuote"></blockquote>
+  <p class="who" id="doneWho"></p>
+  <p class="stats" id="doneStats"></p>
+  <div class="acts">
+    <button class="btn main" id="share">העתקה לשיתוף</button>
+    <button class="btn" id="closeDone">סגירה</button>
+  </div>
+</dialog>
+
+<script>
+  const PUZZLE = {
+    quote: 'אדם שמעולם לא עשה טעות, מעולם לא ניסה שום דבר חדש.',
+    source: 'אלברט איינשטיין',
+    cols: 10,
+    seed: 2027,
+  };
+</script>
+<script src="../engine.js"></script>
+</body>
+</html>
